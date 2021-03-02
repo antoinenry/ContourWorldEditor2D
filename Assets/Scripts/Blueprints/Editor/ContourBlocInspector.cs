@@ -134,7 +134,7 @@ public class ContourBlocInspector : Editor
 
     private void SelectAllPointsInContour(int contourIndex)
     {
-        List<int> pointsInContour = targetBloc.GetPointsInContour(contourIndex, false);
+        List<int> pointsInContour = targetBloc.GetContour(contourIndex, false);
         if (pointsInContour == null) return;
         foreach (int pti in pointsInContour)
             SelectPoint(pti, true);
@@ -165,7 +165,7 @@ public class ContourBlocInspector : Editor
         foreach(int cti in contourIndices)
         {
             bool selectContour = false;
-            List<int> pointIndices = targetBloc.GetPointsInContour(cti, false);
+            List<int> pointIndices = targetBloc.GetContour(cti, false);
             foreach(int pti in pointIndices)
             {
                 if (pointSceneSelection[pti] == true)
@@ -444,7 +444,7 @@ public class ContourBlocInspector : Editor
                     {
                         // Hold Alt to avoid affecting point selection
                         if (!Event.current.modifiers.HasFlag(EventModifiers.Alt))
-                            UnselectPointsIfNoSelectedContour(targetBloc.GetPointsInContour(contourIndex, false));
+                            UnselectPointsIfNoSelectedContour(targetBloc.GetContour(contourIndex, false));
                         // Unselect contour
                         SelectContour(contourIndex, false);
                     }
@@ -469,7 +469,7 @@ public class ContourBlocInspector : Editor
             contourInspectorStates[contourIndex].foldout = EditorGUILayout.Foldout(contourInspectorStates[contourIndex].foldout, "Contour " + contourIndex.ToString());
         }
         // Get contour and points that are in it
-        List<int> contourPoints = targetBloc.GetPointsInContour(contourIndex, true);
+        List<int> contourPoints = targetBloc.GetContour(contourIndex, true);
         // Contour material field
         //EditorGUI.BeginChangeCheck();
         //contour.material = EditorGUILayout.ObjectField(contour.material, typeof(ContourMaterial), true) as ContourMaterial;
@@ -606,7 +606,7 @@ public class ContourBlocInspector : Editor
             List<int> destroyPoints = selectedPointsIndices.FindAll(pti => targetBloc.GetContoursWithPoint(pti).Count == 0);
             if (destroyPoints.Count > 0) targetBloc.DestroyPoints(destroyPoints);
             // Destroy contours that no longer have points
-            List<int> emptyContourIndices = selectedContourIndices.FindAll(cti => targetBloc.GetPointsInContour(cti, false).Count == 0);
+            List<int> emptyContourIndices = selectedContourIndices.FindAll(cti => targetBloc.GetContour(cti, false).Count == 0);
             targetBloc.RemoveContoursAt(emptyContourIndices);
             // Clear selection
             UnselectAll();
@@ -787,9 +787,36 @@ public class ContourBlocInspector : Editor
                     targetBloc.MovePoint(selectedPointIndex, targetPositions[selectedPointIndex] + handleMove);
             }
         }
+        // Contour handles
+        List<List<int>> contours = targetBloc.GetContours(false);
         // Higlight selected contours
+        Handles.color = Color.yellow;
         foreach (int cti in selectedContourIndices)
-            DrawContour(cti, Color.yellow);
+            DrawContour(contours[cti]);
+        // Handles on segments for inserting points (in selected contours only)
+        Handles.color = Color.yellow;
+        foreach(int cti in selectedContourIndices)
+        {
+            List<int> contourPoints = contours[cti];
+            if (contourPoints == null) continue;
+            int contourLength = contourPoints.Count;
+            for (int i = 0; i < contourLength - 1; i++)
+            {
+                // Draw handle in the middle of each segment
+                Vector3 handlePosition = ((Vector3)targetPositions[contourPoints[i]] + (Vector3)targetPositions[contourPoints[i + 1]]) / 2f + blocPosition;
+                if (Handles.Button(handlePosition, Quaternion.identity, .5f * handleSize, handleSize, Handles.CubeHandleCap))
+                {
+                    Undo.RecordObject(targetBloc, "Insert point");
+                    // Insert point on segment, in selected contour, and select only this point
+                    int newPointIndex = targetBloc.PointCount;
+                    targetBloc.InsertPointInContours(selectedContourIndices, contourPoints[i], contourPoints[i + 1]);
+                    ClearPointSelection();
+                    SelectPoint(newPointIndex, true);
+                    // Apply modifications in inspector
+                    EditorUtility.SetDirty(targetBloc);
+                }
+            }
+        }
     }
 
     private void CreateContourSceneGUI()
@@ -803,7 +830,7 @@ public class ContourBlocInspector : Editor
         }
         int newContourIndex = selectedContourIndices[0];
         // Get current contour
-        List<int> pointIndicesInBloc = targetBloc.GetPointsInContour(newContourIndex, false);
+        List<int> pointIndicesInBloc = targetBloc.GetContour(newContourIndex, false);
         int newContourLength = pointIndicesInBloc.Count;
         // General size and position values for displaying handles
         Vector3 blocPosition = targetBloc.transform.position;
@@ -882,16 +909,15 @@ public class ContourBlocInspector : Editor
             }
         }
         // Higlight created contour
-        DrawContour(newContourIndex, Color.green);
+        Handles.color = Color.green;
+        DrawContour(targetBloc.GetContour(newContourIndex, false));
     }
 
-    private void DrawContour(int contourIndex, Color color)
+    private void DrawContour(List<int> pointIndices)
     {
-        Handles.color = color;
         Vector3 blocPosition = targetBloc.transform.position;
         List<Vector2> pointPositions = targetBloc.GetPositions();
         float handleSize = handleScale * HandleUtility.GetHandleSize(blocPosition);
-        List<int> pointIndices = targetBloc.GetPointsInContour(contourIndex, false);
         int contourLength = pointIndices.Count;
         if (contourLength == 0) return;
         if (contourLength == 1)

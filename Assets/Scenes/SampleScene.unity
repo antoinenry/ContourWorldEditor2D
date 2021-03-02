@@ -328,106 +328,154 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   points:
-  - position: {x: -4.852645, y: 2.6918945}
+  - position: {x: -4.9196405, y: 1.800429}
     occurences:
     - contourIndex: 0
       indexInContour: 0
     - contourIndex: 0
-      indexInContour: 5
-  - position: {x: -1, y: 3}
+      indexInContour: 6
+    - contourIndex: 4
+      indexInContour: 16
+  - position: {x: -4.303429, y: 2.8854961}
     occurences:
     - contourIndex: 0
       indexInContour: 1
-    - contourIndex: 1
+    - contourIndex: 4
       indexInContour: 0
-    - contourIndex: 1
-      indexInContour: 5
-  - position: {x: -1.6383107, y: -0.32150143}
+    - contourIndex: 4
+      indexInContour: 17
+  - position: {x: -2.8968604, y: 3.0864348}
     occurences:
     - contourIndex: 0
       indexInContour: 2
-    - contourIndex: 1
-      indexInContour: 4
-    - contourIndex: 2
+    - contourIndex: 4
       indexInContour: 1
-  - position: {x: -4.691894, y: -0.91962504}
+  - position: {x: -1.9725443, y: 2.309472}
     occurences:
     - contourIndex: 0
       indexInContour: 3
+    - contourIndex: 3
+      indexInContour: 2
+    - contourIndex: 4
+      indexInContour: 2
+  - position: {x: -2.4413996, y: 0.5546106}
+    occurences:
+    - contourIndex: 0
+      indexInContour: 4
+    - contourIndex: 1
+      indexInContour: 5
+    - contourIndex: 3
+      indexInContour: 1
+  - position: {x: -4.5847435, y: 0.2063179}
+    occurences:
+    - contourIndex: 0
+      indexInContour: 5
+    - contourIndex: 1
+      indexInContour: 0
+    - contourIndex: 1
+      indexInContour: 6
+    - contourIndex: 4
+      indexInContour: 15
+  - position: {x: -5.361705, y: -1.1734595}
+    occurences:
+    - contourIndex: 1
+      indexInContour: 1
+    - contourIndex: 4
+      indexInContour: 14
+  - position: {x: -4.102491, y: -2.8211546}
+    occurences:
+    - contourIndex: 1
+      indexInContour: 2
+    - contourIndex: 4
+      indexInContour: 13
+  - position: {x: -1.9591471, y: -2.5934243}
+    occurences:
+    - contourIndex: 1
+      indexInContour: 3
+    - contourIndex: 2
+      indexInContour: 1
+    - contourIndex: 4
+      indexInContour: 12
+  - position: {x: -1.4233121, y: -0.27593493}
+    occurences:
+    - contourIndex: 1
+      indexInContour: 4
     - contourIndex: 2
       indexInContour: 0
     - contourIndex: 2
       indexInContour: 6
-  - position: {x: -6, y: 1}
-    occurences:
-    - contourIndex: 0
-      indexInContour: 4
-  - position: {x: 1.6383114, y: 2.5224395}
-    occurences:
-    - contourIndex: 1
-      indexInContour: 1
-    - contourIndex: 4
-      indexInContour: 4
-  - position: {x: 2.4105806, y: 0.0937711}
-    occurences:
-    - contourIndex: 1
-      indexInContour: 2
-    - contourIndex: 3
-      indexInContour: 2
-    - contourIndex: 4
-      indexInContour: 5
-  - position: {x: 1, y: -2}
-    occurences:
-    - contourIndex: 1
-      indexInContour: 3
-    - contourIndex: 2
-      indexInContour: 2
-    - contourIndex: 3
-      indexInContour: 1
-  - position: {x: 1, y: -4}
-    occurences:
-    - contourIndex: 2
-      indexInContour: 3
     - contourIndex: 3
       indexInContour: 0
     - contourIndex: 3
       indexInContour: 6
-  - position: {x: -3.1339588, y: -4.7320824}
+  - position: {x: -0.3784322, y: -3.236427}
+    occurences:
+    - contourIndex: 2
+      indexInContour: 2
+    - contourIndex: 4
+      indexInContour: 11
+  - position: {x: 1.5639718, y: -2.8881333}
+    occurences:
+    - contourIndex: 2
+      indexInContour: 3
+    - contourIndex: 4
+      indexInContour: 10
+  - position: {x: 2.4347062, y: -0.9055418}
     occurences:
     - contourIndex: 2
       indexInContour: 4
-  - position: {x: -5, y: -3}
-    occurences:
-    - contourIndex: 2
+    - contourIndex: 4
+      indexInContour: 9
+    - contourIndex: 5
       indexInContour: 5
-  - position: {x: 5.1875424, y: -1.3348975}
+  - position: {x: -0.6061623, y: 2.952475}
     occurences:
     - contourIndex: 3
       indexInContour: 3
     - contourIndex: 4
+      indexInContour: 3
+  - position: {x: 0.5592805, y: 2.1353264}
+    occurences:
+    - contourIndex: 3
+      indexInContour: 4
+    - contourIndex: 4
+      indexInContour: 4
+    - contourIndex: 5
       indexInContour: 0
+    - contourIndex: 5
+      indexInContour: 7
+  - position: {x: 0.49230143, y: 0.5680069}
+    occurences:
+    - contourIndex: 2
+      indexInContour: 5
+    - contourIndex: 3
+      indexInContour: 5
+    - contourIndex: 5
+      indexInContour: 6
+  - position: {x: 1.9524541, y: 3.0596433}
+    occurences:
+    - contourIndex: 4
+      indexInContour: 5
+    - contourIndex: 5
+      indexInContour: 1
+  - position: {x: 4.1225886, y: 2.5238066}
+    occurences:
+    - contourIndex: 5
+      indexInContour: 2
     - contourIndex: 4
       indexInContour: 6
-  - position: {x: 5.651707, y: -3.200938}
+  - position: {x: 4.645029, y: 0.32688034}
     occurences:
-    - contourIndex: 3
-      indexInContour: 4
-  - position: {x: 3.691895, y: -4.8124576}
-    occurences:
-    - contourIndex: 3
-      indexInContour: 5
-  - position: {x: 5.906228, y: 0.21433485}
-    occurences:
-    - contourIndex: 4
-      indexInContour: 1
-  - position: {x: 6, y: 2}
-    occurences:
-    - contourIndex: 4
-      indexInContour: 2
-  - position: {x: 4, y: 3}
-    occurences:
-    - contourIndex: 4
+    - contourIndex: 5
       indexInContour: 3
+    - contourIndex: 4
+      indexInContour: 7
+  - position: {x: 3.868067, y: -1.0127084}
+    occurences:
+    - contourIndex: 5
+      indexInContour: 4
+    - contourIndex: 4
+      indexInContour: 8
   bufferPoint:
     position: {x: 0, y: 0}
     occurences: []

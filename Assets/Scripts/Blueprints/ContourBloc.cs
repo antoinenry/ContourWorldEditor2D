@@ -64,6 +64,69 @@ public class ContourBloc : MonoBehaviour
         return maxContourIndex + 1;
     }
 
+    public List<List<int>> GetContours(bool includeUndefinedPoints)
+    {
+        List<List<int>> contours = new List<List<int>>();
+        for (int pti = includeUndefinedPoints ? -1 : 0, ptCount = PointCount; pti < ptCount; pti++)
+        {
+            List<PointOccurence> occurences = pti == -1 ? bufferPoint.occurences : points[pti].occurences;
+            if (occurences == null) continue;
+            foreach(PointOccurence occ in occurences)
+            {
+                int contourIndex = occ.contourIndex, indexInContour = occ.indexInContour;
+                // Adjust contour list size if needed
+                if (contours.Count <= contourIndex)
+                {
+                    contours.Capacity = contourIndex + 1;
+                    while (contours.Count <= contourIndex) contours.Add(new List<int>());
+                }
+                // Current contour in list
+                List<int> contour = contours[contourIndex];
+                // Adjust contour size if needed
+                if (contour.Count <= indexInContour)
+                {
+                    contour.Capacity = indexInContour + 1;
+                    while (contour.Count <= indexInContour) contour.Add(-1);
+                }
+                // Add point index to contour
+                contour[indexInContour] = pti;
+                contours[contourIndex] = contour;
+            }
+        }
+        // Remove gaps if specified
+        if (!includeUndefinedPoints)
+            foreach (List<int> contour in contours)
+                contour.RemoveAll(pti => pti == -1);
+        return contours;
+    }
+
+    public List<int> GetContour(int contourIndex, bool includeUndefinedPoints)
+    {
+        List<int> pointIndices = new List<int>();
+        if (contourIndex < 0) return pointIndices;
+        // Find contour index in point occurences
+        for (int pti = includeUndefinedPoints ? -1 : 0, ptCount = PointCount; pti < ptCount; pti++)
+        {
+            Point point = pti == -1 ? bufferPoint : points[pti];
+            for (int occi = 0, occCount = point.OccurenceCount; occi < occCount; occi++)
+                if (point.occurences[occi].contourIndex == contourIndex)
+                {
+                    int indexInContour = point.occurences[occi].indexInContour;
+                    // Adjust contour length
+                    if (pointIndices.Count <= indexInContour)
+                    {
+                        pointIndices.Capacity = indexInContour + 1;
+                        while (pointIndices.Count <= indexInContour) pointIndices.Add(-1);
+                    }
+                    // Set contour
+                    pointIndices[indexInContour] = pti;
+                }
+        }
+        // Remove gaps if specified
+        if (!includeUndefinedPoints) pointIndices.RemoveAll(pti => pti == -1);
+        return pointIndices;
+    }
+
     public void AddPoint(Vector2 position)
     {
         // Create point at position, not in any contour (no occurences)
@@ -89,40 +152,7 @@ public class ContourBloc : MonoBehaviour
         if (pointIndex < 0 || pointIndex >= PointCount) return null;
         return points[pointIndex].occurences.ConvertAll(occ => occ.contourIndex);
     }
-
-    public List<int> GetPointsInContour(int contourIndex, bool includeUndefinedPoints)
-    {
-        List<int> pointIndices = new List<int>();
-        if (contourIndex < 0) return pointIndices;
-        // Find contour index in point occurences
-        for (int pti = 0, ptCount = PointCount; pti < ptCount; pti++)
-            for (int occi = 0, occCount = points[pti].OccurenceCount; occi < occCount; occi++)
-                if (points[pti].occurences[occi].contourIndex == contourIndex)
-                {
-                    int indexInContour = points[pti].occurences[occi].indexInContour;
-                    // Adjust contour length
-                    while (pointIndices.Count <= indexInContour) pointIndices.Add(-1);
-                    pointIndices[indexInContour] = pti;
-                }
-        if (includeUndefinedPoints)
-        {
-            // Also search buffer point
-            for (int occi = 0, occCount = bufferPoint.OccurenceCount; occi < occCount; occi++)
-                if (bufferPoint.occurences[occi].contourIndex == contourIndex)
-                {
-                    int indexInContour = bufferPoint.occurences[occi].indexInContour;
-                    // Adjust contour length
-                    while (pointIndices.Count <= indexInContour) pointIndices.Add(-1);
-                }
-        }
-        else
-        {
-            // Remove gaps
-            pointIndices.RemoveAll(pti => pti == -1);
-        }
-        return pointIndices;
-    }
-
+    
     public void AddPointToContour(int contourIndex, int pointIndex, bool preserveLoop = true)
     {
         // Add a point at the end of a contour
@@ -131,14 +161,14 @@ public class ContourBloc : MonoBehaviour
         if (preserveLoop && IsContourLooped(contourIndex))
         {
             RemovePointFromContour(-1, contourIndex);
-            List<int> pointsInContour = GetPointsInContour(contourIndex, false);
+            List<int> pointsInContour = GetContour(contourIndex, false);
             int contourLength = pointsInContour.Count;
             ReplacePointInContour(contourIndex, contourLength - 1, pointIndex);
             LoopContour(contourIndex, true);
         }
         else
         {
-            List<int> pointsInContour = GetPointsInContour(contourIndex, true);
+            List<int> pointsInContour = GetContour(contourIndex, true);
             // If contour ends with undefined points, replace occurence instead of creating a new one
             int indexInContour = pointsInContour.Count;
             bool replaceUndefinedPoint = false;
@@ -158,7 +188,7 @@ public class ContourBloc : MonoBehaviour
     {
         // Add a point at a specific place in a contour
         if (pointIndex < 0 || pointIndex >= PointCount) return;
-        List<int> contourPoints = GetPointsInContour(contourIndex, true);
+        List<int> contourPoints = GetContour(contourIndex, true);
         if (insertAt < 0 || insertAt >= contourPoints.Count)
         {
             Debug.LogError("Index out of bounds");
@@ -186,12 +216,59 @@ public class ContourBloc : MonoBehaviour
         points[pointIndex].occurences.Add(new PointOccurence() { contourIndex = contourIndex, indexInContour = insertAt });
     }
 
+    public void InsertPointInContours(List<int> contourIndices, int pointA, int pointB)
+    {
+        if (contourIndices == null) return;
+        int pointCount = PointCount;
+        if (pointA == -1 || pointA >= pointCount || pointB < 0 || pointB >= pointCount) return;
+        int newPointIndex = -1;
+        foreach(int contourIndex in contourIndices)
+        {
+            // Find index in contour between points A and B
+            int insertAt;
+            do
+            {
+                List<PointOccurence> occurencesA = points[pointA].occurences;
+                List<PointOccurence> occurencesB = points[pointB].occurences;
+                if (occurencesA == null || occurencesB == null) return;
+                insertAt = -1;
+                foreach (PointOccurence occA in occurencesA)
+                {
+                    // Search point A occurence in contour
+                    if (occA.contourIndex == contourIndex)
+                    {
+                        // Find point B occurence that's next to point A in contour
+                        int findOccB = occurencesB.FindIndex(occ => occ.contourIndex == contourIndex
+                        && (occ.indexInContour == occA.indexInContour + 1 || occ.indexInContour == occA.indexInContour - 1));
+                        if (findOccB != -1)
+                        {
+                            // Insert index is higher index between indices A and B
+                            PointOccurence occB = occurencesB[findOccB];
+                            insertAt = occB.indexInContour > occA.indexInContour ? occB.indexInContour : occA.indexInContour;
+                            // If inserted point has not been created yet, create it
+                            if (newPointIndex == -1)
+                            {
+                                newPointIndex = PointCount;
+                                AddPoint((points[pointA].position + points[pointB].position) / 2f);
+                            }
+                            // Insert new point in contour
+                            InsertPointInContour(contourIndex, insertAt, newPointIndex);
+                            break;
+                        }
+                    }
+                }
+            }
+            while (insertAt != -1);
+            
+        }
+    }
+
     public void RemovePointFromContour(int pointIndex, int contourIndex, bool preserveLoop = true)
     {
         // Remove all point occurence in contour
         if (points == null || pointIndex < -1 || pointIndex >= points.Count) return;
         // Removing one point from one contour impacts all the points that are following (higher index) in this contour, including undefined points
-        List<int> pointIndices = GetPointsInContour(contourIndex, true);
+        List<int> pointIndices = GetContour(contourIndex, true);
         if (pointIndices.Count == 0) return;
         // If contour is looped and we break it by removing the point, restore it later - unless specified otherwise
         bool restoreLoop = preserveLoop && IsContourLooped(contourIndex) && pointIndex == pointIndices[0];
@@ -221,7 +298,7 @@ public class ContourBloc : MonoBehaviour
             else
                 bufferPoint.occurences.RemoveAll(occ => occ.contourIndex == contourIndex);
             // Get updated contour to see if the point to removed is still mentionned in it
-            pointIndices = GetPointsInContour(contourIndex, true);
+            pointIndices = GetContour(contourIndex, true);
             findPointIndexInContour = pointIndices.IndexOf(pointIndex);
         }
         // Loop contour back again if needed
@@ -270,7 +347,7 @@ public class ContourBloc : MonoBehaviour
         // Remove undefined points before changing length
         RemovePointFromContour(-1, contourIndex);
         // Get clean contour
-        List<int> pointIndices = GetPointsInContour(contourIndex, false);
+        List<int> pointIndices = GetContour(contourIndex, false);
         int currentContourLength = pointIndices.Count;
         // First case: decreasing contour length
         if (newLength < currentContourLength)
@@ -337,7 +414,7 @@ public class ContourBloc : MonoBehaviour
 
     public void ReplacePointInContour(int contourIndex, int indexInContour, int newPointIndex)
     {
-        List<int> pointIndices = GetPointsInContour(contourIndex, true);
+        List<int> pointIndices = GetContour(contourIndex, true);
         if (pointIndices == null || indexInContour < 0 || indexInContour >= pointIndices.Count)
         {
             Debug.LogError("Index out of bounds");
@@ -383,7 +460,7 @@ public class ContourBloc : MonoBehaviour
     public void RemoveContourAt(int contourIndex)
     {
         // Remove all points from the contour
-        List<int> pointIndices = GetPointsInContour(contourIndex, true);
+        List<int> pointIndices = GetContour(contourIndex, true);
         foreach(int pti in pointIndices) RemovePointFromContour(pti, contourIndex);
         // Decrement higher contour indices in all point occurences, including buffer point
         for (int pti = -1, ptCount = PointCount; pti < ptCount; pti++)
@@ -443,7 +520,7 @@ public class ContourBloc : MonoBehaviour
 
     public void ReverseContour(int contourIndex)
     {
-        List<int> pointIndices = GetPointsInContour(contourIndex, true);
+        List<int> pointIndices = GetContour(contourIndex, true);
         for (int i = 0, iend = pointIndices.Count; i < iend; i++)
         {
             if (i == iend - 1 - i) continue;
@@ -453,7 +530,7 @@ public class ContourBloc : MonoBehaviour
 
     public bool IsContourLooped(int contourIndex)
     {
-        List<int> pointIndices = GetPointsInContour(contourIndex, false);
+        List<int> pointIndices = GetContour(contourIndex, false);
         int contourLength = pointIndices.Count;
         if (contourLength < 3) return false;
         else return pointIndices[0] == pointIndices[contourLength - 1];
@@ -462,35 +539,45 @@ public class ContourBloc : MonoBehaviour
     public void LoopContour(int contourIndex, bool loop)
     {
         RemovePointFromContour(-1, contourIndex);
-        List<int> pointIndices = GetPointsInContour(contourIndex, false);
+        List<int> pointIndices = GetContour(contourIndex, false);
         int contourLength = pointIndices.Count;
         if (contourLength < 3 || IsContourLooped(contourIndex) == loop) return;
         if (loop) AddPointToContour(contourIndex, pointIndices[0], false);
         else SetContourLength(contourIndex, contourLength - 1, false);
     }
 
+    #region Gizmos
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.gray;
+        DrawContourGizmos();
+    }
+
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.white;
+        DrawContourGizmos();
+    }
+
+    private void DrawContourGizmos()
+    {
         Vector3 blocPosition = transform.position;
         int pointCount = PointCount;
-        int contourCount = GetContourCount();
+        List<List<int>> contours = GetContours(false);
         bool[] pointIsUsed = new bool[pointCount];
-        for (int cti = 0; cti < contourCount; cti++)
+        foreach(List<int> contour in contours)
         {
-            List<int> pointIndices = GetPointsInContour(cti, false);
-            int contourLength = pointIndices.Count;
-            if (contourLength == 0) continue;
-            if (contourLength > 1)
-                for (int i = 0; i < contourLength - 1; i++)
+            if (contour == null) continue;
+                for (int i = 0, iend = contour.Count - 1; i < iend; i++)
                 {
-                    Gizmos.DrawLine((Vector3)points[pointIndices[i]].position + blocPosition, (Vector3)points[pointIndices[i+1]].position + blocPosition);
-                    pointIsUsed[pointIndices[i]] = true;
-                    pointIsUsed[pointIndices[i+1]] = true;
+                    Gizmos.DrawLine((Vector3)points[contour[i]].position + blocPosition, (Vector3)points[contour[i + 1]].position + blocPosition);
+                    pointIsUsed[contour[i]] = true;
+                    pointIsUsed[contour[i + 1]] = true;
                 }
         }
         for (int pti = 0; pti < pointCount; pti++)
             if (!pointIsUsed[pti])
                 Gizmos.DrawIcon((Vector3)points[pti].position + blocPosition, "cross.png");
     }
+    #endregion
 }
