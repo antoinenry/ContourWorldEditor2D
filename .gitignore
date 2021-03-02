@@ -338,3 +338,9 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+/Library
+/Temp
+/UserSettings
+/ContourWorldEditor2D.sln
+/Assembly-CSharp.csproj
+/Assembly-CSharp-Editor.csproj
