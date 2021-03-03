@@ -412,6 +412,37 @@ public class ContourBloc : MonoBehaviour
         points.RemoveAll(pt => pt.OccurenceCount == 0);
     }
 
+    public void DestroyAllPointlessContours()
+    {
+        // Find all pointless contour
+        List<List<int>> contours = GetContours(false);
+        if (contours == null) return;
+        List<int> pointlessContourIndices = new List<int>();
+        for (int cti = 0, ctcount = contours.Count; cti < ctcount; cti++)
+            if (contours[cti].Count == 0) pointlessContourIndices.Add(cti);
+        if (pointlessContourIndices.Count == 0) return;
+        // Remove occurences and shift indices
+        for (int pti = -1, ptCount = PointCount; pti < ptCount; pti++)
+        {
+            Point pt = pti == -1 ? bufferPoint : points[pti];
+            List<PointOccurence> occurences = pt.occurences;
+            if (occurences == null) continue;
+            // Remove occurences if in in pointless contour
+            occurences.RemoveAll(occ => pointlessContourIndices.Contains(occ.contourIndex));
+            // Shift higher contours indices
+            for (int occi = 0, occCount = occurences.Count; occi < occCount; occi++)
+            {
+                PointOccurence occ = occurences[occi];
+                int decrementIndex = pointlessContourIndices.FindAll(cti => occ.contourIndex > cti).Count;
+                occ.contourIndex -= decrementIndex;
+            }
+            // Set occurences
+            pt.occurences = occurences;
+            if (pti == -1) bufferPoint = pt;
+            else points[pti] = pt;
+        }
+    }
+
     public void ReplacePointInContour(int contourIndex, int indexInContour, int newPointIndex)
     {
         List<int> pointIndices = GetContour(contourIndex, true);

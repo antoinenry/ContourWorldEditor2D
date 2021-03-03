@@ -367,6 +367,17 @@ public class ContourBlocInspector : Editor
             targetBloc.MovePoint(pointIndex, editedPosition);
             SceneView.RepaintAll();
         }
+        // Button to remove point
+        if (sceneGUIEditMode && GUILayout.Button("Remove"))
+        {
+            Undo.RecordObject(targetBloc, "Remove point");
+            targetBloc.DestroyPoint(pointIndex);
+            targetBloc.DestroyAllPointlessContours();
+            UnselectAll();
+            SceneView.RepaintAll();
+            changeCheck = true;
+            return;
+        }
         GUI.enabled = GUI_enabled;
         EditorGUILayout.EndHorizontal();
     }
@@ -423,7 +434,9 @@ public class ContourBlocInspector : Editor
         {
             Color normalBackgroundColor = GUI.backgroundColor;
             if (IsContourSelected(contourIndex)) GUI.backgroundColor = createContourMode ? Color.green : Color.yellow;
-            contourInspectorStates[contourIndex].foldout = EditorGUILayout.Foldout(contourInspectorStates[contourIndex].foldout, GUIContent.none);
+            GUIStyle foldOutStyle = new GUIStyle("foldout");
+            foldOutStyle.fixedWidth = 1f;
+            contourInspectorStates[contourIndex].foldout = EditorGUILayout.Foldout(contourInspectorStates[contourIndex].foldout, GUIContent.none, foldOutStyle);
             // Button to select contour
             if (GUILayout.Button("Contour " + contourIndex.ToString()))
             {
@@ -480,7 +493,7 @@ public class ContourBlocInspector : Editor
         //    changeCheck = true;
         //}
         // Button to remove contour
-        if (GUILayout.Button("Remove"))
+        if (sceneGUIEditMode && GUILayout.Button("Remove"))
         {
             Undo.RecordObject(targetBloc, "Remove contour");
             targetBloc.RemoveContourAt(contourIndex);
@@ -576,6 +589,7 @@ public class ContourBlocInspector : Editor
         GUI.enabled = GUI_enabled;
         if (GUILayout.Button("New contour"))
         {
+            Undo.RecordObject(targetBloc, "Create contour");
             createContourMode = true;
             targetBloc.AddContour();
             // Select new contour only
@@ -843,7 +857,7 @@ public class ContourBlocInspector : Editor
         mousePosition = SceneView.currentDrawingSceneView.camera.ScreenToWorldPoint(mousePosition);
         if (Handles.Button(mousePosition, Quaternion.identity, .5f * handleSize, handleSize, Handles.CircleHandleCap))
         {
-            Undo.RecordObject(targetBloc, "Add position");
+            Undo.RecordObject(targetBloc, "Create contour");
             // Add new point to bloc and to new contour
             targetBloc.AddPoint(mousePosition - (Vector2)blocPosition);
             int newPointIndex = targetBloc.PointCount - 1;
@@ -868,6 +882,7 @@ public class ContourBlocInspector : Editor
                     // Last point can't be added but can be removed to easily cancel adding a point
                     if (Handles.Button(pointPositionWorldSpace, Quaternion.identity, 2f * handleSize, handleSize, Handles.SphereHandleCap))
                     {
+                        Undo.RecordObject(targetBloc, "Create contour");
                         // Remove point by trimming contour
                         targetBloc.SetContourLength(newContourIndex, newContourLength - 1);
                         EditorUtility.SetDirty(targetBloc);
@@ -883,6 +898,7 @@ public class ContourBlocInspector : Editor
                     // If first point is clicked again, it ends contour creation and set contour as a loop
                     if (Handles.Button(pointPositionWorldSpace, Quaternion.identity, handleSize, handleSize, Handles.CircleHandleCap))
                     {
+                        Undo.RecordObject(targetBloc, "Create contour");
                         targetBloc.LoopContour(newContourIndex, true);
                         EditorUtility.SetDirty(targetBloc);
                         // Select new contour only
@@ -898,6 +914,7 @@ public class ContourBlocInspector : Editor
                     Handles.color = IsPointSelected(pti) ? Color.green : Color.white;
                     if (Handles.Button(pointPositionWorldSpace, Quaternion.identity, handleSize, handleSize, Handles.CircleHandleCap))
                     {
+                        Undo.RecordObject(targetBloc, "Create contour");
                         // Add point to selection
                         SelectPoint(pti, true);
                         // Add point to contour (again)
