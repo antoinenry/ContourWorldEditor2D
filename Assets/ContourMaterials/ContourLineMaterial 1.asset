@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 586cc879194e349418495395c5a853f8, type: 3}
   m_Name: ContourLineMaterial 1
   m_EditorClassIdentifier: 
-  color: {r: 0.9150943, g: 0.61535114, b: 0.2719384, a: 1}
+  color: {r: 0.11320752, g: 0.11320752, b: 0.11320752, a: 1}
   meshMaterial: {fileID: 10306, guid: 0000000000000000f000000000000000, type: 0}
-  width: 0.1
+  width: 0.05

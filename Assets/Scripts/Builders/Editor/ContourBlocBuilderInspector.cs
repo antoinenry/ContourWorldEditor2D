@@ -11,9 +11,9 @@ public class ContourBlocBuilderInspector : Editor
 
     public override void OnInspectorGUI()
     {
-
         base.OnInspectorGUI();
         targetBuilder = target as ContourBlocBuilder;
+        targetBuilder.Build();
         // Material list inspector
         showMaterials = EditorGUILayout.Foldout(showMaterials, "Materials");
         if (showMaterials)
