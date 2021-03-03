@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System;
 using System.Collections.Generic;
 
 public class ContourLineReader : ContourMeshReader
@@ -9,46 +8,39 @@ public class ContourLineReader : ContourMeshReader
         // Read if possible
         if (blueprint != null && blueprint.material is ContourLineMaterial)
         {
-            ReadBlueprint(blueprint.GetEnabledPoints(), blueprint.material as ContourLineMaterial, blueprint.loop);
+            ReadBlueprint(blueprint.positions, blueprint.material as ContourLineMaterial);
             return true;
         }
         // If not, return false
         return false;
     }
 
-    private void ReadBlueprint(ContourBlueprint.Point[] unloopedPoints, ContourLineMaterial contourMaterial, bool loopContour)
+    private void ReadBlueprint(Vector2[] positions, ContourLineMaterial contourMaterial)
     {
+        // Set material
+        MeshMaterial = contourMaterial != null ? contourMaterial.meshMaterial : null;
         // Check if enough points to build at least one segment
-        base.ReadBlueprint(unloopedPoints, contourMaterial);
-        if (unloopedPoints.Length < 2)
+        int positionCount = positions != null ? positions.Length : 0;
+        if (positionCount < 2)
         {
             Clear();
             return;
         }
         // Loop contour
-        ContourBlueprint.Point[] points;
-        if (loopContour)
-        {
-            points = new ContourBlueprint.Point[unloopedPoints.Length + 1];
-            unloopedPoints.CopyTo(points, 0);
-            points[unloopedPoints.Length] = points[0];
-        }
-        else
-            points = unloopedPoints;
+        bool loopContour = positionCount >= 3 && positions[0] == positions[positionCount - 1];
         // Set vertices: two vertices per point
-        int vertexCount = points.Length * 2;
+        int vertexCount = positionCount * 2;
         Vertices = new List<Vector3>(vertexCount);
         float halfWidth = contourMaterial.width / 2f;
-        //bool loopContour = points.Length > 2 && points[0].position == points[points.Length - 1].position;
-        Vector2 outDirection = (points[1].position - points[0].position).normalized;
-        Vector2 inDirection = loopContour ? (points[points.Length - 1].position - points[points.Length - 2].position).normalized : outDirection; 
-        for (int i = 0, iend = points.Length; i < iend; i++)
+        Vector2 outDirection = (positions[1] - positions[0]).normalized;
+        Vector2 inDirection = loopContour ? (positions[0] - positions[positionCount - 2]).normalized : outDirection; 
+        for (int i = 0; i < positionCount; i++)
         {
             // Calculate current angle median
-            if (i < iend - 1)
-                outDirection = (points[i + 1].position - points[i].position).normalized;
+            if (i < positionCount - 1)
+                outDirection = (positions[i + 1] - positions[i]).normalized;
             else
-                outDirection = loopContour ? (points[1].position - points[0].position).normalized : inDirection;
+                outDirection = loopContour ? (positions[1] - positions[0]).normalized : inDirection;
             Vector2 median = Vector3.Cross(inDirection + outDirection, Vector3.forward).normalized;
             // Correct width depending on angle
             float angle_deg = Vector2.Angle(-inDirection, outDirection);
@@ -56,12 +48,12 @@ public class ContourLineReader : ContourMeshReader
             if (angle_deg != 0f)
                 witdh_correction = 1f / Mathf.Sin(Mathf.Deg2Rad * angle_deg / 2f);
             // Add two vertices for each side of the ribbon
-            Vertices.Add(points[i].position + median * halfWidth * witdh_correction);
-            Vertices.Add(points[i].position - median * halfWidth * witdh_correction);
+            Vertices.Add(positions[i] + median * halfWidth * witdh_correction);
+            Vertices.Add(positions[i] - median * halfWidth * witdh_correction);
             inDirection = outDirection;
         }
         // Set triangles: one quad per segment, two triangles per quad
-        int quadCount = points.Length - 1;
+        int quadCount = positionCount - 1;
         Triangles = new List<int>(quadCount * 6);
         for (int i = 0; i < quadCount; i++)
         {

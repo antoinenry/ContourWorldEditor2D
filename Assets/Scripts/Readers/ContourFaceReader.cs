@@ -8,27 +8,29 @@ public class ContourFaceReader : ContourMeshReader
         // Read if possible
         if (blueprint != null && blueprint.material is ContourFaceMaterial)
         {
-            ReadBlueprint(blueprint.GetEnabledPoints(), blueprint.material as ContourFaceMaterial);
+            ReadBlueprint(blueprint.positions, blueprint.material as ContourFaceMaterial);
             return true;
         }
         // If not, return false
         return false;
     }
 
-    private void ReadBlueprint(ContourBlueprint.Point[] points, ContourFaceMaterial contourMaterial)
+    private void ReadBlueprint(Vector2[] positions, ContourFaceMaterial contourMaterial)
     {
+        // Set material
+        MeshMaterial = contourMaterial != null ? contourMaterial.meshMaterial : null;
         // Check if enough points to build at least one triangle
-        base.ReadBlueprint(points, contourMaterial);
-        if (points.Length < 3)
+        int positionCount = positions != null ? positions.Length : 0;
+        if (positionCount < 3)
         {
             Clear();
             return;
         }
-        if (points == null) return;
+        if (positions == null) return;
         // Set vertices: copy the enabled positions x,y and set z to 0
-        int vertexCount = points.Length;
+        int vertexCount = positionCount;
         Vertices = new List<Vector3>(vertexCount);
-        foreach (ContourBlueprint.Point pt in points) Vertices.Add(pt.position);
+        foreach (Vector2 pos in positions) Vertices.Add(pos);
         // Set triangles: simple convex triangulation
         int triangleCount = Mathf.Max(vertexCount - 2, 0);
         Triangles = new List<int>(triangleCount * 3);

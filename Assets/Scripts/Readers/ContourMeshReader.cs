@@ -18,12 +18,4 @@ public abstract class ContourMeshReader : ContourReader
         UVs = null;
         Colors = null;
     }
-
-    protected void ReadBlueprint(ContourBlueprint.Point[] points, ContourMeshMaterial contourMaterial)
-    {
-        // Set material
-        MeshMaterial = contourMaterial != null ? contourMaterial.meshMaterial : null;
-        // No points case
-        if (points == null) Clear();
-    }
 }

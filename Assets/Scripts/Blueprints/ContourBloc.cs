@@ -20,17 +20,10 @@ public class ContourBloc : MonoBehaviour
         public int OccurenceCount => occurences == null ? 0 : occurences.Count;
     }
 
-    public struct Contour
-    {
-        public int[] points;
-        public int tag;
-    }
-
     [SerializeField] private List<Point> points;
     [SerializeField] private Point bufferPoint;
     [SerializeField] private List<int> contourTags;
 
-    public ContourBlueprint[] ContourBluePrints;
     public List<string> contourTagNames;
 
     private void Reset()

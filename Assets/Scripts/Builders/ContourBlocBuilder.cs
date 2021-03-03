@@ -6,11 +6,17 @@ using UnityEngine;
 public class ContourBlocBuilder : MonoBehaviour
 {
     public ContourBloc bloc;
-    public bool bluePrintsHaveChanged;
+    public List<ContourMaterialBundle> contourMaterialBundles;
 
-    [SerializeField] private ContourBlueprint[] blueprints;
-    [SerializeField] private ContourReader[] readers;
-    [SerializeField] private ContourBuilder[] builders;
+    [SerializeField] private List<ContourBlueprint> blueprints;
+    [SerializeField] private List<ContourReader> readers;
+    [SerializeField] private List<ContourBuilder> builders;
+
+    [Serializable]
+    public struct ContourMaterialBundle
+    {
+        public List<ContourMaterial> contourMaterials;
+    }
 
     private void Reset()
     {
@@ -20,31 +26,72 @@ public class ContourBlocBuilder : MonoBehaviour
     public void Build()
     {
         // Get blueprints from bloc
-        if (bloc == null) SetBlueprints(null);
-        SetBlueprints(bloc.ContourBluePrints);
+        UpdateBluePrints();
+        BuildFromBlueprints();
         // Apply changes
-        if (bluePrintsHaveChanged && builders != null)
+        if (builders != null) foreach(ContourBuilder b in builders) b.Build();
+    }
+
+    private void UpdateBluePrints()
+    {
+        if (bloc != null)
         {
-            foreach(ContourBuilder b in builders) b.Build();
-            bluePrintsHaveChanged = false;
+            List<List<int>> contourPoints = bloc.GetAllContourPoints(false);
+            int contourCount = contourPoints.Count;
+            blueprints = new List<ContourBlueprint>();
+            for(int cti = 0; cti < contourCount; cti++)
+            {
+                Vector2[] contourPositions = contourPoints[cti].ConvertAll(pti => bloc.GetPosition(pti)).ToArray();
+                int contourTag = bloc.GetContourTag(cti);
+                if (contourMaterialBundles == null || contourTag < 0 || contourTag > contourMaterialBundles.Count) continue;
+                // Creat one blueprint for each material
+                List<ContourMaterial> cms = contourMaterialBundles[contourTag].contourMaterials;
+                if (cms == null) continue;
+                foreach (ContourMaterial cm in cms)
+                {
+                    if (cm == null) continue;
+                    blueprints.Add(new ContourBlueprint()
+                    {
+                        positions = contourPositions,
+                        material = cm
+                    });
+                }
+            }
         }
     }
 
-    private void SetBlueprints(ContourBlueprint[] newBlueprints)
+    public int UpdateMaterialListSize()
     {
-        blueprints = newBlueprints;
+        if (bloc == null)
+        {
+            contourMaterialBundles = new List<ContourMaterialBundle>();
+            return 0;
+        }
+        else
+        {
+            int tagCount = bloc.contourTagNames != null ? bloc.contourTagNames.Count : 0;
+            if (contourMaterialBundles == null) contourMaterialBundles = new List<ContourMaterialBundle>(tagCount);
+            int listSize = contourMaterialBundles.Count;
+            if (listSize == tagCount) return listSize;
+            if (listSize < tagCount) contourMaterialBundles.AddRange(new ContourMaterialBundle[tagCount - listSize]);
+            else contourMaterialBundles.RemoveRange(tagCount, listSize - tagCount);
+            return tagCount;
+        }
+    }
 
+    private void BuildFromBlueprints()
+    {
         // Update readers
         {
             if (blueprints == null)
                 readers = null;
             else
-                readers = Array.ConvertAll(blueprints, bp => ContourReader.NewReader(bp));
+                readers = blueprints.ConvertAll(bp => ContourReader.NewReader(bp));
         }
         // Update builders
         {
             // Reset old builders
-            int oldBuilderCount = builders != null ? builders.Length : 0;
+            int oldBuilderCount = builders != null ? builders.Count : 0;
             List<ContourBuilder> unusedBuilders = new List<ContourBuilder>(oldBuilderCount);
             for (int i = 0; i < oldBuilderCount; i++)
             {
@@ -59,7 +106,7 @@ public class ContourBlocBuilder : MonoBehaviour
             List<ContourBuilder> newBuilders;
             if (readers != null)
             {
-                newBuilders = new List<ContourBuilder>(readers.Length);
+                newBuilders = new List<ContourBuilder>(readers.Count);
                 // Dispatch readers to adequate builders
                 foreach (ContourReader r in readers)
                 {
@@ -67,7 +114,7 @@ public class ContourBlocBuilder : MonoBehaviour
                     // Check if adequate builder exist in old builders
                     if (oldBuilderCount > 0)
                     {
-                        matchingBuilder = Array.Find(builders, b => b != null && b.TryAddReader(r));
+                        matchingBuilder = builders.Find(b => b != null && b.TryAddReader(r));
                         if (matchingBuilder != null)
                         {
                             unusedBuilders.Remove(matchingBuilder);
@@ -100,9 +147,7 @@ public class ContourBlocBuilder : MonoBehaviour
                 if (b != null) DestroyImmediate(b.gameObject);
             }
             // Replace old builders with new ones
-            builders = newBuilders != null ? newBuilders.ToArray() : null;
-            // Signal blueprint change (look into that for future optimization)
-            bluePrintsHaveChanged = true;
+            builders = newBuilders != null ? newBuilders : null;
         }
     }
 }
