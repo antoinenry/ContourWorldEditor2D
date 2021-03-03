@@ -20,15 +20,25 @@ public class ContourBloc : MonoBehaviour
         public int OccurenceCount => occurences == null ? 0 : occurences.Count;
     }
 
+    public struct Contour
+    {
+        public int[] points;
+        public int tag;
+    }
+
     [SerializeField] private List<Point> points;
     [SerializeField] private Point bufferPoint;
+    [SerializeField] private List<int> contourTags;
 
-    public ContourBlueprint[] Contours;
+    public ContourBlueprint[] ContourBluePrints;
+    public List<string> contourTagNames;
 
     private void Reset()
     {
         points = new List<Point>();
         bufferPoint = new Point() { occurences = new List<PointOccurence>() };
+        contourTagNames = new List<string>();
+        contourTags = new List<int>();
     }
 
     public int PointCount => points == null ? 0 : points.Count;
@@ -64,7 +74,7 @@ public class ContourBloc : MonoBehaviour
         return maxContourIndex + 1;
     }
 
-    public List<List<int>> GetContours(bool includeUndefinedPoints)
+    public List<List<int>> GetAllContourPoints(bool includeUndefinedPoints)
     {
         List<List<int>> contours = new List<List<int>>();
         for (int pti = includeUndefinedPoints ? -1 : 0, ptCount = PointCount; pti < ptCount; pti++)
@@ -415,7 +425,7 @@ public class ContourBloc : MonoBehaviour
     public void DestroyAllPointlessContours()
     {
         // Find all pointless contour
-        List<List<int>> contours = GetContours(false);
+        List<List<int>> contours = GetAllContourPoints(false);
         if (contours == null) return;
         List<int> pointlessContourIndices = new List<int>();
         for (int cti = 0, ctcount = contours.Count; cti < ctcount; cti++)
@@ -577,6 +587,28 @@ public class ContourBloc : MonoBehaviour
         else SetContourLength(contourIndex, contourLength - 1, false);
     }
 
+    public void CorrectContourTagList()
+    {
+        if (contourTags == null) contourTags = new List<int>();
+        int contourCount = GetContourCount();
+        int tagCount = contourTags.Count;
+        if (tagCount == contourCount) return;
+        if (tagCount > contourCount) contourTags.RemoveRange(contourCount, tagCount - contourCount);
+        else contourTags.AddRange(new int[contourCount - tagCount]);
+    }
+
+    public int GetContourTag(int contourIndex)
+    {
+        CorrectContourTagList();
+        return contourTags[contourIndex];
+    }
+
+    public void SetContourTag(int contourIndex, int contourTag)
+    {
+        CorrectContourTagList();
+        contourTags[contourIndex] = contourTag;
+    }
+
     #region Gizmos
     private void OnDrawGizmos()
     {
@@ -594,7 +626,7 @@ public class ContourBloc : MonoBehaviour
     {
         Vector3 blocPosition = transform.position;
         int pointCount = PointCount;
-        List<List<int>> contours = GetContours(false);
+        List<List<int>> contours = GetAllContourPoints(false);
         bool[] pointIsUsed = new bool[pointCount];
         foreach(List<int> contour in contours)
         {

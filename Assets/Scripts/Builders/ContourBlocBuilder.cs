@@ -21,7 +21,7 @@ public class ContourBlocBuilder : MonoBehaviour
     {
         // Get blueprints from bloc
         if (bloc == null) SetBlueprints(null);
-        SetBlueprints(bloc.Contours);
+        SetBlueprints(bloc.ContourBluePrints);
         // Apply changes
         if (bluePrintsHaveChanged && builders != null)
         {
