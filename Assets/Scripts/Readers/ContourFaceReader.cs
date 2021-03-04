@@ -27,10 +27,12 @@ public class ContourFaceReader : ContourMeshReader
             return;
         }
         if (positions == null) return;
-        // Set vertices: copy the enabled positions x,y and set z to 0
+        // Set vertices: copy positions x,y and set z to 0
         int vertexCount = positionCount;
+        if (positions[0] == positions[positionCount-1]) vertexCount--;
         Vertices = new List<Vector3>(vertexCount);
-        foreach (Vector2 pos in positions) Vertices.Add(pos);
+        for (int i = 0; i < vertexCount; i++)
+            Vertices.Add(positions[i]);
         // Set triangles: simple convex triangulation
         int triangleCount = Mathf.Max(vertexCount - 2, 0);
         Triangles = new List<int>(triangleCount * 3);
