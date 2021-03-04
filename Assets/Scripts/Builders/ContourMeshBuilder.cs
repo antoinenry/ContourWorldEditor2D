@@ -77,7 +77,8 @@ public class ContourMeshBuilder : ContourBuilder
         int startIndex = 0;
         for (int i = 0; i < submeshCount; i++)
         {
-            mesh.SetTriangles(submeshes[i].GetTriangles(startIndex, out int endIndex), i);
+            List<int> submeshTriangles = submeshes[i].GetTriangles(startIndex, out int endIndex);
+            mesh.SetTriangles(submeshTriangles, i);
             startIndex = endIndex;
         }
         // Set bounds

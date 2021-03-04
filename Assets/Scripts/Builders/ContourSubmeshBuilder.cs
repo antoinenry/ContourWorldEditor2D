@@ -37,7 +37,7 @@ public class ContourSubmeshBuilder
                 offset += r.Vertices.Count;
             }
         }
-        endIndex = startIndex + offset;
+        endIndex = offset;
         return triangles;
     }
 

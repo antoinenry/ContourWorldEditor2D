@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 586cc879194e349418495395c5a853f8, type: 3}
   m_Name: ContourLineMaterial 2
   m_EditorClassIdentifier: 
-  color: {r: 0.16981131, g: 0.16981131, b: 0.16981131, a: 1}
+  color: {r: 0.0754717, g: 0.0754717, b: 0.0754717, a: 1}
   meshMaterial: {fileID: 2100000, guid: ef8d8975107c11f4ab29946e9cbbd3e7, type: 2}
   uvScale: {x: 0.01, y: 0.5}
-  width: 0.1
+  width: 0.3

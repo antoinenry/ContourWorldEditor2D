@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 586cc879194e349418495395c5a853f8, type: 3}
   m_Name: GrassContourMaterial
   m_EditorClassIdentifier: 
-  color: {r: 0.16981131, g: 0.16981131, b: 0.16981131, a: 1}
+  color: {r: 0.9339623, g: 0.9339623, b: 0.9339623, a: 1}
   meshMaterial: {fileID: 2100000, guid: 033b687a31e109f44a832198d51f8dc6, type: 2}
   uvScale: {x: 1, y: -1}
   width: 0.5
