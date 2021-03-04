@@ -4,5 +4,4 @@
 public class ContourLineMaterial : ContourMeshMaterial
 {
     public float width = .1f;
-
 }

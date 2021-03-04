@@ -67,11 +67,20 @@ public class ContourLineReader : ContourMeshReader
         Normals = new List<Vector3>(vertexCount);
         for (int i = 0; i < vertexCount; i++)
             Normals.Add(Vector3.back);
-        // Set uvs: since it's 2D, use vertex positions
+        // Set uvs: repeat texture along segments
         UVs = new List<Vector2>(vertexCount);
-        for (int i = 0; i < vertexCount; i++)
-            UVs.Add(Vertices[i]);
-        // Set colors: all to one color (white)
+        float coveredLength = 0f;
+        float yTop = .5f + contourMaterial.uvScale.y / 2f;
+        float yBot = .5f - contourMaterial.uvScale.y / 2f;
+        UVs.Add(new Vector2(0f, yTop));
+        UVs.Add(new Vector2(0f, yBot));
+        for (int i = 1; i < positionCount; i++)
+        {
+            coveredLength += Vector2.Distance(positions[i - 1], positions[i]) * contourMaterial.uvScale.x;
+            UVs.Add(new Vector2(coveredLength, yTop));
+            UVs.Add(new Vector2(coveredLength, yBot));
+        }
+        // Set colors: all to the same color specified in contour material
         Color color = contourMaterial.color;
         Colors = new List<Color>(vertexCount);
         for (int i = 0; i < vertexCount; i++)
