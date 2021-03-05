@@ -31,6 +31,7 @@ public class ContourLineReader : ContourMeshReader
         // Set vertices: two vertices per point
         int vertexCount = positionCount * 2;
         Vertices = new List<Vector3>(vertexCount);
+        Vector3 zOffset = contourMaterial.zOffset * Vector3.forward;
         float halfWidth = contourMaterial.width / 2f;
         Vector2 outDirection = (positions[1] - positions[0]).normalized;
         Vector2 inDirection = loopContour ? (positions[0] - positions[positionCount - 2]).normalized : outDirection; 
@@ -41,15 +42,15 @@ public class ContourLineReader : ContourMeshReader
                 outDirection = (positions[i + 1] - positions[i]).normalized;
             else
                 outDirection = loopContour ? (positions[1] - positions[0]).normalized : inDirection;
-            Vector2 median = Vector3.Cross(inDirection + outDirection, Vector3.forward).normalized;
+            Vector3 median = Vector3.Cross(inDirection + outDirection, Vector3.forward).normalized;
             // Correct width depending on angle
             float angle_deg = Vector2.Angle(-inDirection, outDirection);
             float witdh_correction = 1f;
             if (angle_deg != 0f)
                 witdh_correction = 1f / Mathf.Sin(Mathf.Deg2Rad * angle_deg / 2f);
             // Add two vertices for each side of the ribbon
-            Vertices.Add(positions[i] + median * halfWidth * witdh_correction);
-            Vertices.Add(positions[i] - median * halfWidth * witdh_correction);
+            Vertices.Add((Vector3)positions[i] + median * halfWidth * witdh_correction + zOffset);
+            Vertices.Add((Vector3)positions[i] - median * halfWidth * witdh_correction + zOffset);
             inDirection = outDirection;
         }
         // Set triangles: one quad per segment, two triangles per quad
