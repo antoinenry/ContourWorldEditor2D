@@ -39,10 +39,13 @@ public class ContourFaceReader : ContourMeshReader
         Triangles = new List<int>(triangleCount * 3);
         for (int i = 0; i < triangleCount; i++)
             Triangles.AddRange(new int[] { 0, i + 1, i + 2 });
-        // Set normals: all to (0, 0, -1)
+        // Set normals: all to random vector
         Normals = new List<Vector3>(vertexCount);
+        Vector3 randomNormal = Vector3.back;
+        randomNormal.x = Random.Range(-1f, 1f);
+        randomNormal.y = Random.Range(-1f, 1f);
         for (int i = 0; i < vertexCount; i++)
-            Normals.Add(Vector3.back);
+            Normals.Add(randomNormal);
         // Set uvs: since it's 2D, use vertex positions
         UVs = new List<Vector2>(vertexCount);
         for (int i = 0; i < vertexCount; i++)

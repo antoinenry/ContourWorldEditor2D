@@ -7,19 +7,12 @@ public class ContourBlocBuilder : MonoBehaviour
 {
     public ContourBloc bloc;
     public List<Contour> contours;
-    public List<ContourDress> palette;
+    public ContourPalette palette;
+    public List<ContourBlueprint> blueprints;
     //public List<ContourMaterialBundle> contourMaterialBundles;
 
-    [SerializeField] private List<ContourBlueprint> blueprints;
     [SerializeField] private List<ContourReader> readers;
     [SerializeField] private List<ContourBuilder> builders;
-
-    [Serializable]
-    public struct ContourDress
-    {
-        public string name;
-        public List<ContourMaterial> contourMaterials;
-    }
 
     [Serializable]
     public struct Contour
@@ -79,14 +72,14 @@ public class ContourBlocBuilder : MonoBehaviour
         contours[contourIndex] = ct;
     }
 
-    public int PaletteSize => palette != null ? palette.Count : 0;
+    public int PaletteSize => palette != null ? palette.Size : 0;
 
     public string[] GetPaletteOptionNames()
     {
         int paletteSize = PaletteSize;
         string[] options = new string[paletteSize];
         for (int pi = 0; pi < paletteSize; pi++)
-            options[pi] = palette[pi].name;
+            options[pi] = palette.items[pi].name;
         return options;
     }
 
@@ -115,16 +108,15 @@ public class ContourBlocBuilder : MonoBehaviour
                 int paletteIndex = contours[cti].paletteIndex;
                 if (paletteIndex < 0 || paletteIndex >= PaletteSize) continue;
                 // Create one blueprint for each contour material
-                List<ContourMaterial> cms = palette[paletteIndex].contourMaterials;
+                List<ContourMaterial> cms = palette.items[paletteIndex].contourMaterials;
                 if (cms == null) continue;
                 foreach (ContourMaterial cm in cms)
                 {
                     if (cm == null) continue;
-                    blueprints.Add(new ContourBlueprint()
-                    {
-                        positions = contourPositions != null ? contourPositions.ToArray() : new Vector2[0],
-                        material = cm
-                    });
+                    ContourBlueprint newBlueprint = ScriptableObject.CreateInstance(typeof(ContourMeshBlueprint)) as ContourBlueprint;
+                    newBlueprint.positions = contourPositions != null ? contourPositions.ToArray() : new Vector2[0];
+                    newBlueprint.material = cm;
+                    blueprints.Add(newBlueprint);
                 }
             }
         }

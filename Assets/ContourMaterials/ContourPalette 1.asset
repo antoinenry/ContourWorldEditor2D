@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8892c5410a8667479b9c3c442d3da39, type: 3}
+  m_Name: ContourPalette 1
+  m_EditorClassIdentifier: 
+  items:
+  - name: outline
+    contourMaterials:
+    - {fileID: 11400000, guid: a4aadda7301c2d749b137fb134818a06, type: 2}
+  - name: dirt
+    contourMaterials:
+    - {fileID: 11400000, guid: 9b83c1212aa503342bb763c56d62d52f, type: 2}
+    - {fileID: 11400000, guid: b016d1045857ac145b619d9820e17954, type: 2}
+  - name: grass
+    contourMaterials:
+    - {fileID: 11400000, guid: df8063584f0977b49aae7c763631c28d, type: 2}
+    - {fileID: 11400000, guid: 82b42ebce0ce7e740b118cf093fadf62, type: 2}
