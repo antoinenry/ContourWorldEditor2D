@@ -19,9 +19,6 @@ public class ContourBlocInspector : Editor
     private static bool[] contourSceneSelection;
     private static ContourInspectorState[] contourInspectorStates;
 
-    // Non-static member for use limited in inspector
-    private int editContourTagNameAt = -1;
-
     // General parameters
     const float handleScale = .1f;
 
@@ -487,41 +484,41 @@ public class ContourBlocInspector : Editor
         }
         // Get contour and points that are in it
         List<int> contourPoints = targetBloc.GetContour(contourIndex, true);
-        // Contour tag field
-        int contourTagIndex = targetBloc.GetContourTag(contourIndex);
-        if (targetBloc.contourTagNames == null) targetBloc.contourTagNames = new List<string>();
-        int nameCount = targetBloc.contourTagNames.Count;        
-        if (editContourTagNameAt != contourTagIndex)
-        {
-            // Dropdown to select existing tag
-            string[] tagOptions = new string[nameCount + 1];
-            Array.Copy(targetBloc.contourTagNames.ToArray(), tagOptions, nameCount);
-            tagOptions[nameCount] = "New tag";
-            EditorGUI.BeginChangeCheck();
-            contourTagIndex = EditorGUILayout.Popup(contourTagIndex, tagOptions);
-            if (EditorGUI.EndChangeCheck())
-            {
-                if (contourTagIndex == nameCount)
-                {
-                    targetBloc.contourTagNames.Add("Tag " + contourTagIndex);
-                    editContourTagNameAt = contourTagIndex;
-                }
-                targetBloc.SetContourTag(contourIndex, contourTagIndex);
-            }
-            // Set tag name
-            if (GUILayout.Button("Rename", GUILayout.Width(80f))) editContourTagNameAt = contourTagIndex;
-        }
-        else
-        {
-            // Text field to rename tag
-            if (contourTagIndex >= nameCount)
-            {
-                contourTagIndex = nameCount;
-                targetBloc.contourTagNames.Add("Tag " + contourTagIndex);
-            }
-            targetBloc.contourTagNames[contourTagIndex] = EditorGUILayout.TextField(targetBloc.contourTagNames[contourTagIndex]);
-            if (GUILayout.Button("OK", GUILayout.Width(80f))) editContourTagNameAt = -1;
-        }
+        //// Contour tag field
+        //int contourTagIndex = targetBloc.GetContourTag(contourIndex);
+        //if (targetBloc.contourTagNames == null) targetBloc.contourTagNames = new List<string>();
+        //int nameCount = targetBloc.contourTagNames.Count;        
+        //if (editContourTagNameAt != contourTagIndex)
+        //{
+        //    // Dropdown to select existing tag
+        //    string[] tagOptions = new string[nameCount + 1];
+        //    Array.Copy(targetBloc.contourTagNames.ToArray(), tagOptions, nameCount);
+        //    tagOptions[nameCount] = "New tag";
+        //    EditorGUI.BeginChangeCheck();
+        //    contourTagIndex = EditorGUILayout.Popup(contourTagIndex, tagOptions);
+        //    if (EditorGUI.EndChangeCheck())
+        //    {
+        //        if (contourTagIndex == nameCount)
+        //        {
+        //            targetBloc.contourTagNames.Add("Tag " + contourTagIndex);
+        //            editContourTagNameAt = contourTagIndex;
+        //        }
+        //        targetBloc.SetContourTag(contourIndex, contourTagIndex);
+        //    }
+        //    // Set tag name
+        //    if (GUILayout.Button("Rename", GUILayout.Width(80f))) editContourTagNameAt = contourTagIndex;
+        //}
+        //else
+        //{
+        //    // Text field to rename tag
+        //    if (contourTagIndex >= nameCount)
+        //    {
+        //        contourTagIndex = nameCount;
+        //        targetBloc.contourTagNames.Add("Tag " + contourTagIndex);
+        //    }
+        //    targetBloc.contourTagNames[contourTagIndex] = EditorGUILayout.TextField(targetBloc.contourTagNames[contourTagIndex]);
+        //    if (GUILayout.Button("OK", GUILayout.Width(80f))) editContourTagNameAt = -1;
+        //}
         // Button to remove contour
         if (sceneGUIEditMode && GUILayout.Button("Remove"))
         {

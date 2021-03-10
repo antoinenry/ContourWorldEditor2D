@@ -9,9 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d8fe7299a35008c488e44936454f0322, type: 3}
-  m_Name: ContourFaceMaterial
+  m_Script: {fileID: 11500000, guid: 23aa528e18d7e0544906c460f6549ec7, type: 3}
+  m_Name: ContourFaceMaterial 2
   m_EditorClassIdentifier: 
-  color: {r: 1, g: 1, b: 1, a: 1}
+  color: {r: 0.34509805, g: 0.65882355, b: 0.23529413, a: 1}
   meshMaterial: {fileID: 2100000, guid: 1d62c1125f158714395a4b6fb018d3e4, type: 2}
   uvScale: {x: 1, y: 1}
+  zOffset: -0.02

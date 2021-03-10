@@ -22,16 +22,11 @@ public class ContourBloc : MonoBehaviour
 
     [SerializeField] private List<Point> points;
     [SerializeField] private Point bufferPoint;
-    [SerializeField] private List<int> contourTags;
-
-    public List<string> contourTagNames;
 
     private void Reset()
     {
         points = new List<Point>();
         bufferPoint = new Point() { occurences = new List<PointOccurence>() };
-        contourTagNames = new List<string>();
-        contourTags = new List<int>();
     }
 
     public int PointCount => points == null ? 0 : points.Count;
@@ -128,6 +123,13 @@ public class ContourBloc : MonoBehaviour
         // Remove gaps if specified
         if (!includeUndefinedPoints) pointIndices.RemoveAll(pti => pti == -1);
         return pointIndices;
+    }
+
+    public List<Vector2> GetContourPositions(int contourIndex)
+    {
+        List<int> pointIndices = GetContour(contourIndex, false);
+        if (pointIndices == null) return new List<Vector2>();
+        else return pointIndices.ConvertAll(pti => GetPosition(pti));
     }
 
     public void AddPoint(Vector2 position)
@@ -578,28 +580,6 @@ public class ContourBloc : MonoBehaviour
         if (contourLength < 3 || IsContourLooped(contourIndex) == loop) return;
         if (loop) AddPointToContour(contourIndex, pointIndices[0], false);
         else SetContourLength(contourIndex, contourLength - 1, false);
-    }
-
-    public void CorrectContourTagList()
-    {
-        if (contourTags == null) contourTags = new List<int>();
-        int contourCount = GetContourCount();
-        int tagCount = contourTags.Count;
-        if (tagCount == contourCount) return;
-        if (tagCount > contourCount) contourTags.RemoveRange(contourCount, tagCount - contourCount);
-        else contourTags.AddRange(new int[contourCount - tagCount]);
-    }
-
-    public int GetContourTag(int contourIndex)
-    {
-        CorrectContourTagList();
-        return contourTags[contourIndex];
-    }
-
-    public void SetContourTag(int contourIndex, int contourTag)
-    {
-        CorrectContourTagList();
-        contourTags[contourIndex] = contourTag;
     }
 
     #region Gizmos
