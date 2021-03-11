@@ -44,7 +44,7 @@ public class ContourFaceReader : ContourMeshReader
             UVs = new List<Vector2>(vertexCount);
             for (int i = 0; i < vertexCount; i++)
                 UVs.Add(Vertices[i]);
-            // Set colors: all to the same color
+            // Set colors: fetch color in material
             Color color = contourMaterial.color;
             Colors = new List<Color>(vertexCount);
             for (int i = 0; i < vertexCount; i++)

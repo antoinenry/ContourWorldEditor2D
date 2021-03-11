@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: ContourFaceMaterial 2
   m_EditorClassIdentifier: 
   color: {r: 0.34509805, g: 0.65882355, b: 0.23529413, a: 1}
-  meshMaterial: {fileID: 2100000, guid: 1d62c1125f158714395a4b6fb018d3e4, type: 2}
+  meshMaterial: {fileID: 2100000, guid: 51c47e9edb427ab4d84767ac3859bbbf, type: 2}
   uvScale: {x: 1, y: 1}
   zOffset: -0.02

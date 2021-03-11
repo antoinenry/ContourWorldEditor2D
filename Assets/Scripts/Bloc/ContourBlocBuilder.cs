@@ -122,7 +122,7 @@ public class ContourBlocBuilder : MonoBehaviour
                 foreach (ContourMaterial cm in cms)
                 {
                     if (cm == null) continue;
-                    Type blueprintType = cm is ContourFaceMaterial ? typeof(ContourMeshBlueprint) : typeof(ContourBlueprint);
+                    Type blueprintType = cm is ContourMeshMaterial ? typeof(ContourMeshBlueprint) : typeof(ContourBlueprint);
                     if (++newBlueprintCount > existingBlueprintCount)
                     {
                         // Create new blueprint
