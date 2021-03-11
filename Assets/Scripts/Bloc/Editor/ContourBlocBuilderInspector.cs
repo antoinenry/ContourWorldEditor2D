@@ -19,7 +19,7 @@ public class ContourBlocBuilderInspector : Editor
         showDebug = EditorGUILayout.Toggle("Show debug", showDebug);
         if (showDebug) base.OnInspectorGUI();
         targetBuilder = target as ContourBlocBuilder;
-        if (GUILayout.Button("Build")) targetBuilder.Build();
+        /*if (GUILayout.Button("Build"))*/ targetBuilder.Build();
         ContourListInspectorGUI();
         BlueprintListInspectorGUI();
     }

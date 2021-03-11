@@ -16,4 +16,4 @@ MonoBehaviour:
   meshMaterial: {fileID: 2100000, guid: ef8d8975107c11f4ab29946e9cbbd3e7, type: 2}
   uvScale: {x: 1, y: 1}
   zOffset: 0
-  width: 0.15
+  width: 0.1

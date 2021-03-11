@@ -4,5 +4,6 @@ using UnityEngine;
 [Serializable]
 public class ContourMeshBlueprint : ContourBlueprint
 {
-    public Vector2 normal;
+    [UnitVector(autoAdjust = UnitVectorAttribute.AutoAdjustBehaviour.AdjustZ)]
+    public Vector3 normal = Vector3.back;
 }

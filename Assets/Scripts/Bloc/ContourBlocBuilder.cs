@@ -27,6 +27,8 @@ public class ContourBlocBuilder : MonoBehaviour
     {
         bloc = GetComponent<ContourBloc>();
         Blueprints = new List<ContourBlueprint>(GetComponents<ContourBlueprint>());
+        foreach (ContourBlueprint bp in Blueprints) DestroyImmediate(bp);
+        Blueprints = new List<ContourBlueprint>();
     }
 
     public void Build()
@@ -103,8 +105,10 @@ public class ContourBlocBuilder : MonoBehaviour
     private void UpdateBluePrints()
     {
         Blueprints = new List<ContourBlueprint>(GetComponents<ContourBlueprint>());
-        foreach (ContourBlueprint bp in Blueprints) DestroyImmediate(bp);
-        Blueprints.Clear();
+        int existingBlueprintCount = Blueprints.Count;
+        int newBlueprintCount = 0;
+        //foreach (ContourBlueprint bp in Blueprints) DestroyImmediate(bp);
+        //Blueprints.Clear();
         if (contours != null)
         {
             for (int cti = 0, ctCount = ContourCount; cti < ctCount; cti++)
@@ -112,18 +116,56 @@ public class ContourBlocBuilder : MonoBehaviour
                 List<Vector2> contourPositions = contours[cti].positions;
                 int paletteIndex = contours[cti].paletteIndex;
                 if (paletteIndex < 0 || paletteIndex >= PaletteSize) continue;
-                // Create one blueprint for each contour material
+                // Create/Update one blueprint for each contour material
                 List<ContourMaterial> cms = palette.items[paletteIndex].contourMaterials;
                 if (cms == null) continue;
                 foreach (ContourMaterial cm in cms)
                 {
                     if (cm == null) continue;
                     Type blueprintType = cm is ContourFaceMaterial ? typeof(ContourMeshBlueprint) : typeof(ContourBlueprint);
-                    ContourBlueprint newBlueprint = gameObject.AddComponent(blueprintType) as ContourBlueprint;
-                    newBlueprint.hideFlags = HideFlags.HideInInspector;
-                    newBlueprint.positions = contourPositions != null ? contourPositions.ToArray() : new Vector2[0];
-                    newBlueprint.material = cm;
-                    Blueprints.Add(newBlueprint);
+                    if (++newBlueprintCount > existingBlueprintCount)
+                    {
+                        // Create new blueprint
+                        ContourBlueprint newBlueprint = gameObject.AddComponent(blueprintType) as ContourBlueprint;
+                        newBlueprint.hideFlags = HideFlags.HideInInspector;
+                        newBlueprint.positions = contourPositions != null ? contourPositions.ToArray() : new Vector2[0];
+                        newBlueprint.material = cm;
+                        Blueprints.Add(newBlueprint);
+                    }
+                    else
+                    {
+                        // Update existing blueprint
+                        ContourBlueprint existingBlueprint = Blueprints[newBlueprintCount - 1];
+                        // Null case
+                        if (existingBlueprint == null)
+                        {
+                            // Create new blueprint
+                            ContourBlueprint newBlueprint = gameObject.AddComponent(blueprintType) as ContourBlueprint;
+                            newBlueprint.hideFlags = HideFlags.HideInInspector;
+                            newBlueprint.positions = contourPositions != null ? contourPositions.ToArray() : new Vector2[0];
+                            newBlueprint.material = cm;
+                            Blueprints[newBlueprintCount - 1] = newBlueprint;
+                        }
+                        else
+                        {
+                            // Update type
+                            if (blueprintType != existingBlueprint.GetType())
+                            {
+                                DestroyImmediate(existingBlueprint);
+                                ContourBlueprint newBlueprint = gameObject.AddComponent(blueprintType) as ContourBlueprint;
+                                newBlueprint.hideFlags = HideFlags.HideInInspector;
+                                newBlueprint.positions = contourPositions != null ? contourPositions.ToArray() : new Vector2[0];
+                                newBlueprint.material = cm;
+                                Blueprints[newBlueprintCount - 1] = newBlueprint;
+                            }
+                            // Update positions and material
+                            else
+                            {
+                                Blueprints[newBlueprintCount - 1].positions = contourPositions != null ? contourPositions.ToArray() : new Vector2[0];
+                                Blueprints[newBlueprintCount - 1].material = cm;
+                            }
+                        }
+                    }
                 }
             }
         }
