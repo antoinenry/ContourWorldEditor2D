@@ -19,7 +19,7 @@ public class ContourBlocBuilderInspector : Editor
         showDebug = EditorGUILayout.Toggle("Show debug", showDebug);
         if (showDebug) base.OnInspectorGUI();
         targetBuilder = target as ContourBlocBuilder;
-        /*if (GUILayout.Button("Build"))*/ targetBuilder.Build();
+        //if (GUILayout.Button("Build")) targetBuilder.Build();
         ContourListInspectorGUI();
         BlueprintListInspectorGUI();
     }
@@ -40,7 +40,8 @@ public class ContourBlocBuilderInspector : Editor
             //else EditorGUILayout.PropertyField(blueprintProperty);
             ContourBlueprint bp = blueprints[bpi];
             if (bp == null) EditorGUILayout.HelpBox("Null blueprint", MessageType.Error);
-            CreateCachedEditor(bp, null, ref blueprintEditors[bpi]);
+            CreateCachedEditor(bp, typeof(IntegratedContourBlueprintEditor), ref blueprintEditors[bpi]);
+            (blueprintEditors[bpi] as IntegratedContourBlueprintEditor).label = bpi.ToString();
             blueprintEditors[bpi].OnInspectorGUI();
             EditorGUILayout.EndVertical();
         }
@@ -65,11 +66,18 @@ public class ContourBlocBuilderInspector : Editor
                 if (expand) contourInspectors[cti] |= ContourInspectorState.Expand;
                 else contourInspectors[cti] &= ~ContourInspectorState.Expand;
                 SceneView.RepaintAll();
+                // Apply modifications in inspector
+                EditorUtility.SetDirty(targetBuilder);
                 return;
             }
             EditorGUI.BeginChangeCheck();
             int paletteIndex = EditorGUILayout.Popup(targetBuilder.GetPaletteIndex(cti), paletteOptions);
-            if (EditorGUI.EndChangeCheck()) targetBuilder.SetPaletteIndex(cti, paletteIndex);
+            if (EditorGUI.EndChangeCheck())
+            {
+                targetBuilder.SetPaletteIndex(cti, paletteIndex);
+                // Apply modifications in inspector
+                EditorUtility.SetDirty(targetBuilder);
+            }
             EditorGUILayout.EndHorizontal();
             // Expanded inspector: positions
             if (expand)
@@ -84,13 +92,20 @@ public class ContourBlocBuilderInspector : Editor
                 {
                     if (showPositions) contourInspectors[cti] |= ContourInspectorState.ShowPositions;
                     else contourInspectors[cti] &= ~ContourInspectorState.ShowPositions;
+                    // Apply modifications in inspector
+                    EditorUtility.SetDirty(targetBuilder);
                 }
                 int posCount = positions != null ? positions.Length : 0;
                 EditorGUI.BeginChangeCheck();
                 int newPosCount = EditorGUILayout.IntField(posCount);
                 Vector2[] newPositions = new Vector2[newPosCount];
                 if (positions != null) Array.Copy(positions, newPositions, Math.Min(posCount, newPosCount));
-                if (EditorGUI.EndChangeCheck()) targetBuilder.SetPositions(cti, newPositions);
+                if (EditorGUI.EndChangeCheck())
+                {
+                    targetBuilder.SetPositions(cti, newPositions);
+                    // Apply modifications in inspector
+                    EditorUtility.SetDirty(targetBuilder);
+                }
                 EditorGUILayout.EndHorizontal();
                 // Show all positions
                 if (showPositions)
@@ -105,6 +120,8 @@ public class ContourBlocBuilderInspector : Editor
                         {
                             newPositions[pi] = newPosition;
                             targetBuilder.SetPositions(cti, newPositions);
+                            // Apply modifications in inspector
+                            EditorUtility.SetDirty(targetBuilder);
                             break;
                         }
                     }

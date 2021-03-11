@@ -826,6 +826,8 @@ public class ContourBlocInspector : Editor
                 // Move selected points
                 foreach (int selectedPointIndex in selectedPointsIndices)
                     targetBloc.MovePoint(selectedPointIndex, targetPositions[selectedPointIndex] + handleMove);
+                // Apply modifications in inspector
+                EditorUtility.SetDirty(targetBloc);
             }
         }
         // Contour handles
@@ -833,7 +835,9 @@ public class ContourBlocInspector : Editor
         // Higlight selected contours
         Handles.color = Color.yellow;
         foreach (int cti in selectedContourIndices)
+        {
             DrawContour(contours[cti]);
+        }
         // Handles on segments for inserting points (in selected contours only)
         Handles.color = Color.yellow;
         foreach(int cti in selectedContourIndices)
@@ -862,7 +866,7 @@ public class ContourBlocInspector : Editor
 
     private void CreateContourSceneGUI()
     {
-        // New contour is the only selected contour, stop contour creation if contour selection changes
+        // New contour is the only selected contour
         List<int> selectedContourIndices = GetSelectedContourIndices();
         if (selectedContourIndices.Count != 1)
         {

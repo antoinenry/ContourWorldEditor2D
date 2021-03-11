@@ -20,7 +20,9 @@ MonoBehaviour:
     contourMaterials:
     - {fileID: 11400000, guid: 9b83c1212aa503342bb763c56d62d52f, type: 2}
     - {fileID: 11400000, guid: b016d1045857ac145b619d9820e17954, type: 2}
-  - name: grass
+  - name: grass_face
+    contourMaterials:
+    - {fileID: 11400000, guid: 82b42ebce0ce7e740b118cf093fadf62, type: 2}
+  - name: grass_line
     contourMaterials:
     - {fileID: 11400000, guid: df8063584f0977b49aae7c763631c28d, type: 2}
-    - {fileID: 11400000, guid: 82b42ebce0ce7e740b118cf093fadf62, type: 2}

@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(ContourBloc))]
+[ExecuteInEditMode]
+//[RequireComponent(typeof(ContourBloc))]
 public class ContourBlocBuilder : MonoBehaviour
 {
     public ContourBloc bloc;
@@ -23,12 +24,22 @@ public class ContourBlocBuilder : MonoBehaviour
 
     public List<ContourBlueprint> Blueprints { get; private set; }
 
+    
+    private void Update()
+    {
+        Build();
+    }
+
     private void Reset()
     {
         bloc = GetComponent<ContourBloc>();
         Blueprints = new List<ContourBlueprint>(GetComponents<ContourBlueprint>());
         foreach (ContourBlueprint bp in Blueprints) DestroyImmediate(bp);
         Blueprints = new List<ContourBlueprint>();
+        readers = new List<ContourReader>();
+        foreach (ContourBuilder b in GetComponentsInChildren<ContourBuilder>())
+            if (b != null && b.gameObject != null) DestroyImmediate(b.gameObject);
+        builders = new List<ContourBuilder>();
     }
 
     public void Build()
@@ -54,8 +65,9 @@ public class ContourBlocBuilder : MonoBehaviour
             for (int cti = 0; cti < contourCount; cti++)
             {
                 if (cti >= listSize) contours.Add(new Contour());
+                List<Vector2> blocPositions = bloc.GetContourPositions(cti);
                 Contour ct = contours[cti];
-                ct.positions = bloc.GetContourPositions(cti);
+                ct.positions = new List<Vector2>(blocPositions);
                 contours[cti] = ct;
             }
         }
@@ -123,25 +135,25 @@ public class ContourBlocBuilder : MonoBehaviour
                 {
                     if (cm == null) continue;
                     Type blueprintType = cm is ContourMeshMaterial ? typeof(ContourMeshBlueprint) : typeof(ContourBlueprint);
+                    // Create new blueprint
                     if (++newBlueprintCount > existingBlueprintCount)
                     {
-                        // Create new blueprint
                         ContourBlueprint newBlueprint = gameObject.AddComponent(blueprintType) as ContourBlueprint;
-                        newBlueprint.hideFlags = HideFlags.HideInInspector;
+                        //newBlueprint.hideFlags = HideFlags.HideInInspector;
                         newBlueprint.positions = contourPositions != null ? contourPositions.ToArray() : new Vector2[0];
                         newBlueprint.material = cm;
                         Blueprints.Add(newBlueprint);
                     }
+                    // Update existing blueprint
                     else
                     {
-                        // Update existing blueprint
                         ContourBlueprint existingBlueprint = Blueprints[newBlueprintCount - 1];
                         // Null case
                         if (existingBlueprint == null)
                         {
                             // Create new blueprint
                             ContourBlueprint newBlueprint = gameObject.AddComponent(blueprintType) as ContourBlueprint;
-                            newBlueprint.hideFlags = HideFlags.HideInInspector;
+                            //newBlueprint.hideFlags = HideFlags.HideInInspector;
                             newBlueprint.positions = contourPositions != null ? contourPositions.ToArray() : new Vector2[0];
                             newBlueprint.material = cm;
                             Blueprints[newBlueprintCount - 1] = newBlueprint;
@@ -153,7 +165,7 @@ public class ContourBlocBuilder : MonoBehaviour
                             {
                                 DestroyImmediate(existingBlueprint);
                                 ContourBlueprint newBlueprint = gameObject.AddComponent(blueprintType) as ContourBlueprint;
-                                newBlueprint.hideFlags = HideFlags.HideInInspector;
+                                //newBlueprint.hideFlags = HideFlags.HideInInspector;
                                 newBlueprint.positions = contourPositions != null ? contourPositions.ToArray() : new Vector2[0];
                                 newBlueprint.material = cm;
                                 Blueprints[newBlueprintCount - 1] = newBlueprint;
@@ -169,7 +181,13 @@ public class ContourBlocBuilder : MonoBehaviour
                 }
             }
         }
-        Blueprints.TrimExcess();
+        // Destroy excess blueprints
+        if (newBlueprintCount < existingBlueprintCount)
+        {
+            for (int bpi = newBlueprintCount; bpi < existingBlueprintCount; bpi++)
+                if (Blueprints[bpi] != null) DestroyImmediate(Blueprints[bpi]);
+            Blueprints.RemoveRange(newBlueprintCount, existingBlueprintCount - newBlueprintCount);
+        }
     }
 
     //public int UpdateMaterialListSize()
@@ -259,7 +277,7 @@ public class ContourBlocBuilder : MonoBehaviour
                 if (b != null) DestroyImmediate(b.gameObject);
             }
             // Replace old builders with new ones
-            builders = newBuilders != null ? newBuilders : null;
+            builders = new List<ContourBuilder>(newBuilders);
         }
     }
 }

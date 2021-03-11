@@ -10,9 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 23aa528e18d7e0544906c460f6549ec7, type: 3}
-  m_Name: ContourFaceMaterial 2
+  m_Name: FaceMaterial_green
   m_EditorClassIdentifier: 
-  color: {r: 0.34509805, g: 0.65882355, b: 0.23529413, a: 1}
   meshMaterial: {fileID: 2100000, guid: 51c47e9edb427ab4d84767ac3859bbbf, type: 2}
+  color: {r: 0.34509805, g: 0.65882355, b: 0.23529413, a: 1}
+  colorMode: 0
+  normal: {x: 0, y: 0, z: -1}
+  normalMode: 1
   uvScale: {x: 1, y: 1}
   zOffset: -0.02
