@@ -8,7 +8,7 @@ public class ContourBlocBuilder : MonoBehaviour
     public ContourBloc bloc;
     public List<Contour> contours;
     public ContourPalette palette;
-    public List<ContourBlueprint> blueprints;
+    //public List<ContourBlueprint> blueprints;
     //public List<ContourMaterialBundle> contourMaterialBundles;
 
     [SerializeField] private List<ContourReader> readers;
@@ -21,9 +21,12 @@ public class ContourBlocBuilder : MonoBehaviour
         public int paletteIndex;
     }
 
+    public List<ContourBlueprint> Blueprints { get; private set; }
+
     private void Reset()
     {
         bloc = GetComponent<ContourBloc>();
+        Blueprints = new List<ContourBlueprint>(GetComponents<ContourBlueprint>());
     }
 
     public void Build()
@@ -99,9 +102,11 @@ public class ContourBlocBuilder : MonoBehaviour
 
     private void UpdateBluePrints()
     {
+        Blueprints = new List<ContourBlueprint>(GetComponents<ContourBlueprint>());
+        foreach (ContourBlueprint bp in Blueprints) DestroyImmediate(bp);
+        Blueprints.Clear();
         if (contours != null)
         {
-            blueprints = new List<ContourBlueprint>();
             for (int cti = 0, ctCount = ContourCount; cti < ctCount; cti++)
             {
                 List<Vector2> contourPositions = contours[cti].positions;
@@ -113,13 +118,16 @@ public class ContourBlocBuilder : MonoBehaviour
                 foreach (ContourMaterial cm in cms)
                 {
                     if (cm == null) continue;
-                    ContourBlueprint newBlueprint = ScriptableObject.CreateInstance(typeof(ContourMeshBlueprint)) as ContourBlueprint;
+                    Type blueprintType = cm is ContourFaceMaterial ? typeof(ContourMeshBlueprint) : typeof(ContourBlueprint);
+                    ContourBlueprint newBlueprint = gameObject.AddComponent(blueprintType) as ContourBlueprint;
+                    newBlueprint.hideFlags = HideFlags.HideInInspector;
                     newBlueprint.positions = contourPositions != null ? contourPositions.ToArray() : new Vector2[0];
                     newBlueprint.material = cm;
-                    blueprints.Add(newBlueprint);
+                    Blueprints.Add(newBlueprint);
                 }
             }
         }
+        Blueprints.TrimExcess();
     }
 
     //public int UpdateMaterialListSize()
@@ -145,10 +153,10 @@ public class ContourBlocBuilder : MonoBehaviour
     {
         // Update readers
         {
-            if (blueprints == null)
+            if (Blueprints == null)
                 readers = null;
             else
-                readers = blueprints.ConvertAll(bp => ContourReader.NewReader(bp));
+                readers = Blueprints.ConvertAll(bp => ContourReader.NewReader(bp));
         }
         // Update builders
         {

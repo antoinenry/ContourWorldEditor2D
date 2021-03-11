@@ -2,7 +2,7 @@
 using UnityEngine;
 
 [Serializable]
-public class ContourBlueprint : ScriptableObject
+public class ContourBlueprint : MonoBehaviour
 {
     public Vector2[] positions;
     public ContourMaterial material;

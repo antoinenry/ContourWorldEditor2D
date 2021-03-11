@@ -26,17 +26,23 @@ public class ContourBlocBuilderInspector : Editor
 
     private void BlueprintListInspectorGUI()
     {
-        List<ContourBlueprint> blueprints = targetBuilder.blueprints;
+        List<ContourBlueprint> blueprints = targetBuilder.Blueprints;
         if (blueprints == null) return;
         int bpCount = blueprints.Count;
         if (blueprintEditors == null) blueprintEditors = new Editor[bpCount];
         else if (blueprintEditors.Length != bpCount) Array.Resize(ref blueprintEditors, bpCount);
-        for(int bpi = 0; bpi < bpCount; bpi++)
+        //SerializedProperty blueprintArrayProperty = serializedObject.FindProperty("blueprints");
+        for (int bpi = 0; bpi < bpCount; bpi++)
         {
+            EditorGUILayout.BeginVertical("box");
+            //SerializedProperty blueprintProperty = blueprintArrayProperty.GetArrayElementAtIndex(bpi);
+            //if (blueprintProperty == null) EditorGUILayout.HelpBox("Missing blueprint property", MessageType.Error);
+            //else EditorGUILayout.PropertyField(blueprintProperty);
             ContourBlueprint bp = blueprints[bpi];
             if (bp == null) EditorGUILayout.HelpBox("Null blueprint", MessageType.Error);
-            CreateCachedEditor(bp as ContourMeshBlueprint, null, ref blueprintEditors[bpi]);
+            CreateCachedEditor(bp, null, ref blueprintEditors[bpi]);
             blueprintEditors[bpi].OnInspectorGUI();
+            EditorGUILayout.EndVertical();
         }
     }
 
