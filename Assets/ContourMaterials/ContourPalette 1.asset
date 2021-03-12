@@ -26,3 +26,7 @@ MonoBehaviour:
   - name: grass_line
     contourMaterials:
     - {fileID: 11400000, guid: df8063584f0977b49aae7c763631c28d, type: 2}
+  - name: grass
+    contourMaterials:
+    - {fileID: 11400000, guid: df8063584f0977b49aae7c763631c28d, type: 2}
+    - {fileID: 11400000, guid: 82b42ebce0ce7e740b118cf093fadf62, type: 2}
