@@ -6,21 +6,21 @@ using UnityEngine;
 //[RequireComponent(typeof(ContourBloc))]
 public class ContourBlocBuilder : MonoBehaviour
 {
-    public ContourBloc bloc;
+    [HideInInspector] public ContourBloc bloc;
+    [HideInInspector] public ContourPalette palette;
     public List<Contour> contours;
-    public ContourPalette palette;
     //public List<ContourBlueprint> blueprints;
     //public List<ContourMaterialBundle> contourMaterialBundles;
 
-    [SerializeField] private List<ContourReader> readers;
-    [SerializeField] private List<ContourBuilder> builders;
+    [HideInInspector] [SerializeField] private List<ContourReader> readers;
+    [HideInInspector] [SerializeField] private List<ContourBuilder> builders;
 
     [Serializable]
     public struct Contour
     {
         public List<Vector2> positions;
-        public int paletteIndex;
-        public List<int> blueprintIndices;
+        [HideInInspector] public List<int> blueprintIndices;
+        [HideInInspector] public int paletteIndex;
     }
     
     private void Update()
@@ -82,6 +82,7 @@ public class ContourBlocBuilder : MonoBehaviour
         Contour ct = contours[contourIndex];
         ct.positions = positions != null ? new List<Vector2>(positions) : new List<Vector2>();
         contours[contourIndex] = ct;
+        UpdateBluePrints();
     }
 
     public ContourBlueprint[] GetContourBlueprints(int contourIndex)

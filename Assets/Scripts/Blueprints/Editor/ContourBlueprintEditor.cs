@@ -2,10 +2,11 @@
 using System;
 using System.Reflection;
 
-//[CustomEditor(typeof(ContourBlueprint), true)]
-public class IntegratedContourBlueprintEditor : Editor
+[CustomEditor(typeof(ContourBlueprint), true)]
+public class ContourBlueprintEditor : Editor
 {
     public string label;
+    public bool hidePositions;
 
     public override void OnInspectorGUI()
     {
@@ -20,6 +21,7 @@ public class IntegratedContourBlueprintEditor : Editor
             Type contourMaterialType = contourMaterial.GetType();
             foreach (FieldInfo fieldInfo in fieldInfos)
             {
+                if (hidePositions && fieldInfo.Name == "positions") continue;
                 SerializedProperty fieldProperty = serializedObject.FindProperty(fieldInfo.Name);
                 LinkMaterialAndBlueprintAttribute linkAttribute = fieldInfo.GetCustomAttribute(typeof(LinkMaterialAndBlueprintAttribute)) as LinkMaterialAndBlueprintAttribute; ;
                 if (linkAttribute != null)
