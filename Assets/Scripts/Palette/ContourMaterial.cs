@@ -2,5 +2,5 @@
 
 public abstract class ContourMaterial : ScriptableObject
 {
-    public enum BlueprintMode { UseMaterialValue, UseBlueprintValue, CombineBoth }
+    public enum BlueprintMode { UseMaterialValue, UseBlueprintValue, UseBoth }
 }

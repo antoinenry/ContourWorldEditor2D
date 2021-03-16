@@ -28,9 +28,15 @@ public class ContourBlueprintEditor : Editor
                 {
                     object valueInMaterial = contourMaterialType.GetField(linkAttribute.valueField).GetValue(contourMaterial);
                     ContourMaterial.BlueprintMode linkMode = (ContourMaterial.BlueprintMode)contourMaterialType.GetField(linkAttribute.modeField).GetValue(contourMaterial);
-
-                    if (linkMode != ContourMaterial.BlueprintMode.UseMaterialValue)
-                        EditorGUILayout.PropertyField(fieldProperty);
+                    switch(linkMode)
+                    {
+                        case ContourMaterial.BlueprintMode.UseMaterialValue:
+                            break;
+                        case ContourMaterial.BlueprintMode.UseBlueprintValue:
+                        case ContourMaterial.BlueprintMode.UseBoth:
+                            EditorGUILayout.PropertyField(fieldProperty);
+                            break;
+                    }
                 }
                 else
                 {

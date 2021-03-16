@@ -63,7 +63,7 @@ public class ContourLineReader : ContourMeshReader
             }
             // Set normals: fetch value in blueprint
             Normals = new List<Vector3>(vertexCount);
-            Vector3 normal = meshBlueprint.normal;
+            Vector3 normal = meshBlueprint.Normal;
             for (int i = 0; i < vertexCount; i++)
                 Normals.Add(normal);
             // Set uvs: repeat texture along segments
@@ -79,8 +79,8 @@ public class ContourLineReader : ContourMeshReader
                 UVs.Add(new Vector2(coveredLength, yTop));
                 UVs.Add(new Vector2(coveredLength, yBot));
             }
-            // Set colors: all to the same color specified in contour material
-            Color color = contourMaterial.color;
+            // Set colors: fetch value in blueprint
+            Color color = meshBlueprint.Color;
             Colors = new List<Color>(vertexCount);
             for (int i = 0; i < vertexCount; i++)
                 Colors.Add(color);
