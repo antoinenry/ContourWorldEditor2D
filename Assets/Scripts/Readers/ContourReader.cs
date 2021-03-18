@@ -8,6 +8,7 @@ public abstract class ContourReader
         {
             if (blueprint.material is ContourFaceMaterial) newReader = new ContourFaceReader();
             else if (blueprint.material is ContourLineMaterial) newReader = new ContourLineReader();
+            else if (blueprint.material is ContourColliderMaterial) newReader = new ContourColliderReader();
         }
 
         if (newReader != null) newReader.TryReadBlueprint(blueprint);

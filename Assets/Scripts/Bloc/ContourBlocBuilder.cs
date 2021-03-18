@@ -19,7 +19,7 @@ public class ContourBlocBuilder : MonoBehaviour
     public struct Contour
     {
         public List<Vector2> positions;
-        [HideInInspector] public List<int> blueprintIndices;
+        [HideInInspector] public List<ContourBlueprint> blueprints;
         [HideInInspector] public int paletteIndex;
     }
     
@@ -50,20 +50,9 @@ public class ContourBlocBuilder : MonoBehaviour
     {
         if (bloc != null)
         {
-            // Adjust contour list size
-            int contourCount = bloc.GetContourCount();
-            int listSize = contours != null ? contours.Count : 0;
-            if (contours == null) contours = new List<Contour>(contourCount);
-            else if (listSize < contourCount) contours.Capacity = contourCount;
-            else if (listSize > contourCount) contours.RemoveRange(contourCount, listSize - contourCount);
-            // Set positions
-            for (int cti = 0; cti < contourCount; cti++)
+            if (contours != null)
             {
-                if (cti >= listSize) contours.Add(new Contour());
-                List<Vector2> blocPositions = bloc.GetContourPositions(cti);
-                Contour ct = contours[cti];
-                ct.positions = new List<Vector2>(blocPositions);
-                contours[cti] = ct;
+
             }
         }
     }
@@ -87,12 +76,8 @@ public class ContourBlocBuilder : MonoBehaviour
 
     public ContourBlueprint[] GetContourBlueprints(int contourIndex)
     {
-        if (contours == null || contourIndex < 0 || contourIndex >= contours.Count || contours[contourIndex].blueprintIndices == null) return new ContourBlueprint[0];
-        ContourBlueprint[] allBlueprints = GetComponents<ContourBlueprint>();
-        List<ContourBlueprint> contourBlueprints = new List<ContourBlueprint>();
-        foreach (int bpi in contours[contourIndex].blueprintIndices)
-            if (bpi >= 0 && bpi < allBlueprints.Length) contourBlueprints.Add(allBlueprints[bpi]);
-        return contourBlueprints.ToArray();
+        if (contours == null || contourIndex < 0 || contourIndex >= contours.Count || contours[contourIndex].blueprints == null) return new ContourBlueprint[0];
+        return contours[contourIndex].blueprints.ToArray();
     }
 
     public int PaletteSize => palette != null ? palette.Size : 0;
@@ -129,86 +114,144 @@ public class ContourBlocBuilder : MonoBehaviour
 
     private void UpdateBluePrints()
     {
+        // Existing blueprints components
         List<ContourBlueprint> existingBlueprints = new List<ContourBlueprint>();
         GetComponents(existingBlueprints);
         int existingBlueprintCount = existingBlueprints.Count;
         int newBlueprintCount = 0;
-        //foreach (ContourBlueprint bp in Blueprints) DestroyImmediate(bp);
-        //Blueprints.Clear();
+        // Converting contours to blueprints
         if (contours != null)
         {
             for (int cti = 0, ctCount = ContourCount; cti < ctCount; cti++)
             {
-                Contour updateContour = contours[cti];
-                updateContour.blueprintIndices = new List<int>();
-                int paletteIndex = updateContour.paletteIndex;
+                Contour contour = contours[cti];
+                // Get contour materials
+                int paletteIndex = contour.paletteIndex;
                 if (paletteIndex < 0 || paletteIndex >= PaletteSize) continue;
-                // Create/Update one blueprint for each contour material
-                List<ContourMaterial> cms = palette.items[paletteIndex].contourMaterials;
-                if (cms == null) continue;
-                foreach (ContourMaterial cm in cms)
+                List<ContourMaterial> contourMaterials = palette.items[paletteIndex].contourMaterials;
+                if (contourMaterials == null) continue;
+                // Compare contour materials and blueprints
+                int cmCount = contourMaterials.Count;
+                int bpCount = contour.blueprints != null ? contour.blueprints.Count : 0;
+                for (int cmi = 0; cmi < cmCount; cmi++)
                 {
-                    if (cm == null) continue;
-                    Type blueprintType = cm is ContourMeshMaterial ? typeof(ContourMeshBlueprint) : typeof(ContourBlueprint);
-                    // Create new blueprint
-                    if (++newBlueprintCount > existingBlueprintCount)
+                    // What type of blueprint is needed for this material
+                    Type blueprintType = contourMaterials[cmi].BlueprintType;
+                    //
+                    if (cmi >= bpCount)
                     {
-                        ContourBlueprint newBlueprint = gameObject.AddComponent(blueprintType) as ContourBlueprint;
-                        newBlueprint.hideFlags = HideFlags.HideInInspector;
-                        newBlueprint.positions = updateContour.positions != null ? updateContour.positions.ToArray() : new Vector2[0];
-                        newBlueprint.material = cm;
-                        existingBlueprints.Add(newBlueprint);
-                        updateContour.blueprintIndices.Add(newBlueprintCount - 1);
                     }
-                    // Update existing blueprint
                     else
                     {
-                        ContourBlueprint existingBlueprint = existingBlueprints[newBlueprintCount - 1];
-                        // Null case
-                        if (existingBlueprint == null)
-                        {
-                            // Create new blueprint
-                            ContourBlueprint newBlueprint = gameObject.AddComponent(blueprintType) as ContourBlueprint;
-                            newBlueprint.hideFlags = HideFlags.HideInInspector;
-                            newBlueprint.positions = updateContour.positions != null ? updateContour.positions.ToArray() : new Vector2[0];
-                            newBlueprint.material = cm;
-                            existingBlueprints[newBlueprintCount - 1] = newBlueprint;
-                            updateContour.blueprintIndices.Add(newBlueprintCount - 1);
-                        }
-                        else
-                        {
-                            // Update type
-                            if (blueprintType != existingBlueprint.GetType())
-                            {
-                                DestroyImmediate(existingBlueprint);
-                                ContourBlueprint newBlueprint = gameObject.AddComponent(blueprintType) as ContourBlueprint;
-                                newBlueprint.hideFlags = HideFlags.HideInInspector;
-                                newBlueprint.positions = updateContour.positions != null ? updateContour.positions.ToArray() : new Vector2[0];
-                                newBlueprint.material = cm;
-                                existingBlueprints[newBlueprintCount - 1] = newBlueprint;
-                                updateContour.blueprintIndices.Add(newBlueprintCount - 1);
-                            }
-                            // Update positions and material
-                            else
-                            {
-                                existingBlueprints[newBlueprintCount - 1].positions = updateContour.positions != null ? updateContour.positions.ToArray() : new Vector2[0];
-                                existingBlueprints[newBlueprintCount - 1].material = cm;
-                                updateContour.blueprintIndices.Add(newBlueprintCount - 1);
-                            }
-                        }
+
                     }
-                    // Update contour
-                    contours[cti] = updateContour;
+                }
+                if (contour.blueprints == null)
+                {
+                    // Blueprints are not set => create new blueprints
+                }
+                else
+                {
+                    // Blueprints already exist => update existing blueprints
                 }
             }
         }
-        // Destroy excess blueprints
+        // Destroy excess blueprint components
         if (newBlueprintCount < existingBlueprintCount)
-        {
             for (int bpi = newBlueprintCount; bpi < existingBlueprintCount; bpi++)
                 if (existingBlueprints[bpi] != null) DestroyImmediate(existingBlueprints[bpi]);
-        }
     }
+
+    //private void UpdateBluePrints()
+    //{
+    //    List<ContourBlueprint> existingBlueprints = new List<ContourBlueprint>();
+    //    GetComponents(existingBlueprints);
+    //    int existingBlueprintCount = existingBlueprints.Count;
+    //    int newBlueprintCount = 0;
+    //    //foreach (ContourBlueprint bp in Blueprints) DestroyImmediate(bp);
+    //    //Blueprints.Clear();
+    //    if (contours != null)
+    //    {
+    //        for (int cti = 0, ctCount = ContourCount; cti < ctCount; cti++)
+    //        {
+    //            Contour updateContour = contours[cti];
+    //            updateContour.blueprintIndices = new List<int>();
+    //            int paletteIndex = updateContour.paletteIndex;
+    //            if (paletteIndex < 0 || paletteIndex >= PaletteSize) continue;
+    //            // Create/Update one blueprint for each contour material
+    //            List<ContourMaterial> cms = palette.items[paletteIndex].contourMaterials;
+    //            if (cms == null) continue;
+    //            foreach (ContourMaterial cm in cms)
+    //            {
+    //                if (cm == null) continue;
+    //                Type blueprintType = cm.BlueprintType;
+    //                if (newBlueprintCount++ < existingBlueprintCount)
+    //                {
+    //                    // Update existing blueprint
+    //                    ContourBlueprint existingBlueprint = existingBlueprints[newBlueprintCount - 1];
+
+
+
+
+
+
+
+
+    //                    // Insert blueprint if current blueprint doesn't fit material
+    //                    if (existingBlueprint == null ||)
+    //                    {
+    //                        // Create new blueprint                            
+    //                        ContourBlueprint newBlueprint = gameObject.AddComponent(blueprintType) as ContourBlueprint;
+    //                        newBlueprint.hideFlags = HideFlags.HideInInspector;
+    //                        newBlueprint.positions = updateContour.positions != null ? updateContour.positions.ToArray() : new Vector2[0];
+    //                        newBlueprint.material = cm;
+    //                        existingBlueprints[newBlueprintCount - 1] = newBlueprint;
+    //                        updateContour.blueprintIndices.Add(newBlueprintCount - 1);
+    //                    }
+    //                    else
+    //                    {
+    //                        // Update type
+    //                        if (blueprintType != existingBlueprint.GetType())
+    //                        {
+    //                            DestroyImmediate(existingBlueprint);
+    //                            ContourBlueprint newBlueprint = gameObject.AddComponent(blueprintType) as ContourBlueprint;
+    //                            newBlueprint.hideFlags = HideFlags.HideInInspector;
+    //                            newBlueprint.positions = updateContour.positions != null ? updateContour.positions.ToArray() : new Vector2[0];
+    //                            newBlueprint.material = cm;
+    //                            existingBlueprints[newBlueprintCount - 1] = newBlueprint;
+    //                            updateContour.blueprintIndices.Add(newBlueprintCount - 1);
+    //                        }
+    //                        // Update positions and material
+    //                        else
+    //                        {
+    //                            existingBlueprints[newBlueprintCount - 1].positions = updateContour.positions != null ? updateContour.positions.ToArray() : new Vector2[0];
+    //                            existingBlueprints[newBlueprintCount - 1].material = cm;
+    //                            updateContour.blueprintIndices.Add(newBlueprintCount - 1);
+    //                        }
+    //                    }
+    //                }
+    //                else
+    //                {
+    //                    // Add new blueprint at the end of the list
+    //                    ContourBlueprint newBlueprint = gameObject.AddComponent(blueprintType) as ContourBlueprint;
+    //                    newBlueprint.hideFlags = HideFlags.HideInInspector;
+    //                    newBlueprint.positions = updateContour.positions != null ? updateContour.positions.ToArray() : new Vector2[0];
+    //                    newBlueprint.material = cm;
+    //                    existingBlueprints.Add(newBlueprint);
+    //                    updateContour.blueprintIndices.Add(newBlueprintCount - 1);
+    //                }
+    //                // Update contour
+    //                contours[cti] = updateContour;
+    //            }
+    //        }
+    //    }
+    //    // Destroy excess blueprints
+    //    if (newBlueprintCount < existingBlueprintCount)
+    //    {
+    //        for (int bpi = newBlueprintCount; bpi < existingBlueprintCount; bpi++)
+    //            if (existingBlueprints[bpi] != null) DestroyImmediate(existingBlueprints[bpi]);
+    //    }
+    //}
 
     //public int UpdateMaterialListSize()
     //{

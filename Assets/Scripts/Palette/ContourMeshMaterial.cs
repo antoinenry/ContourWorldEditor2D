@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public abstract class ContourMeshMaterial : ContourMaterial
 {
@@ -9,4 +10,6 @@ public abstract class ContourMeshMaterial : ContourMaterial
     public BlueprintMode normalMode;
     public Vector2 uvScale = Vector2.one;
     public float zOffset = 0f;
+
+    public override Type BlueprintType => typeof(ContourMeshBlueprint);
 }

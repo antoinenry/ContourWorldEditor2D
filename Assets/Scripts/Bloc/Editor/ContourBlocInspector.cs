@@ -831,7 +831,7 @@ public class ContourBlocInspector : Editor
             }
         }
         // Contour handles
-        List<List<int>> contours = targetBloc.GetAllContourPoints(false);
+        List<List<int>> contours = targetBloc.GetAllContours(false);
         // Higlight selected contours
         Handles.color = Color.yellow;
         foreach (int cti in selectedContourIndices)

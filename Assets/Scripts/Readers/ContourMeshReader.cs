@@ -12,6 +12,7 @@ public abstract class ContourMeshReader : ContourReader
 
     protected void Clear()
     {
+        MeshMaterial = null;
         Vertices = null;
         Triangles = null;
         Normals = null;

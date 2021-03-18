@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System;
 using System.Collections.Generic;
 
 public abstract class ContourBuilder : MonoBehaviour
@@ -13,7 +14,19 @@ public abstract class ContourBuilder : MonoBehaviour
         // Add builder component according to reader type and return it
         if(reader != null)
         {
-            if (reader is ContourMeshReader) return ContourMeshBuilder.AddBuilderComponent(reader as ContourMeshReader, builderGO);
+            if (reader is ContourMeshReader)
+            {
+                builderGO.name = "Mesh builder";
+                return builderGO.AddComponent<ContourMeshBuilder>();
+            }
+            if (reader is ContourColliderReader)
+            {
+                builderGO.name = "Collider builder";
+                Type colliderType = (reader as ContourColliderReader).ColliderType;
+                if (colliderType != null && typeof(Collider2D).IsAssignableFrom(colliderType))
+                    builderGO.AddComponent(colliderType);
+                return builderGO.AddComponent<ContourColliderBuilder>();
+            }
         }
         // If add component has failed, cancel gameobject creation and return null
         DestroyImmediate(builderGO);
@@ -41,5 +54,4 @@ public abstract class ContourBuilder : MonoBehaviour
     public abstract bool CanBuildFrom(ContourReader reader);
 
     public abstract void Build();
-
 }

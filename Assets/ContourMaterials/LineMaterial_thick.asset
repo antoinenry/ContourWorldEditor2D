@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: LineMaterial_thick
   m_EditorClassIdentifier: 
   meshMaterial: {fileID: 2100000, guid: ef8d8975107c11f4ab29946e9cbbd3e7, type: 2}
-  color: {r: 0.20392159, g: 0.20784315, b: 0.20784315, a: 1}
+  color: {r: 0.05660379, g: 0.05660379, b: 0.05660379, a: 1}
   colorMode: 0
   normal: {x: 0, y: 0, z: -1}
   normalMode: 0

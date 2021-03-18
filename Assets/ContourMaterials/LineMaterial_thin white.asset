@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6d615d4a006a41b4985788ba28ea6f31, type: 3}
-  m_Name: LineMaterial_thin
+  m_Name: LineMaterial_thin white
   m_EditorClassIdentifier: 
   meshMaterial: {fileID: 2100000, guid: ef8d8975107c11f4ab29946e9cbbd3e7, type: 2}
-  color: {r: 0.1509434, g: 0.1509434, b: 0.1509434, a: 1}
+  color: {r: 0.9528302, g: 0.9528302, b: 0.9528302, a: 1}
   colorMode: 0
   normal: {x: 0, y: 0, z: -1}
   normalMode: 0

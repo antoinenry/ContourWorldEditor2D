@@ -27,13 +27,6 @@ public class ContourMeshBuilder : ContourBuilder
         }
     }
 
-    public static ContourMeshBuilder AddBuilderComponent(ContourMeshReader meshReader, GameObject go)
-    {
-        go.name = "Mesh builder";
-        ContourMeshBuilder newBuilder = go.AddComponent<ContourMeshBuilder>();
-        return newBuilder;
-    }
-
     public override bool CanBuildFrom(ContourReader reader)
     {
         return reader != null && reader is ContourMeshReader;

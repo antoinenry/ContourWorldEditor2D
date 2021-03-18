@@ -16,17 +16,16 @@ public class ContourFaceReader : ContourMeshReader
             ContourFaceMaterial contourMaterial = blueprint.material as ContourFaceMaterial;
             if (contourMaterial == null) return false;
             MeshMaterial = contourMaterial.meshMaterial;
-            // Check if enough points to build at least one triangle
+            // To build a face, there must be enough positions and contour must be a loop
             int positionCount = positions != null ? positions.Length : 0;
-            if (positionCount < 3)
+            if (positionCount < 3 || positions[0] != positions[positionCount - 1])
             {
                 Clear();
                 return false;
             }
-            // Set vertices: copy positions x,y and set z to value in contourMaterial
-            int vertexCount = positionCount;
+            // Set vertices: copy positions x,y and set z to value in contourMaterial (last position is ignored because of loop)
+            int vertexCount = positionCount - 1;
             Vector3 zOffset = contourMaterial.zOffset * Vector3.forward;
-            if (positions[0] == positions[positionCount - 1]) vertexCount--;
             Vertices = new List<Vector3>(vertexCount);
             for (int i = 0; i < vertexCount; i++)
                 Vertices.Add((Vector3)positions[i] + zOffset);

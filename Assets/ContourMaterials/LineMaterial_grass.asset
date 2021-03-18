@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: LineMaterial_grass
   m_EditorClassIdentifier: 
   meshMaterial: {fileID: 2100000, guid: 033b687a31e109f44a832198d51f8dc6, type: 2}
-  color: {r: 0.4798543, g: 0.6792453, b: 0.40690637, a: 1}
+  color: {r: 0.4, g: 0.58431375, b: 0.33333334, a: 1}
   colorMode: 0
   normal: {x: 0, y: 0, z: -1}
-  normalMode: 0
+  normalMode: 1
   uvScale: {x: 1, y: -1}
   zOffset: -0.01
   width: 0.7
