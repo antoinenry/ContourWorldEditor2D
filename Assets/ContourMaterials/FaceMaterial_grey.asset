@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: FaceMaterial_grey
   m_EditorClassIdentifier: 
   meshMaterial: {fileID: 2100000, guid: 1d62c1125f158714395a4b6fb018d3e4, type: 2}
-  color: {r: 0.2735849, g: 0.27035865, b: 0.26713243, a: 1}
+  color: {r: 0.35439655, g: 0.38180846, b: 0.41509432, a: 1}
   colorMode: 0
   normal: {x: 0, y: 0, z: -1}
   normalMode: 1

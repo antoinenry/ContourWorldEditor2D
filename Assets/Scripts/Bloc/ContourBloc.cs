@@ -20,21 +20,11 @@ public class ContourBloc : MonoBehaviour
         public int OccurenceCount => occurences == null ? 0 : occurences.Count;
     }
 
-    [Serializable]
-    private struct Contour
-    {
-        public List<Vector2> positions;
-        public Contour(List<Vector2> positions)
-        {
-            this.positions = positions != null ? positions : new List<Vector2>();
-        }
-    }
-
     [SerializeField] private List<Point> points;
     [SerializeField] private Point bufferPoint;
-    [SerializeField] private List<Contour> contours;
+    [SerializeField] private List<ContourShape> contours;
 
-    public List<ContourShape> ContourShapes => contours != null ? contours.ConvertAll(contour => new ContourShape(contour.positions)) : new List<ContourShape>();
+    public List<ContourShape> ContourShapes => contours != null ? contours : new List<ContourShape>();
 
     public int PointCount => points == null ? 0 : points.Count;
 
@@ -42,7 +32,7 @@ public class ContourBloc : MonoBehaviour
     {
         points = new List<Point>();
         bufferPoint = new Point() { occurences = new List<PointOccurence>() };
-        contours = new List<Contour>();
+        contours = new List<ContourShape>();
     }
 
     public List<Vector2> GetPositions()
@@ -531,8 +521,8 @@ public class ContourBloc : MonoBehaviour
         // Create empty contour (contour with one undefined point)
         int contourCount = GetContourCount();
         bufferPoint.occurences.Add(new PointOccurence() { contourIndex = contourCount, indexInContour = 0 });
-        if (contours == null) contours = new List<Contour>();
-        contours.Add(new Contour(new List<Vector2>()));
+        if (contours == null) contours = new List<ContourShape>();
+        contours.Add(new ContourShape(new List<Vector2>()));
     }
 
     public void RemoveContourAt(int contourIndex)
@@ -652,7 +642,7 @@ public class ContourBloc : MonoBehaviour
         Vector3 blocPosition = transform.position;
         // Draw contours
         if (contours != null)
-            foreach(Contour contour in contours)
+            foreach(ContourShape contour in contours)
                 for(int pti = 0, ptCount = contour.positions.Count; pti < ptCount - 1; pti++)
                     Gizmos.DrawLine((Vector3)contour.positions[pti] + blocPosition, (Vector3)contour.positions[pti + 1] + blocPosition);
         // Draw unused points

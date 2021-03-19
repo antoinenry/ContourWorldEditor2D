@@ -15,4 +15,10 @@ public class ContourPalette : ScriptableObject
     }
 
     public int Size => items != null ? items.Count : 0;
+
+    public List<ContourMaterial> GetContourMaterials(int paletteIndex)
+    {
+        if (paletteIndex < 0 || paletteIndex >= Size) return new List<ContourMaterial>();
+        else return items[paletteIndex].contourMaterials;
+    }
 }

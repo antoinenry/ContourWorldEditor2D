@@ -5,7 +5,7 @@ using System.Collections.Generic;
 [Serializable]
 public class ContourShape
 {
-    private List<Vector2> positions;
+    public List<Vector2> positions;
 
     public ContourShape(List<Vector2> positions)
     {
