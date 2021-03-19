@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
+using System;
+using System.Collections.Generic;
 
-public struct ContourShape
+[Serializable]
+public class ContourShape
 {
     private List<Vector2> positions;
 
@@ -13,6 +15,6 @@ public struct ContourShape
     public Vector2[] GetPositions()
     {
         if (positions != null) return positions.ToArray();
-        else return new Vector2[0];
+        else return null;
     }
 }

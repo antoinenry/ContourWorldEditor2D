@@ -34,8 +34,21 @@ public class ContourBlocBuilderInspector : Editor
         DrawDefaultInspector();
         GUI.enabled = true;
         // Set bloc and palette
-        targetBuilder.bloc = EditorGUILayout.ObjectField("Bloc", targetBuilder.bloc, typeof(ContourBloc), true) as ContourBloc;
-        targetBuilder.palette = EditorGUILayout.ObjectField("Palette", targetBuilder.palette, typeof(ContourPalette), true) as ContourPalette;
+        EditorGUI.BeginChangeCheck();
+        ContourBloc bloc = EditorGUILayout.ObjectField("Bloc", targetBuilder.bloc, typeof(ContourBloc), true) as ContourBloc;
+        if (EditorGUI.EndChangeCheck())
+        {
+            Undo.RecordObject(target, "Set bloc");
+            targetBuilder.bloc = bloc;
+            EditorUtility.SetDirty(targetBuilder);
+        }
+        EditorGUI.BeginChangeCheck();
+        ContourPalette palette = targetBuilder.palette = EditorGUILayout.ObjectField("Palette", targetBuilder.palette, typeof(ContourPalette), true) as ContourPalette;
+        {
+            Undo.RecordObject(target, "Set palette");
+            targetBuilder.palette = palette;
+            EditorUtility.SetDirty(targetBuilder);
+        }
         // Edit blueprints
         showBlueprintList = EditorGUILayout.Foldout(showBlueprintList, "Blueprints");
         if (showBlueprintList)

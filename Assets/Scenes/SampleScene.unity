@@ -331,6 +331,7 @@ MonoBehaviour:
   bufferPoint:
     position: {x: 0, y: 0}
     occurences: []
+  contours: []
 --- !u!4 &1747825118
 Transform:
   m_ObjectHideFlags: 0

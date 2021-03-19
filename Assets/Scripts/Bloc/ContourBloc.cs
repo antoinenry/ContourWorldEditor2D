@@ -35,6 +35,7 @@ public class ContourBloc : MonoBehaviour
     [SerializeField] private List<Contour> contours;
 
     public List<ContourShape> ContourShapes => contours != null ? contours.ConvertAll(contour => new ContourShape(contour.positions)) : new List<ContourShape>();
+
     public int PointCount => points == null ? 0 : points.Count;
 
     private void Reset()
