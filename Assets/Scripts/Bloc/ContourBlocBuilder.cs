@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 [ExecuteInEditMode]
@@ -17,7 +18,7 @@ public class ContourBlocBuilder : MonoBehaviour
     {
         [HideInInspector] public List<ContourBlueprint> blueprints;
         [HideInInspector] public int paletteIndex;
-        [HideInInspector] public ContourShape shape;
+        [SerializeField] public ContourShape shape;
         [SerializeField] private Vector2[] positions;
 
         public Contour(ContourShape shape)
@@ -32,7 +33,7 @@ public class ContourBlocBuilder : MonoBehaviour
         public Vector2[] GetPositions()
         {
             Vector2[] shapePositions = shape.GetPositions();
-            return shapePositions != null ? shapePositions : positions;
+            return shapePositions != null ? shapePositions : positions;            
         }
 
         public void UpdatePositions()
@@ -131,11 +132,17 @@ public class ContourBlocBuilder : MonoBehaviour
                 List<Contour> updatedContours = new List<Contour>(contourCount);
                 foreach (ContourShape shape in shapesInBloc)
                 {
-                    Contour contour = contours.Find(ct => ct.shape == shape);
-                    if (contour.shape == null) contour.shape = shape;
+                    if (shape == null) continue;
+                    // First we try to find a match by reference
+                    Contour contour = contours.Find(ct => ct.shape != null && ct.shape == shape);
+                    // Then we try to fing a match by positions (usefull for first update)
+                    if (contour.shape == null) contour = contours.Find(ct =>Enumerable.SequenceEqual(ct.shape.positions, shape.positions));
+                    // If no match, contour will have default values
+                    contour.shape = shape;
                     contour.UpdatePositions();
                     updatedContours.Add(contour);
                 }
+                // Apply update
                 contours = updatedContours;
             }
         }

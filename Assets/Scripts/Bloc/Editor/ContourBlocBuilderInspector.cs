@@ -93,7 +93,7 @@ public class ContourBlocBuilderInspector : Editor
             {
                 if (expand) contourInspectors[cti].inspectorState |= ContourInspector.State.Expand;
                 else contourInspectors[cti].inspectorState &= ~ContourInspector.State.Expand;
-                //SceneView.RepaintAll();
+                SceneView.RepaintAll();
                 // Apply modifications in inspector
                 EditorUtility.SetDirty(targetBuilder);
                 return;
@@ -104,6 +104,7 @@ public class ContourBlocBuilderInspector : Editor
                 int paletteIndex = EditorGUILayout.Popup(targetBuilder.GetPaletteIndex(cti), paletteOptions);
                 if (EditorGUI.EndChangeCheck())
                 {
+                    Undo.RecordObject(targetBuilder, "Set contour type");
                     targetBuilder.SetPaletteIndex(cti, paletteIndex);
                     // Apply modifications in inspector
                     EditorUtility.SetDirty(targetBuilder);
@@ -135,7 +136,6 @@ public class ContourBlocBuilderInspector : Editor
                             ContourBlueprintEditor bpEditor = (bpEditors[bpi] as ContourBlueprintEditor);
                             bpEditor.label = bpi.ToString();
                             bpEditor.hidePositions = true;
-                            EditorGUI.BeginChangeCheck();
                             bpEditor.OnInspectorGUI();
                         }
                         EditorGUILayout.EndVertical();
