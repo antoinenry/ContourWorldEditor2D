@@ -93,7 +93,7 @@ public class ContourBlocBuilderInspector : Editor
             {
                 if (expand) contourInspectors[cti].inspectorState |= ContourInspector.State.Expand;
                 else contourInspectors[cti].inspectorState &= ~ContourInspector.State.Expand;
-                SceneView.RepaintAll();
+                //SceneView.RepaintAll();
                 // Apply modifications in inspector
                 EditorUtility.SetDirty(targetBuilder);
                 return;

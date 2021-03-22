@@ -36,10 +36,14 @@ public class ContourBlocInspector : Editor
 
     private void OnEnable()
     {
-        targetBloc = target as ContourBloc;
-        createContourMode = false;
-        CorrectPointSelectionArrayLengths();
-        CorrectContourSelectionArrayLengths();
+        // When switching target
+        if (target != targetBloc)
+        {
+            targetBloc = target as ContourBloc;
+            createContourMode = false;
+            CorrectPointSelectionArrayLengths();
+            CorrectContourSelectionArrayLengths();
+        }
     }
 
     // -------------------------------------------
@@ -835,9 +839,7 @@ public class ContourBlocInspector : Editor
         // Higlight selected contours
         Handles.color = Color.yellow;
         foreach (int cti in selectedContourIndices)
-        {
-            DrawContour(contours[cti]);
-        }
+                DrawContour(contours[cti]);
         // Handles on segments for inserting points (in selected contours only)
         Handles.color = Color.yellow;
         foreach(int cti in selectedContourIndices)
