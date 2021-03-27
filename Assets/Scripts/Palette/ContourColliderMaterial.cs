@@ -6,7 +6,7 @@ public class ContourColliderMaterial : ContourMaterial
 {
     public ColliderType type;
     public bool isTrigger;
-    public PhysicMaterial physicMaterial;
+    public PhysicsMaterial2D physicsMaterial;
 
     public enum ColliderType { Auto, Edge, Polygon }
 }

@@ -6,6 +6,8 @@ public class ContourColliderReader : ContourReader
 {
     public List<Vector2> Positions { get; private set; }
     public Type ColliderType { get; private set; }
+    public bool IsTrigger { get; private set; }
+    public PhysicsMaterial2D PhysicsMaterial { get; private set; }
 
     public override bool TryReadBlueprint(ContourBlueprint blueprint)
     {
@@ -46,6 +48,9 @@ public class ContourColliderReader : ContourReader
             // Get positions
             Positions = new List<Vector2>(blueprint.positions);
             if (ColliderType == typeof(PolygonCollider2D)) Positions.RemoveAt(positionCount - 1);
+            // Get collider parameters
+            IsTrigger = contourMaterial.isTrigger;
+            PhysicsMaterial = contourMaterial.physicsMaterial;
         }
         return false;
     }

@@ -21,10 +21,14 @@ public abstract class ContourBuilder : MonoBehaviour
             }
             if (reader is ContourColliderReader)
             {
+                ContourColliderReader colliderReader = reader as ContourColliderReader;
                 builderGO.name = "Collider builder";
-                Type colliderType = (reader as ContourColliderReader).ColliderType;
+                Type colliderType = colliderReader.ColliderType;
                 if (colliderType != null && typeof(Collider2D).IsAssignableFrom(colliderType))
-                    builderGO.AddComponent(colliderType);
+                {
+                    Collider2D colliderComponent = builderGO.AddComponent(colliderType) as Collider2D;
+                    colliderComponent.isTrigger = colliderReader.IsTrigger;
+                }
                 return builderGO.AddComponent<ContourColliderBuilder>();
             }
         }

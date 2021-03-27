@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6d615d4a006a41b4985788ba28ea6f31, type: 3}
   m_Name: LineMaterial_thin white
   m_EditorClassIdentifier: 
-  meshMaterial: {fileID: 2100000, guid: ef8d8975107c11f4ab29946e9cbbd3e7, type: 2}
-  color: {r: 0.9528302, g: 0.9528302, b: 0.9528302, a: 1}
+  meshMaterial: {fileID: 2100000, guid: 130d02a5e161fc849828bd4b89339035, type: 2}
+  color: {r: 1, g: 1, b: 1, a: 1}
   colorMode: 0
   normal: {x: 0, y: 0, z: -1}
   normalMode: 0
   uvScale: {x: 1, y: 1}
-  zOffset: 0
-  width: 0.1
+  zOffset: -0.01
+  width: 0.2

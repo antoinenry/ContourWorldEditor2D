@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 23aa528e18d7e0544906c460f6549ec7, type: 3}
   m_Name: FaceMaterial_grey
   m_EditorClassIdentifier: 
-  meshMaterial: {fileID: 2100000, guid: 1d62c1125f158714395a4b6fb018d3e4, type: 2}
-  color: {r: 0.35439655, g: 0.38180846, b: 0.41509432, a: 1}
+  meshMaterial: {fileID: 2100000, guid: b61fd3de82d67204fa5a5521cdd98f2a, type: 2}
+  color: {r: 0.15930934, g: 0.17215866, b: 0.18867922, a: 1}
   colorMode: 0
   normal: {x: 0, y: 0, z: -1}
   normalMode: 1

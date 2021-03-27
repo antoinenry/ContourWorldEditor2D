@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6d615d4a006a41b4985788ba28ea6f31, type: 3}
-  m_Name: LineMaterial_grass
+  m_Name: LineMaterial_atmo
   m_EditorClassIdentifier: 
-  meshMaterial: {fileID: 2100000, guid: 033b687a31e109f44a832198d51f8dc6, type: 2}
+  meshMaterial: {fileID: 2100000, guid: 1989c6c2785eed141aac9d27ffdd4f77, type: 2}
   color: {r: 1, g: 1, b: 1, a: 1}
-  colorMode: 0
+  colorMode: 1
   normal: {x: 0, y: 0, z: -1}
-  normalMode: 1
+  normalMode: 0
   uvScale: {x: 1, y: -1}
-  zOffset: 0
-  width: 0.7
+  zOffset: 0.1
+  width: 1

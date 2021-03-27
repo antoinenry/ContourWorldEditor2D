@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6d615d4a006a41b4985788ba28ea6f31, type: 3}
-  m_Name: LineMaterial_thick
+  m_Name: LineMaterial_dotted
   m_EditorClassIdentifier: 
-  meshMaterial: {fileID: 2100000, guid: ef8d8975107c11f4ab29946e9cbbd3e7, type: 2}
-  color: {r: 0.05660379, g: 0.05660379, b: 0.05660379, a: 1}
+  meshMaterial: {fileID: 2100000, guid: b675f96cfbe5dc34ba82fee14b426bd6, type: 2}
+  color: {r: 1, g: 1, b: 1, a: 1}
   colorMode: 0
   normal: {x: 0, y: 0, z: -1}
   normalMode: 0
-  uvScale: {x: 1, y: 1}
+  uvScale: {x: 1, y: -1}
   zOffset: 0
-  width: 0.7
+  width: 0.05

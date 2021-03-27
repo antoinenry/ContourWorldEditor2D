@@ -18,6 +18,7 @@ public class ContourBlocInspector : Editor
     private static bool showContourListInspector;
     private static bool[] contourSceneSelection;
     private static ContourInspectorState[] contourInspectorStates;
+    private static float gridSnap;
 
     // General parameters
     const float handleScale = .1f;
@@ -36,8 +37,13 @@ public class ContourBlocInspector : Editor
 
     private void OnEnable()
     {
+        SetTarget();
+    }
+
+    private void SetTarget()
+    {
         // When switching target
-        if (target != targetBloc)
+        if (target != targetBloc || targetBloc == null)
         {
             targetBloc = target as ContourBloc;
             createContourMode = false;
@@ -286,19 +292,8 @@ public class ContourBlocInspector : Editor
     {
         changeCheck = false;
         EditorGUILayout.BeginHorizontal();
-        // In edit mode, point list is always visible
-        if (sceneGUIEditMode)
-        {
-            showPointListInspector = true;
-            EditorGUILayout.LabelField("Points");
-        }
-        // Else toggle list view
-        else if (showPointListInspector != EditorGUILayout.Foldout(showPointListInspector, "Points"))
-        {
-            showPointListInspector = !showPointListInspector;
-            // When point inspector is toggle off, cancel current selection
-            if (!showPointListInspector) ClearPointSelection();
-        }
+        // Toggle list view
+        showPointListInspector = EditorGUILayout.Foldout(showPointListInspector, "Points");
         // Add point button
         if (GUILayout.Button("Add"))
         {
@@ -393,19 +388,8 @@ public class ContourBlocInspector : Editor
         int countourCount = targetBloc.GetContourCount();
         changeCheck = false;
         EditorGUILayout.BeginHorizontal();
-        // In edit mode, contour list is always visible
-        if (sceneGUIEditMode)
-        {
-            showContourListInspector = true;
-            EditorGUILayout.LabelField("Contours");
-        }
-        // Else toggle list view
-        else if (showContourListInspector != EditorGUILayout.Foldout(showContourListInspector, "Contours"))
-        {
-            showContourListInspector = !showContourListInspector;
-            // When point inspector is toggle off, cancel current selection
-            if (!showContourListInspector) ClearContourSelection();
-        }
+        // Toggle list view
+        showContourListInspector = EditorGUILayout.Foldout(showContourListInspector, "Contours");
         // Button to add a contour
         if (GUILayout.Button("Add"))
         {
@@ -721,8 +705,11 @@ public class ContourBlocInspector : Editor
             changeCheck = true;
         }
         EditorGUILayout.EndHorizontal();
-        // Restore GUI.enabled and color
+        // Restore GUI color
         GUI.backgroundColor = GUIbackgroundColor;
+        // Toggle grid mode
+        gridSnap = EditorGUILayout.FloatField("Grid snap", gridSnap);
+        // Restore GUI.enabled
         GUI.enabled = GUIenabled;
     }
     #endregion
@@ -734,6 +721,8 @@ public class ContourBlocInspector : Editor
 
     private void OnSceneGUI()
     {
+        SetTarget();
+
         if (sceneGUIEditMode)
         {
             if (createContourMode)
@@ -888,11 +877,18 @@ public class ContourBlocInspector : Editor
         Vector2 mousePosition = Event.current.mousePosition;
         mousePosition.y = SceneView.currentDrawingSceneView.camera.pixelHeight - mousePosition.y;
         mousePosition = SceneView.currentDrawingSceneView.camera.ScreenToWorldPoint(mousePosition);
+        Vector2 createPointPosition = mousePosition;
+        // Snap position to grid if enabled
+        if (gridSnap > 0f)
+        {
+            createPointPosition = (Vector2)(Vector2Int.RoundToInt(mousePosition / gridSnap)) * gridSnap;
+            Handles.CircleHandleCap(0, createPointPosition, Quaternion.identity, .5f * handleSize, EventType.Repaint);
+        }
         if (Handles.Button(mousePosition, Quaternion.identity, .5f * handleSize, handleSize, Handles.CircleHandleCap))
         {
             Undo.RecordObject(targetBloc, "Create contour");
             // Add new point to bloc and to new contour
-            targetBloc.AddPoint(mousePosition - (Vector2)blocPosition);
+            targetBloc.AddPoint(createPointPosition - (Vector2)blocPosition);
             int newPointIndex = targetBloc.PointCount - 1;
             targetBloc.AddPointToContour(newContourIndex, newPointIndex);
             // Select added point
