@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: FaceMaterial_hot
   m_EditorClassIdentifier: 
   meshMaterial: {fileID: 2100000, guid: f041ca0564dd4ec4a9d3143c68df91d3, type: 2}
-  color: {r: 0.8773585, g: 0.49530467, b: 0.037246335, a: 1}
+  color: {r: 0.8584906, g: 0.5043802, b: 0.08503916, a: 1}
   colorMode: 0
   normal: {x: 0, y: 0, z: -1}
   normalMode: 1

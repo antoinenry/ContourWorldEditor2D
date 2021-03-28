@@ -6,6 +6,10 @@ using System.Collections.Generic;
 public class ContourShape
 {
     public List<Vector2> positions;
+    public ShapeChange changes;
+
+    [Flags]
+    public enum ShapeChange { None = 0, PositionMoved = 1, LengthChanged = 2 }
 
     public ContourShape(List<Vector2> positions)
     {

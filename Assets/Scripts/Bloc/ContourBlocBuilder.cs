@@ -19,13 +19,13 @@ public class ContourBlocBuilder : MonoBehaviour
         [HideInInspector] public List<ContourBlueprint> blueprints;
         [HideInInspector] public int paletteIndex;
         [SerializeField] public ContourShape shape;
-        [SerializeField] private Vector2[] positions;
+        //[SerializeField] private Vector2[] positions;
 
         public Contour(ContourShape shape)
         {
             this.shape = shape;
-            positions = shape.GetPositions();
-            if (positions == null) positions = new Vector2[0];
+            //positions = shape.GetPositions();
+            //if (positions == null) positions = new Vector2[0];
             paletteIndex = 0;
             blueprints = new List<ContourBlueprint>();
         }
@@ -33,19 +33,19 @@ public class ContourBlocBuilder : MonoBehaviour
         public Vector2[] GetPositions()
         {
             Vector2[] shapePositions = shape.GetPositions();
-            return shapePositions != null ? shapePositions : positions;            
+            return shapePositions != null ? shapePositions : new Vector2[0]; //positions;            
         }
 
-        public void UpdatePositions()
-        {
-            positions = GetPositions();
-        }
+        //public void UpdatePositions()
+        //{
+        //    positions = GetPositions();
+        //}
 
-        public void SetShape(ContourShape shape)
-        {
-            this.shape = shape;
-            UpdatePositions();
-        }
+        //public void SetShape(ContourShape shape)
+        //{
+        //    this.shape = shape;
+        //    UpdatePositions();
+        //}
     }
 
     private void Reset()
@@ -57,16 +57,24 @@ public class ContourBlocBuilder : MonoBehaviour
             if (b != null && b.gameObject != null) DestroyImmediate(b.gameObject);
     }
 
+    private void OnEnable()
+    {
+        RebuildAll();
+    }
+
     private void Update()
-    {        
-        Build();
+    {
+        //if (bloc != null) GetContoursFromBloc();
+        UpdateBlueprints();
+        UpdateBuilders();
+        if (builders != null) foreach (ContourBuilder b in builders) b.Build();
     }
 
     public int ContourCount => contours != null ? contours.Count : 0;
     
-    public void Build()
+    public void RebuildAll()
     {
-        UpdateContours();
+        if (bloc != null) GetContoursFromBloc();
         UpdateBlueprints();
         UpdateBuilders();
         if (builders != null) foreach (ContourBuilder b in builders) b.Build();
@@ -116,35 +124,32 @@ public class ContourBlocBuilder : MonoBehaviour
         return blueprints;
     }
 
-    public void UpdateContours()
+    public void GetContoursFromBloc()
     {
         // Update contour shapes from bloc, while keeping materials & blueprints related parameters
-        if (bloc != null)
+        List<ContourShape> shapesInBloc = bloc.ContourShapes;
+        int contourCount = shapesInBloc.Count;
+        // If builder has no contours, create contour list from scratch
+        if (ContourCount == 0)
+            contours = shapesInBloc.ConvertAll(shape => new Contour(shape));
+        // Or update existing list
+        else
         {
-            List<ContourShape> shapesInBloc = bloc.ContourShapes;
-            int contourCount = shapesInBloc.Count;
-            // If builder has no contours, create contour list from scratch
-            if (ContourCount == 0)
-                contours = shapesInBloc.ConvertAll(shape => new Contour(shape));
-            // Or update existing list
-            else
+            List<Contour> updatedContours = new List<Contour>(contourCount);
+            foreach (ContourShape shape in shapesInBloc)
             {
-                List<Contour> updatedContours = new List<Contour>(contourCount);
-                foreach (ContourShape shape in shapesInBloc)
-                {
-                    if (shape == null) continue;
-                    // First we try to find a match by reference
-                    Contour contour = contours.Find(ct => ct.shape != null && ct.shape == shape);
-                    // Then we try to fing a match by positions (usefull for first update)
-                    if (contour.shape == null) contour = contours.Find(ct =>Enumerable.SequenceEqual(ct.shape.positions, shape.positions));
-                    // If no match, contour will have default values
-                    contour.shape = shape;
-                    contour.UpdatePositions();
-                    updatedContours.Add(contour);
-                }
-                // Apply update
-                contours = updatedContours;
+                if (shape == null) continue;
+                // First we try to find a match by reference
+                Contour contour = contours.Find(ct => ct.shape != null && ct.shape == shape);
+                // Then we try to fing a match by positions (usefull for first update)
+                if (contour.shape == null) contour = contours.Find(ct => Enumerable.SequenceEqual(ct.shape.positions, shape.positions));
+                // If no match, contour will have default values
+                contour.shape = shape;
+                //contour.UpdatePositions();
+                updatedContours.Add(contour);
             }
+            // Apply update
+            contours = updatedContours;
         }
     }
 
