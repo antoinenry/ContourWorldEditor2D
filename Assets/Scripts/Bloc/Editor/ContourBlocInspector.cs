@@ -722,7 +722,6 @@ public class ContourBlocInspector : Editor
     private void OnSceneGUI()
     {
         SetTarget();
-
         if (sceneGUIEditMode)
         {
             if (createContourMode)
@@ -731,6 +730,17 @@ public class ContourBlocInspector : Editor
             else
                 // Normal handles for selecting and moving points
                 HandlesSceneGUI();
+        }
+        if (showContourListInspector)
+        {
+            // Contour gizmos
+            List<List<int>> contours = targetBloc.GetAllContours(false);
+            // Draw label for each contour and higlight selected contours
+            for (int cti = 0, ctCount = contours != null ? contours.Count : 0; cti < ctCount; cti++)
+            {
+                Handles.color = IsContourSelected(cti) ? Color.yellow : Color.white;
+                DrawContour(contours[cti], cti.ToString());
+            }
         }
     }    
 
@@ -823,13 +833,8 @@ public class ContourBlocInspector : Editor
                 EditorUtility.SetDirty(targetBloc);
             }
         }
-        // Contour handles
-        List<List<int>> contours = targetBloc.GetAllContours(false);
-        // Higlight selected contours
-        Handles.color = Color.yellow;
-        foreach (int cti in selectedContourIndices)
-                DrawContour(contours[cti]);
         // Handles on segments for inserting points (in selected contours only)
+        List<List<int>> contours = targetBloc.GetAllContours(false);  
         Handles.color = Color.yellow;
         foreach(int cti in selectedContourIndices)
         {
@@ -959,7 +964,7 @@ public class ContourBlocInspector : Editor
         DrawContour(targetBloc.GetContour(newContourIndex, false));
     }
 
-    private void DrawContour(List<int> pointIndices)
+    private void DrawContour(List<int> pointIndices, string label = null)
     {
         Vector3 blocPosition = targetBloc.transform.position;
         List<Vector2> pointPositions = targetBloc.GetPositions();
@@ -969,8 +974,21 @@ public class ContourBlocInspector : Editor
         if (contourLength == 1)
             Handles.SphereHandleCap(0, (Vector3)pointPositions[pointIndices[0]] + blocPosition, Quaternion.identity, handleSize, EventType.Repaint);
         else
+        {
+            Vector3 labelPosition = Vector3.zero;
             for (int i = 0; i < contourLength - 1; i++)
+            {
                 Handles.DrawLine((Vector3)pointPositions[pointIndices[i]] + blocPosition, (Vector3)pointPositions[pointIndices[i + 1]] + blocPosition);
+                if (label != null) labelPosition += (Vector3)pointPositions[pointIndices[i]];
+            }
+            if (label != null)
+            {
+                labelPosition += (Vector3)pointPositions[pointIndices[contourLength - 1]];
+                labelPosition /= contourLength;
+                labelPosition += blocPosition;
+                Handles.Label(labelPosition, label);
+            }
+        }
     }
     #endregion
 }

@@ -631,11 +631,11 @@ public class ContourBloc : MonoBehaviour
         DrawContourGizmos();
     }
 
-    private void OnDrawGizmosSelected()
-    {
-        Gizmos.color = Color.white;
-        DrawContourGizmos();
-    }
+    //private void OnDrawGizmosSelected()
+    //{
+    //    Gizmos.color = Color.white;
+    //    DrawContourGizmos();
+    //}
 
     private void DrawContourGizmos()
     {

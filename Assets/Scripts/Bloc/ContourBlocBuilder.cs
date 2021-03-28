@@ -198,72 +198,67 @@ public class ContourBlocBuilder : MonoBehaviour
     {
         List<ContourBlueprint> blueprints = GetAllBlueprints();
         // Update readers
+        if (blueprints == null)
+            readers = null;
+        else
+            readers = blueprints.ConvertAll(bp => ContourReader.NewReader(bp));
+        // Reset old builders
+        int oldBuilderCount = builders != null ? builders.Count : 0;
+        List<ContourBuilder> unusedBuilders = new List<ContourBuilder>(oldBuilderCount);
+        for (int i = 0; i < oldBuilderCount; i++)
         {
-            if (blueprints == null)
-                readers = null;
-            else
-                readers = blueprints.ConvertAll(bp => ContourReader.NewReader(bp));
-        }
-        // Update builders
-        {
-            // Reset old builders
-            int oldBuilderCount = builders != null ? builders.Count : 0;
-            List<ContourBuilder> unusedBuilders = new List<ContourBuilder>(oldBuilderCount);
-            for (int i = 0; i < oldBuilderCount; i++)
+            ContourBuilder oldBuilder = builders[i];
+            if (oldBuilder != null)
             {
-                ContourBuilder oldBuilder = builders[i];
-                if (oldBuilder != null)
-                {
-                    oldBuilder.Reset();
-                    if (!unusedBuilders.Contains(oldBuilder)) unusedBuilders.Add(oldBuilder);
-                }
+                oldBuilder.Reset();
+                if (!unusedBuilders.Contains(oldBuilder)) unusedBuilders.Add(oldBuilder);
             }
-            // Set new builders
-            List<ContourBuilder> newBuilders;
-            if (readers != null)
+        }
+        // Set new builders
+        List<ContourBuilder> newBuilders;
+        if (readers != null)
+        {
+            newBuilders = new List<ContourBuilder>(readers.Count);
+            // Dispatch readers to adequate builders
+            foreach (ContourReader r in readers)
             {
-                newBuilders = new List<ContourBuilder>(readers.Count);
-                // Dispatch readers to adequate builders
-                foreach (ContourReader r in readers)
+                ContourBuilder matchingBuilder = null;
+                // Check if adequate builder exist in old builders
+                if (oldBuilderCount > 0)
                 {
-                    ContourBuilder matchingBuilder = null;
-                    // Check if adequate builder exist in old builders
-                    if (oldBuilderCount > 0)
-                    {
-                        matchingBuilder = builders.Find(b => b != null && b.TryAddReader(r));
-                        if (matchingBuilder != null)
-                        {
-                            unusedBuilders.Remove(matchingBuilder);
-                            newBuilders.Add(matchingBuilder);
-                            continue;
-                        }
-                    }
-                    // Else check if adequate builder exists in new builders
-                    matchingBuilder = newBuilders.Find(b => b != null && b.TryAddReader(r));
+                    matchingBuilder = builders.Find(b => b != null && b.TryAddReader(r));
                     if (matchingBuilder != null)
                     {
                         unusedBuilders.Remove(matchingBuilder);
                         newBuilders.Add(matchingBuilder);
                         continue;
                     }
-                    // Else create builder from scratch
-                    matchingBuilder = ContourBuilder.NewBuilder(r, transform);
-                    if (matchingBuilder == null) continue;
-                    matchingBuilder.TryAddReader(r);
-                    newBuilders.Add(matchingBuilder);
                 }
+                // Else check if adequate builder exists in new builders
+                matchingBuilder = newBuilders.Find(b => b != null && b.TryAddReader(r));
+                if (matchingBuilder != null)
+                {
+                    unusedBuilders.Remove(matchingBuilder);
+                    newBuilders.Add(matchingBuilder);
+                    continue;
+                }
+                // Else create builder from scratch
+                matchingBuilder = ContourBuilder.NewBuilder(r, transform);
+                if (matchingBuilder == null) continue;
+                matchingBuilder.TryAddReader(r);
+                newBuilders.Add(matchingBuilder);
             }
-            else
-            {
-                newBuilders = null;
-            }
-            // Destroy all unused builders
-            foreach(ContourBuilder b in unusedBuilders)
-            {
-                if (b != null) DestroyImmediate(b.gameObject);
-            }
-            // Replace old builders with new ones
-            builders = new List<ContourBuilder>(newBuilders);
         }
+        else
+        {
+            newBuilders = null;
+        }
+        // Destroy all unused builders
+        foreach (ContourBuilder b in unusedBuilders)
+        {
+            if (b != null) DestroyImmediate(b.gameObject);
+        }
+        // Replace old builders with new ones
+        builders = new List<ContourBuilder>(newBuilders);
     }
 }
