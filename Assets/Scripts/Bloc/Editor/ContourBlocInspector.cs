@@ -704,11 +704,13 @@ public class ContourBlocInspector : Editor
             // Contour gizmos
             List<List<int>> contours = targetBloc.GetAllContours(false);
             // Draw label for each contour and higlight selected contours
+            Handles.color = Color.white;
             for (int cti = 0, ctCount = contours != null ? contours.Count : 0; cti < ctCount; cti++)
-            {
-                Handles.color = IsContourSelected(cti) ? Color.yellow : Color.white;
+                if (!IsContourSelected(cti)) DrawContour(contours[cti], cti.ToString());
+            // Higlight selected contours
+            Handles.color = Color.yellow;
+            foreach (int cti in GetSelectedContourIndices())
                 DrawContour(contours[cti], cti.ToString());
-            }
         }
     }    
 

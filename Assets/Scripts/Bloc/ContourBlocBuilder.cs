@@ -64,10 +64,18 @@ public class ContourBlocBuilder : MonoBehaviour
 
     private void Update()
     {
-        //if (bloc != null) GetContoursFromBloc();
-        UpdateBlueprints();
-        UpdateBuilders();
-        if (builders != null) foreach (ContourBuilder b in builders) b.Build();
+        if (bloc != null)
+        {
+            if (bloc.changes.HasFlag(ContourBloc.BlocChanges.ContourAdded) || bloc.changes.HasFlag(ContourBloc.BlocChanges.ContourRemoved))
+                RebuildAll();
+            else if (bloc.changes.HasFlag(ContourBloc.BlocChanges.ContourChanged))
+            {
+                UpdateBlueprints();
+                UpdateBuilders();
+                if (builders != null) foreach (ContourBuilder b in builders) b.Build();
+            } 
+            bloc.changes = ContourBloc.BlocChanges.None;
+        }
     }
 
     public int ContourCount => contours != null ? contours.Count : 0;
@@ -126,6 +134,7 @@ public class ContourBlocBuilder : MonoBehaviour
 
     public void GetContoursFromBloc()
     {
+        Debug.Log("GetContoursFromBloc");
         // Update contour shapes from bloc, while keeping materials & blueprints related parameters
         List<ContourShape> shapesInBloc = bloc.ContourShapes;
         int contourCount = shapesInBloc.Count;
@@ -155,6 +164,7 @@ public class ContourBlocBuilder : MonoBehaviour
 
     private void UpdateBlueprints()
     {
+        Debug.Log("UpdateBlueprints");
         // Get all current blueprints
         List<ContourBlueprint> unusedBlueprints = GetAllBlueprints();
         //Each contour needs one blueprint per material
@@ -201,6 +211,7 @@ public class ContourBlocBuilder : MonoBehaviour
 
     private void UpdateBuilders()
     {
+        Debug.Log("UpdateBuilders");
         List<ContourBlueprint> blueprints = GetAllBlueprints();
         // Update readers
         if (blueprints == null)
