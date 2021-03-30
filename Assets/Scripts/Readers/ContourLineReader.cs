@@ -3,7 +3,12 @@ using System.Collections.Generic;
 
 public class ContourLineReader : ContourMeshReader
 {
-    public override bool TryReadBlueprint(ContourBlueprint blueprint)
+    protected override void ReadBlueprintPositions()
+    {
+
+    }
+
+    protected override bool TryReadBlueprint(ContourBlueprint blueprint)
     {
         // Read if possible
         if (blueprint != null && blueprint is ContourMeshBlueprint && blueprint.material is ContourLineMaterial)

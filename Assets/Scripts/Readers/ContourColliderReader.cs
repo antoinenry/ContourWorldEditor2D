@@ -9,7 +9,12 @@ public class ContourColliderReader : ContourReader
     public bool IsTrigger { get; private set; }
     public PhysicsMaterial2D PhysicsMaterial { get; private set; }
 
-    public override bool TryReadBlueprint(ContourBlueprint blueprint)
+    protected override void ReadBlueprintPositions()
+    {
+
+    }
+
+    protected override bool TryReadBlueprint(ContourBlueprint blueprint)
     {
         // Read if possible
         if (blueprint != null && blueprint.material is ContourColliderMaterial)
@@ -52,7 +57,7 @@ public class ContourColliderReader : ContourReader
             IsTrigger = contourMaterial.isTrigger;
             PhysicsMaterial = contourMaterial.physicsMaterial;
         }
-        return false;
+        return true;
     }
 
     public void Clear()

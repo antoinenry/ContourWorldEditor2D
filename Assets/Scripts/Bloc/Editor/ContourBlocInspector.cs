@@ -232,7 +232,9 @@ public class ContourBlocInspector : Editor
     private List<int> GetSelectedContourIndices()
     {
         List<int> selected = new List<int>(targetBloc.GetContourCount());
-        for (int i = 0, iend = contourSceneSelection.Length; i < iend; i++) if (contourSceneSelection[i]) selected.Add(i);
+        for (int i = 0, iend = contourSceneSelection.Length; i < iend; i++) 
+            if (contourSceneSelection[i]) 
+                selected.Add(i);
         return selected;
     }
 
@@ -251,6 +253,7 @@ public class ContourBlocInspector : Editor
 
     public override void OnInspectorGUI()
     {
+        SetTarget();
         bool changeCheck = false;
         // Remove later
         showDebug = EditorGUILayout.Toggle("Show debug", showDebug);
@@ -703,6 +706,7 @@ public class ContourBlocInspector : Editor
         {
             // Contour gizmos
             List<List<int>> contours = targetBloc.GetAllContours(false);
+            int contourCount = contours.Count;
             // Draw label for each contour and higlight selected contours
             Handles.color = Color.white;
             for (int cti = 0, ctCount = contours != null ? contours.Count : 0; cti < ctCount; cti++)
@@ -710,7 +714,8 @@ public class ContourBlocInspector : Editor
             // Higlight selected contours
             Handles.color = Color.yellow;
             foreach (int cti in GetSelectedContourIndices())
-                DrawContour(contours[cti], cti.ToString());
+                if (cti < contourCount)
+                    DrawContour(contours[cti], cti.ToString());
         }
     }    
 

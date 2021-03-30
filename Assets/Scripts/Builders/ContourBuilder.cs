@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 
+[ExecuteInEditMode]
 public abstract class ContourBuilder : MonoBehaviour
 {
     protected List<ContourReader> readers;
@@ -42,6 +43,24 @@ public abstract class ContourBuilder : MonoBehaviour
         if (readers != null) readers.Clear();
     }
 
+    public void Update()
+    {
+        if (readers != null)
+        {
+            ContourReader.ReaderChanges maxChange = ContourReader.ReaderChanges.None;
+            foreach(ContourReader rd in readers)
+            {
+                if (rd == null) continue;
+                maxChange |= rd.changes;
+                rd.changes = ContourReader.ReaderChanges.None;
+            }
+            if (maxChange.HasFlag(ContourReader.ReaderChanges.LengthChanged))
+                Build();
+            else if (maxChange.HasFlag(ContourReader.ReaderChanges.PositionMoved))
+                OnMovePositions();
+        }
+    }
+
     public bool TryAddReader(ContourReader reader)
     {
         if (CanBuildFrom(reader))
@@ -58,4 +77,6 @@ public abstract class ContourBuilder : MonoBehaviour
     public abstract bool CanBuildFrom(ContourReader reader);
 
     public abstract void Build();
+
+    protected abstract void OnMovePositions();
 }

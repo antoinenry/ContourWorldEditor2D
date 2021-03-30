@@ -79,4 +79,17 @@ public class ContourMeshBuilder : ContourBuilder
         // Update mesh filter and renderer
         UpdateComponents();
     }
+
+    protected override void OnMovePositions()
+    {
+        // Update mesh vertices
+        List<Vector3> vertices = new List<Vector3>();
+        foreach (ContourSubmeshBuilder sub in submeshes)
+            vertices.AddRange(sub.GetVertices());
+        mesh.SetVertices(vertices);
+        // Set bounds
+        mesh.RecalculateBounds();
+        // Update mesh filter and renderer
+        UpdateComponents();
+    }
 }

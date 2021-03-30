@@ -1,9 +1,11 @@
 ﻿using UnityEngine;
+using System;
 using System.Collections.Generic;
 
+[Serializable]
 public class ContourFaceReader : ContourMeshReader
 {
-    public override bool TryReadBlueprint(ContourBlueprint blueprint)
+    protected override bool TryReadBlueprint(ContourBlueprint blueprint)
     {
         // Read if possible
         if (blueprint != null && blueprint is ContourMeshBlueprint && blueprint.material is ContourFaceMaterial)
@@ -52,5 +54,34 @@ public class ContourFaceReader : ContourMeshReader
         }
         // If not, return false
         return false;
+    }
+
+    protected override void ReadBlueprintPositions()
+    {
+        // Read contour positions only (assumes only modification on contour is some point moved)
+        if (blueprint != null && blueprint is ContourMeshBlueprint && blueprint.material is ContourFaceMaterial)
+        {
+            ContourMeshBlueprint meshBlueprint = blueprint as ContourMeshBlueprint;
+            // Get positions
+            Vector2[] positions = blueprint.positions;
+            // Check if blueprint matches reader mesh's length
+            int positionCount = positions != null ? positions.Length : 0;
+            int vertexCount = Vertices.Count;
+            if (vertexCount == positionCount - 1)
+            {
+                if (vertexCount > 0)
+                {
+                    // Update vertices
+                    for (int i = 0; i < vertexCount; i++)
+                        Vertices[i] = new Vector3(positions[i].x, positions[i].y, Vertices[i].z);
+                    // Update uvs (to avoid texture stretching)
+                    for (int i = 0; i < vertexCount; i++)
+                        UVs[i] = Vertices[i];
+                }
+            }
+            else throw new Exception("Blueprint and reader mismatch");
+        }
+        // Notify if there's a problem with the blueprint
+        else throw new Exception("Can't read blueprint");
     }
 }
