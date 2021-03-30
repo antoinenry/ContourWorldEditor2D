@@ -39,6 +39,21 @@ public class ContourBlocInspector : Editor
     private void OnEnable()
     {
         SetTarget();
+        Undo.undoRedoPerformed += OnUndoRedo;
+    }
+
+    private void OnDisable()
+    {
+        Undo.undoRedoPerformed -= OnUndoRedo;
+    }
+
+    private void OnUndoRedo()
+    {
+        ClearContourSelection();
+        ClearPointSelection();
+        SetTarget();
+        SetTargetDirty();
+        targetBloc.changes = ~ContourBloc.BlocChanges.None;
     }
 
     private void SetTarget()
@@ -53,6 +68,11 @@ public class ContourBlocInspector : Editor
             CorrectPointSelectionArrayLengths();
             CorrectContourSelectionArrayLengths();
         }
+    }
+
+    private void SetTargetDirty()
+    {
+        foreach (Component c in targetBlocAndBuilder) EditorUtility.SetDirty(c);
     }
 
     // -------------------------------------------
@@ -83,7 +103,7 @@ public class ContourBlocInspector : Editor
         pointInspectorStates[pointIndex].selected = select;
         // Update InspectorGUI and SceneGUI
         showPointListInspector = true;
-        EditorUtility.SetDirty(targetBloc);
+        SetTargetDirty();
         SceneView.RepaintAll();
     }
 
@@ -96,7 +116,7 @@ public class ContourBlocInspector : Editor
         contourInspectorStates[contourIndex].selected = select;
         // Update InspectorGUI and SceneGUI
         showContourListInspector = true;
-        EditorUtility.SetDirty(targetBloc);
+        SetTargetDirty();
         SceneView.RepaintAll();
     }
 
@@ -129,7 +149,7 @@ public class ContourBlocInspector : Editor
             pointInspectorStates[pti].selected = false;
         }
         // Update InspectorGUI and SceneGUI
-        EditorUtility.SetDirty(targetBloc);
+        SetTargetDirty();
         SceneView.RepaintAll();
     }
 
@@ -142,7 +162,7 @@ public class ContourBlocInspector : Editor
             contourInspectorStates[cti].selected = false;
         }
         // Update InspectorGUI and SceneGUI
-        EditorUtility.SetDirty(targetBloc);
+        SetTargetDirty();
         SceneView.RepaintAll();
     }    
 
@@ -762,7 +782,7 @@ public class ContourBlocInspector : Editor
                             SelectAllContoursWithPoint(i);
                     }
                     // Apply modifications in inspector
-                    EditorUtility.SetDirty(targetBloc);
+                    SetTargetDirty();
                     return;
                 }
             }
@@ -780,7 +800,7 @@ public class ContourBlocInspector : Editor
                     if (!Event.current.modifiers.HasFlag(EventModifiers.Alt))
                         SelectAllContoursWithPoint(i);
                     // Apply modifications in inspector
-                    EditorUtility.SetDirty(targetBloc);
+                    SetTargetDirty();
                     return;
                 }
 
@@ -805,7 +825,7 @@ public class ContourBlocInspector : Editor
                 foreach (int selectedPointIndex in selectedPointsIndices)
                     targetBloc.MovePoint(selectedPointIndex, targetPositions[selectedPointIndex] + handleMove);
                 // Apply modifications in inspector
-                EditorUtility.SetDirty(targetBloc);
+                SetTargetDirty();
             }
         }
         // Handles on segments for inserting points (in selected contours only)
@@ -829,7 +849,7 @@ public class ContourBlocInspector : Editor
                     ClearPointSelection();
                     SelectPoint(newPointIndex, true);
                     // Apply modifications in inspector
-                    EditorUtility.SetDirty(targetBloc);
+                    SetTargetDirty();
                 }
             }
         }
@@ -873,7 +893,7 @@ public class ContourBlocInspector : Editor
             targetBloc.AddPointToContour(newContourIndex, newPointIndex);
             // Select added point
             SelectPoint(newPointIndex, true);
-            EditorUtility.SetDirty(targetBloc);
+            SetTargetDirty();
             return;
         }
         // Then, handles to select existing points
@@ -894,11 +914,11 @@ public class ContourBlocInspector : Editor
                         Undo.RecordObjects(targetBlocAndBuilder, "Create contour");
                         // Remove point by trimming contour
                         targetBloc.SetContourLength(newContourIndex, newContourLength - 1);
-                        EditorUtility.SetDirty(targetBloc);
+                        SetTargetDirty();
                         return;
                     }
                     // Draw a dotted line to show future segment
-                    Handles.DrawDottedLine(pointPositionWorldSpace, mousePosition, handleSize * 10f);
+                    Handles.DrawDottedLine(pointPositionWorldSpace, createPointPosition, handleSize * 10f);
                 }
                 // First point in contour is also treated differently
                 else if(newContourLength > 0 && pti == pointIndicesInBloc[0])
@@ -909,7 +929,7 @@ public class ContourBlocInspector : Editor
                     {
                         Undo.RecordObjects(targetBlocAndBuilder, "Create contour");
                         targetBloc.LoopContour(newContourIndex, true);
-                        EditorUtility.SetDirty(targetBloc);
+                        SetTargetDirty();
                         // Select new contour only
                         UnselectAll();
                         SelectContour(newContourIndex, true);
@@ -928,7 +948,7 @@ public class ContourBlocInspector : Editor
                         SelectPoint(pti, true);
                         // Add point to contour (again)
                         targetBloc.AddPointToContour(newContourIndex, pti);
-                        EditorUtility.SetDirty(targetBloc);
+                        SetTargetDirty();
                         return;
                     }
                 }
