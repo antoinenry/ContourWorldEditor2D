@@ -10,6 +10,36 @@ public class ContourColliderBuilder : ContourBuilder
         if (readers == null || collider2D == null)
             return;
         // Set collider shape
+        SetColliderPoints();
+        // Set collider parameters (all readers should have the same parameter so we get values from the first one)
+        if (readers.Count > 0 && readers[0] != null)
+        {
+            ContourColliderReader topReader = readers[0] as ContourColliderReader;
+            collider2D.isTrigger = topReader.IsTrigger;
+            collider2D.sharedMaterial = topReader.PhysicsMaterial;
+        }
+    }
+
+    public override bool CanBuildFrom(ContourReader reader)
+    {
+        if (collider2D == null)
+            collider2D = GetComponent<Collider2D>();
+        if (reader != null && reader is ContourColliderReader && collider2D != null)
+        {
+            ContourColliderReader colliderReader = reader as ContourColliderReader;
+            return (colliderReader.ColliderType == collider2D.GetType() && colliderReader.IsTrigger == collider2D.isTrigger);
+        }
+        return false;
+    }
+
+    protected override void OnMovePositions()
+    {
+        SetColliderPoints();
+    }
+
+    private void SetColliderPoints()
+    {
+        // Set collider shape
         if (collider2D is EdgeCollider2D)
         {
             EdgeCollider2D edgeCollider = collider2D as EdgeCollider2D;
@@ -37,29 +67,5 @@ public class ContourColliderBuilder : ContourBuilder
                     polygonCollider.SetPath(ri, new Vector2[0]);
             }
         }
-        // Set collider parameters (all readers should have the same parameter so we get values from the first one)
-        if (readers.Count > 0 && readers[0] != null)
-        {
-            ContourColliderReader topReader = readers[0] as ContourColliderReader;
-            collider2D.isTrigger = topReader.IsTrigger;
-            collider2D.sharedMaterial = topReader.PhysicsMaterial;
-        }
-    }
-
-    public override bool CanBuildFrom(ContourReader reader)
-    {
-        if (collider2D == null)
-            collider2D = GetComponent<Collider2D>();
-        if (reader != null && reader is ContourColliderReader && collider2D != null)
-        {
-            ContourColliderReader colliderReader = reader as ContourColliderReader;
-            return (colliderReader.ColliderType == collider2D.GetType() && colliderReader.IsTrigger == collider2D.isTrigger);
-        }
-        return false;
-    }
-
-    protected override void OnMovePositions()
-    {
-
     }
 }

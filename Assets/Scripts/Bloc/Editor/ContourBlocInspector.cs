@@ -9,7 +9,6 @@ public class ContourBlocInspector : Editor
     // Static members are required for sharing values between InspectorGUI and SceneGUI
     // and for continuity between different instances of the inspector
     private static ContourBloc targetBloc;
-    private static Component[] targetBlocAndBuilder;
     private static bool sceneGUIEditMode;
     private static bool createContourMode;
     private static bool showDebug;
@@ -49,6 +48,7 @@ public class ContourBlocInspector : Editor
 
     private void OnUndoRedo()
     {
+        Debug.Log("Undo/Redo");
         ClearContourSelection();
         ClearPointSelection();
         SetTarget();
@@ -63,7 +63,6 @@ public class ContourBlocInspector : Editor
         {
             targetBloc = target as ContourBloc;
             ContourBlocBuilder attachedBuilder = targetBloc.GetComponent<ContourBlocBuilder>();
-            targetBlocAndBuilder = attachedBuilder != null ? new Component[] { targetBloc, attachedBuilder } : new Component[] { targetBloc };
             createContourMode = false;
             CorrectPointSelectionArrayLengths();
             CorrectContourSelectionArrayLengths();
@@ -72,7 +71,23 @@ public class ContourBlocInspector : Editor
 
     private void SetTargetDirty()
     {
-        foreach (Component c in targetBlocAndBuilder) EditorUtility.SetDirty(c);
+        // Set target and attached builder dirty
+        if (targetBloc == null) return;
+        EditorUtility.SetDirty(targetBloc);
+        ContourBlocBuilder targetBuilder = targetBloc.GetComponent<ContourBlocBuilder>();
+        if (targetBuilder == null) return;
+        EditorUtility.SetDirty(targetBuilder);
+    }
+
+    private void RecordUndo(string undoName)
+    {
+        // Record target and attached builder for undo
+        if (targetBloc == null) return;
+        ContourBlocBuilder targetBuilder = targetBloc.GetComponent<ContourBlocBuilder>();
+        if (targetBuilder == null)
+            Undo.RecordObject(targetBloc, undoName);
+        else
+            Undo.RecordObjects(new UnityEngine.Object[] { targetBloc, targetBuilder }, undoName);
     }
 
     // -------------------------------------------
@@ -389,14 +404,14 @@ public class ContourBlocInspector : Editor
         if (editedPosition != getPosition)
         {
             // If positions has been changed, update bloc
-            Undo.RecordObjects(targetBlocAndBuilder, "Edit Point In Bloc");
+            RecordUndo("Edit Point In Bloc");
             targetBloc.MovePoint(pointIndex, editedPosition);
             SceneView.RepaintAll();
         }
         // Button to remove point
         if (sceneGUIEditMode && GUILayout.Button("Remove"))
         {
-            Undo.RecordObjects(targetBlocAndBuilder, "Remove point");
+            RecordUndo("Remove point");
             targetBloc.DestroyPoint(pointIndex);
             targetBloc.DestroyAllPointlessContours();
             UnselectAll();
@@ -501,7 +516,7 @@ public class ContourBlocInspector : Editor
         // Button to remove contour
         if (sceneGUIEditMode && GUILayout.Button("Remove"))
         {
-            Undo.RecordObjects(targetBlocAndBuilder, "Remove contour");
+            RecordUndo("Remove contour");
             targetBloc.RemoveContourAt(contourIndex);
             targetBloc.DestroyAllContourlessPoints();
             UnselectAll();
@@ -519,7 +534,7 @@ public class ContourBlocInspector : Editor
             if (EditorGUILayout.Toggle("Loop", loop) != loop)
             {
                 // If loop field is edited, apply changes
-                Undo.RecordObjects(targetBlocAndBuilder, "Set loop");
+                RecordUndo("Set loop");
                 targetBloc.LoopContour(contourIndex, !loop);
                 SceneView.RepaintAll();
                 changeCheck = true;
@@ -532,7 +547,7 @@ public class ContourBlocInspector : Editor
             if (editContourLength != contourLength)
             {
                 SelectContour(contourIndex, true);
-                Undo.RecordObjects(targetBlocAndBuilder, "Set Contour Length");
+                RecordUndo("Set Contour Length");
                 targetBloc.SetContourLength(contourIndex, editContourLength);
                 SceneView.RepaintAll();
                 changeCheck = true;
@@ -560,7 +575,7 @@ public class ContourBlocInspector : Editor
                     if (editPointIndex != pointIndexInBloc)
                     {
                         // If field is edited, apply changes
-                        Undo.RecordObjects(targetBlocAndBuilder, "Set Contour Point");
+                        RecordUndo("Set Contour Point");
                         targetBloc.ReplacePointInContour(contourIndex, pointIndexInContour, editPointIndex);
                         SceneView.RepaintAll();
                         changeCheck = true;
@@ -595,7 +610,7 @@ public class ContourBlocInspector : Editor
         GUI.enabled = GUI_enabled;
         if (GUILayout.Button("New contour"))
         {
-            Undo.RecordObjects(targetBlocAndBuilder, "Create contour");
+            //RecordUndo("Create contour");
             createContourMode = true;
             targetBloc.AddContour();
             // Select new contour only
@@ -615,7 +630,7 @@ public class ContourBlocInspector : Editor
         GUI.enabled = selectedPointCount >= 1;
         if (GUILayout.Button("Remove"))
         {
-            Undo.RecordObjects(targetBlocAndBuilder, selectedPointCount == 1 ? "Delete position" : "Delete positions");
+            RecordUndo(selectedPointCount == 1 ? "Delete position" : "Delete positions");
             // Remove point only in selected contours
             for (int i = 0; i < selectedPointCount; i++)
             {
@@ -638,7 +653,7 @@ public class ContourBlocInspector : Editor
         GUI.enabled = selectedPointCount >= 2;
         if (GUILayout.Button("Merge"))
         {
-            Undo.RecordObjects(targetBlocAndBuilder, "Merge points");
+            RecordUndo("Merge points");
             // Merge selected points
             targetBloc.MergePoints(selectedPointsIndices);
             UnselectAll();
@@ -816,7 +831,7 @@ public class ContourBlocInspector : Editor
             if (handleMove != Vector2.zero)
             {
                 // Translate all selected points, following the handle
-                Undo.RecordObjects(targetBlocAndBuilder, "Move position");
+                RecordUndo("Move position");
                 // Detach selected points from unselected contour
                 List<int> unselectedContourIndices = GetUnselectedContourIndices();
                 foreach (int selectedPointIndex in selectedPointsIndices)
@@ -842,7 +857,7 @@ public class ContourBlocInspector : Editor
                 Vector3 handlePosition = ((Vector3)targetPositions[contourPoints[i]] + (Vector3)targetPositions[contourPoints[i + 1]]) / 2f + blocPosition;
                 if (Handles.Button(handlePosition, Quaternion.identity, .5f * handleSize, handleSize, Handles.CubeHandleCap))
                 {
-                    Undo.RecordObjects(targetBlocAndBuilder, "Insert point");
+                    RecordUndo("Insert point");
                     // Insert point on segment, in selected contour, and select only this point
                     int newPointIndex = targetBloc.PointCount;
                     targetBloc.InsertPointInContours(selectedContourIndices, contourPoints[i], contourPoints[i + 1]);
@@ -886,7 +901,7 @@ public class ContourBlocInspector : Editor
         }
         if (Handles.Button(mousePosition, Quaternion.identity, .5f * handleSize, handleSize, Handles.CircleHandleCap))
         {
-            Undo.RecordObjects(targetBlocAndBuilder, "Create contour");
+            //RecordUndo("Create contour");
             // Add new point to bloc and to new contour
             targetBloc.AddPoint(createPointPosition - (Vector2)blocPosition);
             int newPointIndex = targetBloc.PointCount - 1;
@@ -911,7 +926,7 @@ public class ContourBlocInspector : Editor
                     // Last point can't be added but can be removed to easily cancel adding a point
                     if (Handles.Button(pointPositionWorldSpace, Quaternion.identity, 2f * handleSize, handleSize, Handles.SphereHandleCap))
                     {
-                        Undo.RecordObjects(targetBlocAndBuilder, "Create contour");
+                        //RecordUndo("Create contour");
                         // Remove point by trimming contour
                         targetBloc.SetContourLength(newContourIndex, newContourLength - 1);
                         SetTargetDirty();
@@ -927,7 +942,7 @@ public class ContourBlocInspector : Editor
                     // If first point is clicked again, it ends contour creation and set contour as a loop
                     if (Handles.Button(pointPositionWorldSpace, Quaternion.identity, handleSize, handleSize, Handles.CircleHandleCap))
                     {
-                        Undo.RecordObjects(targetBlocAndBuilder, "Create contour");
+                        //RecordUndo("Create contour");
                         targetBloc.LoopContour(newContourIndex, true);
                         SetTargetDirty();
                         // Select new contour only
@@ -943,7 +958,7 @@ public class ContourBlocInspector : Editor
                     Handles.color = IsPointSelected(pti) ? Color.green : Color.white;
                     if (Handles.Button(pointPositionWorldSpace, Quaternion.identity, handleSize, handleSize, Handles.CircleHandleCap))
                     {
-                        Undo.RecordObjects(targetBlocAndBuilder, "Create contour");
+                        //RecordUndo("Create contour");
                         // Add point to selection
                         SelectPoint(pti, true);
                         // Add point to contour (again)

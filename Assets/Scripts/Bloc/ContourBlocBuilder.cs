@@ -173,7 +173,6 @@ public class ContourBlocBuilder : MonoBehaviour
 
     public void GetContoursFromBloc()
     {
-        Debug.Log("GetContoursFromBloc");
         // Update contour shapes from bloc, while keeping materials & blueprints related parameters
         List<ContourShape> shapesInBloc = bloc.ContourShapes;
         int contourCount = shapesInBloc.Count;
@@ -203,7 +202,6 @@ public class ContourBlocBuilder : MonoBehaviour
 
     private void ResetAllBlueprintsAndReaders()
     {
-        Debug.Log("ResetAllBlueprintsAndReaders");
         // Get all current blueprints
         List<ContourBlueprint> unusedBlueprints = GetAllBlueprints();
         //Each contour needs one blueprint and reader per material
@@ -255,7 +253,6 @@ public class ContourBlocBuilder : MonoBehaviour
 
     private void ResetAllBuilders()
     {
-        Debug.Log("ResetAllBuilders");
         // Reset old builders
         int oldBuilderCount = builders != null ? builders.Count : 0;
         List<ContourBuilder> unusedBuilders = new List<ContourBuilder>(oldBuilderCount);

@@ -9,11 +9,6 @@ public class ContourColliderReader : ContourReader
     public bool IsTrigger { get; private set; }
     public PhysicsMaterial2D PhysicsMaterial { get; private set; }
 
-    protected override void ReadBlueprintPositions()
-    {
-
-    }
-
     protected override bool TryReadBlueprint(ContourBlueprint blueprint)
     {
         // Read if possible
@@ -58,6 +53,31 @@ public class ContourColliderReader : ContourReader
             PhysicsMaterial = contourMaterial.physicsMaterial;
         }
         return true;
+    }
+
+    protected override void ReadBlueprintPositions()
+    {
+        // Read contour positions only (assumes only modification on contour is some point moved)
+        if (blueprint != null && blueprint.material is ContourColliderMaterial)
+        {
+            // Get positions
+            Vector2[] positions = blueprint.positions;
+            // Check if blueprint matches reader mesh's length
+            int colliderLength = Positions != null ? Positions.Count : 0;
+            bool lengthCheck;
+            if (ColliderType == typeof(PolygonCollider2D))
+                lengthCheck = positions.Length == colliderLength + 1;
+            else
+                lengthCheck = positions.Length == colliderLength;
+            if (lengthCheck)
+            {                
+                for (int i = 0; i < colliderLength; i++)
+                    Positions[i] = blueprint.positions[i];
+            }
+            else throw new Exception("Blueprint and reader mismatch");
+        }
+        // Notify if there's a problem with the blueprint
+        else throw new Exception("Can't read blueprint");
     }
 
     public void Clear()

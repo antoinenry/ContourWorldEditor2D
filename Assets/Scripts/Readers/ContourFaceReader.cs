@@ -61,7 +61,6 @@ public class ContourFaceReader : ContourMeshReader
         // Read contour positions only (assumes only modification on contour is some point moved)
         if (blueprint != null && blueprint is ContourMeshBlueprint && blueprint.material is ContourFaceMaterial)
         {
-            ContourMeshBlueprint meshBlueprint = blueprint as ContourMeshBlueprint;
             // Get positions
             Vector2[] positions = blueprint.positions;
             // Check if blueprint matches reader mesh's length

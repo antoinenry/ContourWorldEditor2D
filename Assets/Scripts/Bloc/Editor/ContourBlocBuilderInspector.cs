@@ -44,6 +44,7 @@ public class ContourBlocBuilderInspector : Editor
         }
         EditorGUI.BeginChangeCheck();
         ContourPalette palette = targetBuilder.palette = EditorGUILayout.ObjectField("Palette", targetBuilder.palette, typeof(ContourPalette), true) as ContourPalette;
+        if (EditorGUI.EndChangeCheck())
         {
             Undo.RecordObject(target, "Set palette");
             targetBuilder.palette = palette;
