@@ -47,16 +47,16 @@ public abstract class ContourBuilder : MonoBehaviour
     {
         if (readers != null)
         {
-            ContourReader.ReaderChanges maxChange = ContourReader.ReaderChanges.None;
+            ContourBlueprint.BlueprintChanges maxChange = ContourBlueprint.BlueprintChanges.None;
             foreach(ContourReader rd in readers)
             {
-                if (rd == null) continue;
-                maxChange |= rd.changes;
-                rd.changes = ContourReader.ReaderChanges.None;
+                if (rd == null || rd.Blueprint == null) continue;
+                maxChange |= rd.Blueprint.changes;
+                rd.Blueprint.changes = ContourBlueprint.BlueprintChanges.None;
             }
-            if (maxChange.HasFlag(ContourReader.ReaderChanges.LengthChanged))
+            if (maxChange.HasFlag(ContourBlueprint.BlueprintChanges.LengthChanged))
                 Build();
-            else if (maxChange.HasFlag(ContourReader.ReaderChanges.PositionMoved))
+            else if (maxChange.HasFlag(ContourBlueprint.BlueprintChanges.PositionMoved))
                 OnMovePositions();
         }
     }

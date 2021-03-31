@@ -158,7 +158,7 @@ public class ContourBloc : MonoBehaviour
             foreach(PointOccurence occ in movedPoint.occurences)
             {
                 contours[occ.contourIndex].positions[occ.indexInContour] = position;
-                contours[occ.contourIndex].changes |= ContourShape.ShapeChange.PositionMoved;
+                contours[occ.contourIndex].hasChanged = true;
                 changes |= BlocChanges.ContourChanged;
             }
     }
@@ -202,7 +202,7 @@ public class ContourBloc : MonoBehaviour
                 points[pointIndex].occurences.Add(new PointOccurence() { contourIndex = contourIndex, indexInContour = indexInContour });
                 // Add position to contour
                 contours[contourIndex].positions.Add(GetPosition(pointIndex));
-                contours[contourIndex].changes |= ContourShape.ShapeChange.LengthChanged;
+                contours[contourIndex].hasChanged = true;
                 changes |= BlocChanges.ContourChanged;
             }
         }
@@ -240,7 +240,7 @@ public class ContourBloc : MonoBehaviour
         points[pointIndex].occurences.Add(new PointOccurence() { contourIndex = contourIndex, indexInContour = insertAt });
         // Add position to contour
         contours[contourIndex].positions.Insert(insertAt, GetPosition(pointIndex));
-        contours[contourIndex].changes |= ContourShape.ShapeChange.LengthChanged;
+        contours[contourIndex].hasChanged = true;
         changes |= BlocChanges.ContourChanged;
     }
 
@@ -326,7 +326,7 @@ public class ContourBloc : MonoBehaviour
             {
                 points[pointIndex].occurences.RemoveAll(occ => occ.contourIndex == contourIndex);
                 contours[contourIndex].positions.RemoveAt(findPointIndexInContour);
-                contours[contourIndex].changes |= ContourShape.ShapeChange.LengthChanged;
+                contours[contourIndex].hasChanged = true;
                 changes |= BlocChanges.ContourChanged;
             }
             // Or remove point from buffer
@@ -390,7 +390,7 @@ public class ContourBloc : MonoBehaviour
         {
             // Remove positions from contour
             contours[contourIndex].positions.RemoveRange(newLength, currentContourLength - newLength);
-            contours[contourIndex].changes |= ContourShape.ShapeChange.LengthChanged;
+            contours[contourIndex].hasChanged = true;
             changes |= BlocChanges.ContourChanged;
             // If contour is looped, preserve loop - unless specified otherwise
             if (preserveLoop && IsContourLooped(contourIndex))
@@ -522,11 +522,11 @@ public class ContourBloc : MonoBehaviour
                     contours[contourIndex].positions.Add(new Vector2());
                 else
                     contours[contourIndex].positions.Insert(indexInContour, new Vector2());
-                contours[contourIndex].changes |= ContourShape.ShapeChange.LengthChanged;
+                contours[contourIndex].hasChanged = true;
             }
             // Set position in contour
             contours[contourIndex].positions[indexInContour] = GetPosition(newPointIndex);
-            contours[contourIndex].changes |= ContourShape.ShapeChange.PositionMoved;
+            contours[contourIndex].hasChanged = true;
             changes |= BlocChanges.ContourChanged;
         }
         else
@@ -614,7 +614,7 @@ public class ContourBloc : MonoBehaviour
             foreach (PointOccurence occ in occurences)
             {
                 contours[occ.contourIndex].positions[occ.indexInContour] = newPoint.position;
-                contours[occ.contourIndex].changes |= ContourShape.ShapeChange.PositionMoved;
+                contours[occ.contourIndex].hasChanged = true;
                 changes |= BlocChanges.ContourChanged;
             }
         }

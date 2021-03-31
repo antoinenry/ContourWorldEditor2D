@@ -10,13 +10,19 @@ public abstract class ContourMeshReader : ContourReader
     public List<Vector2> UVs { get; protected set; }
     public List<Color> Colors { get; protected set; }
 
-    protected void Clear()
+    public override bool Clear()
     {
-        MeshMaterial = null;
-        Vertices = null;
-        Triangles = null;
-        Normals = null;
-        UVs = null;
-        Colors = null;
+        if (MeshMaterial == null && Vertices == null && Triangles == null && Normals == null && UVs == null && Colors == null)
+            return false;
+        else
+        {
+            MeshMaterial = null;
+            Vertices = null;
+            Triangles = null;
+            Normals = null;
+            UVs = null;
+            Colors = null;
+            return true;
+        }
     }
 }

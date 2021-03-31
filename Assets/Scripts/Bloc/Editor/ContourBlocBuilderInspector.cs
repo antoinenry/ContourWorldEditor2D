@@ -73,7 +73,6 @@ public class ContourBlocBuilderInspector : Editor
             bp.hideFlags = visible ? HideFlags.None : HideFlags.HideInInspector;
             EditorUtility.SetDirty(bp);
         }
-        
     }
 
     private void ContourListInspectorGUI()

@@ -88,27 +88,27 @@ public class ContourBlocBuilder : MonoBehaviour
                 for (int cti = 0, ctCount = ContourCount; cti < ctCount; cti++)
                 {
                     Contour contour = contours[cti];
-                    ContourShape shape = contour.shape;
-                    if (shape != null)
+                    if (contour.shape != null)
                     {
-                        ContourShape.ShapeChange shapeChanges = shape.changes;
-                        if (shapeChanges != ContourShape.ShapeChange.None)
+                        if (contour.shape.hasChanged)
                         {
-                            List<ContourReader> updateReader = contour.readers;
-                            if (updateReader != null)
+                            List<ContourReader> updateReaders = contour.readers;
+                            if (updateReaders != null)
                             {
-                                if (shapeChanges.HasFlag(ContourShape.ShapeChange.PositionMoved) || shapeChanges.HasFlag(ContourShape.ShapeChange.LengthChanged))
+                                // Update blueprints and readers
+                                foreach (ContourReader rd in updateReaders)
                                 {
-                                    // Update readers and blueprints
-                                    foreach (ContourReader rd in updateReader)
-                                        rd.SetContourPositions(shape.positions.ToArray());
+                                    if (rd == null) continue;
+                                    ContourBlueprint bp = rd.Blueprint;
+                                    if (bp != null) bp.SetPositions(contour.shape.positions);
+                                    rd.CheckBlueprint();
                                 }
                             }
                             // Force builder updates (better editor reactivity)
                             foreach (ContourBuilder builder in builders)
                                 if (builder != null) builder.Update();
                         }
-                        contour.shape.changes = ContourShape.ShapeChange.None;
+                        contour.shape.hasChanged = false;
                     }
                     contours[cti] = contour;
                 }
@@ -234,7 +234,8 @@ public class ContourBlocBuilder : MonoBehaviour
                 reader = oldReaders[findReaderIndex];
                 oldReaders.RemoveAt(findReaderIndex);
                 blueprint = reader.Blueprint;
-                reader.SetContourPositions(contour.GetPositions());
+                reader.CheckBlueprint();
+                //reader.SetContourPositions(contour.GetPositions());
                 unusedBlueprints.Remove(blueprint);
             }
             // Or create blueprint and reader

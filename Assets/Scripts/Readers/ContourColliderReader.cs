@@ -80,9 +80,15 @@ public class ContourColliderReader : ContourReader
         else throw new Exception("Can't read blueprint");
     }
 
-    public void Clear()
+    public override bool Clear()
     {
-        Positions = null;
-        ColliderType = null;
+        if (Positions == null && ColliderType == null)
+            return false;
+        else
+        {
+            Positions = null;
+            ColliderType = null;
+            return true;
+        }
     }
 }
