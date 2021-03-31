@@ -105,7 +105,7 @@ public class ContourBlocBuilderInspector : Editor
                 int paletteIndex = EditorGUILayout.Popup(targetBuilder.GetPaletteIndex(cti), paletteOptions);
                 if (EditorGUI.EndChangeCheck())
                 {
-                    Undo.RecordObject(targetBuilder, "Set contour type");
+                    Undo.RecordObject(targetBuilder, "Set contour material");
                     targetBuilder.SetPaletteIndex(cti, paletteIndex);
                     // Apply modifications in inspector
                     EditorUtility.SetDirty(targetBuilder);

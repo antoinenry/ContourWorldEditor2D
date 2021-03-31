@@ -124,7 +124,6 @@ public class ContourBlocBuilder : MonoBehaviour
         if (bloc != null) GetContoursFromBloc();
         ResetAllBlueprintsAndReaders();
         ResetAllBuilders();
-        if (builders != null) foreach (ContourBuilder b in builders) b.Build();
     }
 
     public Vector2[] GetPositions(int contourIndex)
@@ -160,15 +159,13 @@ public class ContourBlocBuilder : MonoBehaviour
     {
         if (contours == null || contourIndex < 0 || contourIndex >= contours.Count) return;
         Contour ct = contours[contourIndex];
-        ct.paletteIndex = paletteIndex;
-        contours[contourIndex] = ct;
-    }
-
-    public List<ContourBlueprint> GetAllBlueprints()
-    {
-        List<ContourBlueprint> blueprints = new List<ContourBlueprint>();
-        GetComponents(blueprints);
-        return blueprints;
+        if (ct.paletteIndex != paletteIndex)
+        {
+            ct.paletteIndex = paletteIndex;
+            contours[contourIndex] = ct;
+            ResetContourBlueprintsAndReaders(contourIndex);
+            ResetAllBuilders();
+        }
     }
 
     public void GetContoursFromBloc()
@@ -202,53 +199,60 @@ public class ContourBlocBuilder : MonoBehaviour
 
     private void ResetAllBlueprintsAndReaders()
     {
-        // Get all current blueprints
-        List<ContourBlueprint> unusedBlueprints = GetAllBlueprints();
-        //Each contour needs one blueprint and reader per material
-        if (palette != null)
-        {
-            for (int cti = 0, ctCount = ContourCount; cti < ctCount; cti++)
-            {
-                Contour contour = contours[cti];
-                List<ContourMaterial> contourMaterials = palette.GetContourMaterials(contour.paletteIndex);
-                int cmCount = contourMaterials.Count;
-                List<ContourReader> oldReaders = contour.readers;
-                contour.readers = new List<ContourReader>(cmCount);
-                // Find each corresponding blueprint to each material, or create new blueprints when needed
-                foreach (ContourMaterial cm in contourMaterials)
-                {
-                    if (cm == null) continue;
-                    int findReaderIndex = oldReaders != null ? oldReaders.FindIndex(rd => rd != null && rd.Material == cm) : - 1;
-                    ContourReader reader;
-                    ContourBlueprint blueprint;
-                    // Found blueprint
-                    if (findReaderIndex != -1)
-                    {
-                        reader = oldReaders[findReaderIndex];
-                        oldReaders.RemoveAt(findReaderIndex);
-                        blueprint = reader.Blueprint;
-                        reader.SetContourPositions(contour.GetPositions());
-                        unusedBlueprints.Remove(blueprint);
-                    }
-                    // Or create blueprint and reader
-                    else
-                    {
-                        Vector2[] contourPositions = contour.GetPositions();
-                        blueprint = gameObject.AddComponent(cm.BlueprintType) as ContourBlueprint;
-                        blueprint.material = cm;
-                        blueprint.positions = contourPositions;
-                        reader = ContourReader.NewReader(blueprint);
-                        //reader.MoveBlueprintPositions(contourPositions);
-                    }
-                    contour.readers.Add(reader);
-                }                    
-                // Apply changes
-                contours[cti] = contour;
-            }
-        }
-        // Destroy unused blueprints
+        // Reset readers and blueprint for each contour
+        for (int cti = 0, ctCount = ContourCount; cti < ctCount; cti++)
+                ResetContourBlueprintsAndReaders(cti);
+        // Destroy all unused blueprints
+        List<ContourBlueprint> unusedBlueprints = new List<ContourBlueprint>();
+        GetComponents(unusedBlueprints);
+        foreach (Contour contour in contours)
+            foreach (ContourBlueprint usedBlueprint in contour.GetBlueprints())
+                unusedBlueprints.Remove(usedBlueprint);
         foreach (ContourBlueprint bp in unusedBlueprints)
             DestroyImmediate(bp);
+    }
+
+    private void ResetContourBlueprintsAndReaders(int contourIndex)
+    {
+        // Each contour needs one blueprint and reader per material
+        Contour contour = contours[contourIndex];
+        List<ContourMaterial> contourMaterials = palette != null ? palette.GetContourMaterials(contour.paletteIndex) : new List<ContourMaterial>();
+        int cmCount = contourMaterials.Count;
+        List<ContourReader> oldReaders = contour.readers;
+        List<ContourBlueprint> unusedBlueprints = contour.GetBlueprints();
+        contour.readers = new List<ContourReader>(cmCount);
+        // Find each corresponding blueprint to each material, or create new blueprints when needed
+        foreach (ContourMaterial cm in contourMaterials)
+        {
+            if (cm == null) continue;
+            int findReaderIndex = oldReaders != null ? oldReaders.FindIndex(rd => rd != null && rd.Material == cm) : -1;
+            ContourReader reader;
+            ContourBlueprint blueprint;
+            // Found blueprint
+            if (findReaderIndex != -1)
+            {
+                reader = oldReaders[findReaderIndex];
+                oldReaders.RemoveAt(findReaderIndex);
+                blueprint = reader.Blueprint;
+                reader.SetContourPositions(contour.GetPositions());
+                unusedBlueprints.Remove(blueprint);
+            }
+            // Or create blueprint and reader
+            else
+            {
+                Vector2[] contourPositions = contour.GetPositions();
+                blueprint = gameObject.AddComponent(cm.BlueprintType) as ContourBlueprint;
+                blueprint.material = cm;
+                blueprint.positions = contourPositions;
+                reader = ContourReader.NewReader(blueprint);
+                //reader.MoveBlueprintPositions(contourPositions);
+            }
+            contour.readers.Add(reader);
+        }
+        // Apply changes
+        contours[contourIndex] = contour;
+        // Destroy unused blueprints
+        foreach (ContourBlueprint bp in unusedBlueprints) DestroyImmediate(bp);
     }
 
     private void ResetAllBuilders()
@@ -311,10 +315,10 @@ public class ContourBlocBuilder : MonoBehaviour
         }
         // Destroy all unused builders
         foreach (ContourBuilder b in unusedBuilders)
-        {
             if (b != null) DestroyImmediate(b.gameObject);
-        }
         // Replace old builders with new ones
         builders = new List<ContourBuilder>(newBuilders);
+        // Rebuild all
+        foreach (ContourBuilder b in builders) b.Build();
     }
 }
