@@ -117,7 +117,6 @@ public class ContourBlocInspector : Editor
         pointSceneSelection[pointIndex] = select;
         pointInspectorStates[pointIndex].selected = select;
         // Update InspectorGUI and SceneGUI
-        showPointListInspector = true;
         SetTargetDirty();
         SceneView.RepaintAll();
     }
@@ -130,7 +129,6 @@ public class ContourBlocInspector : Editor
         contourSceneSelection[contourIndex] = select;
         contourInspectorStates[contourIndex].selected = select;
         // Update InspectorGUI and SceneGUI
-        showContourListInspector = true;
         SetTargetDirty();
         SceneView.RepaintAll();
     }
@@ -291,14 +289,15 @@ public class ContourBlocInspector : Editor
         SetTarget();
         bool changeCheck = false;
         // Remove later
-        showDebug = EditorGUILayout.Toggle("Show debug", showDebug);
+        //showDebug = EditorGUILayout.Toggle("Show debug", showDebug);
         if (showDebug)
         {
             base.OnInspectorGUI();
             EditorGUILayout.Space();
         }
         // Toggle scene edit mode: enables edit bloc with handles in SceneGUI
-        if (sceneGUIEditMode != EditorGUILayout.Foldout(sceneGUIEditMode, "EDIT"))
+        //if (sceneGUIEditMode != EditorGUILayout.Foldout(sceneGUIEditMode, "EDIT"))
+        if (sceneGUIEditMode != GUILayout.Toggle(sceneGUIEditMode, "Edit bloc",  "Button"))
         {
             sceneGUIEditMode = !sceneGUIEditMode;
             // Cancel selection and minimize inspector when closing edit mode
@@ -407,17 +406,6 @@ public class ContourBlocInspector : Editor
             RecordUndo("Edit Point In Bloc");
             targetBloc.MovePoint(pointIndex, editedPosition);
             SceneView.RepaintAll();
-        }
-        // Button to remove point
-        if (sceneGUIEditMode && GUILayout.Button("Remove"))
-        {
-            RecordUndo("Remove point");
-            targetBloc.DestroyPoint(pointIndex);
-            targetBloc.DestroyAllPointlessContours();
-            UnselectAll();
-            SceneView.RepaintAll();
-            changeCheck = true;
-            return;
         }
         GUI.enabled = GUI_enabled;
         EditorGUILayout.EndHorizontal();

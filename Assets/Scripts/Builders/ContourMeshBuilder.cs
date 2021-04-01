@@ -92,4 +92,9 @@ public class ContourMeshBuilder : ContourBuilder
         // Update mesh filter and renderer
         UpdateComponents();
     }
+
+    protected override void OnChangeBlueprintParameters()
+    {
+        Build();
+    }
 }

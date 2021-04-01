@@ -58,6 +58,8 @@ public abstract class ContourBuilder : MonoBehaviour
                 Build();
             else if (maxChange.HasFlag(ContourBlueprint.BlueprintChanges.PositionMoved))
                 OnMovePositions();
+            else if (maxChange.HasFlag(ContourBlueprint.BlueprintChanges.ParameterChanged))
+                OnChangeBlueprintParameters();
         }
     }
 
@@ -79,4 +81,9 @@ public abstract class ContourBuilder : MonoBehaviour
     public abstract void Build();
 
     protected abstract void OnMovePositions();
+
+    protected virtual void OnChangeBlueprintParameters()
+    {
+        return;
+    }
 }

@@ -34,7 +34,13 @@ public class ContourBlueprintEditor : Editor
                             break;
                         case ContourMaterial.BlueprintMode.UseBlueprintValue:
                         case ContourMaterial.BlueprintMode.UseBoth:
+                            EditorGUI.BeginChangeCheck();
                             EditorGUILayout.PropertyField(fieldProperty);
+                            if (EditorGUI.EndChangeCheck())
+                            {
+                                ContourBlueprint targetBlueprint = serializedObject.targetObject as ContourBlueprint;
+                                targetBlueprint.changedParameters.Add(fieldProperty.name);
+                            }
                             break;
                     }
                 }

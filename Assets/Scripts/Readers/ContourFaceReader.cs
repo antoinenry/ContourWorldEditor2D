@@ -36,15 +36,15 @@ public class ContourFaceReader : ContourMeshReader
             Triangles = new List<int>(triangleCount * 3);
             for (int i = 0; i < triangleCount; i++)
                 Triangles.AddRange(new int[] { 0, i + 1, i + 2 });
-            // Set normals: fetch value in blueprint
-            Normals = new List<Vector3>(vertexCount);
-            Vector3 normal = meshBlueprint.Normal;
-            for (int i = 0; i < vertexCount; i++)
-                Normals.Add(normal);
             // Set uvs: since it's 2D, use vertex positions
             UVs = new List<Vector2>(vertexCount);
             for (int i = 0; i < vertexCount; i++)
                 UVs.Add(Vertices[i]);
+            // Set normals: fetch value in blueprint
+            Normals = new List<Vector3>(vertexCount);
+            Vector3 normal = meshBlueprint.Normal;
+            for (int i = 0; i < vertexCount; i++)
+                Normals.Add(normal);            
             // Set colors: fetch color in blueprint
             Color color = meshBlueprint.Color;
             Colors = new List<Color>(vertexCount);

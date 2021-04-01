@@ -9,10 +9,11 @@ public class ContourBlueprint : MonoBehaviour
     public Vector2[] positions;
     //public List<Vector2> positions;
     public ContourMaterial material;
-    public BlueprintChanges changes;
+    [HideInInspector] public BlueprintChanges changes;
+    [HideInInspector] public List<string> changedParameters;
 
     [Flags]
-    public enum BlueprintChanges { None = 0, PositionMoved = 1, LengthChanged = 2 }
+    public enum BlueprintChanges { None = 0, PositionMoved = 1, LengthChanged = 2, ParameterChanged = 4 }
 
     public void SetPositions(List<Vector2> newPositions)
     {

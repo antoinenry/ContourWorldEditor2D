@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using UnityEditor;
 using System;
-using System.Collections.Generic;
 
 [CustomEditor(typeof(ContourBlocBuilder))]
 public class ContourBlocBuilderInspector : Editor

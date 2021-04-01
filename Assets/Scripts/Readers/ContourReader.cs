@@ -46,6 +46,8 @@ public abstract class ContourReader
                 TryReadBlueprint(blueprint);
             if (changes.HasFlag(ContourBlueprint.BlueprintChanges.PositionMoved))
                 ReadBlueprintPositions();
+            if (changes.HasFlag(ContourBlueprint.BlueprintChanges.ParameterChanged))
+                OnBlueprintParameterChanged();
             return true;
         }
     }
@@ -54,6 +56,10 @@ public abstract class ContourReader
 
     protected abstract void ReadBlueprintPositions();
 
+    protected virtual void OnBlueprintParameterChanged()
+    {
+        return;
+    }
 
     //public void SetContourPositions(Vector2[] positions)
     //{
