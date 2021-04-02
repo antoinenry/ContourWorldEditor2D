@@ -136,6 +136,8 @@ public class ContourBlocBuilderInspector : Editor
                             bpEditor.label = bpi.ToString();
                             bpEditor.hidePositions = true;
                             bpEditor.OnInspectorGUI();
+                            if (bp.changes.HasFlag(ContourBlueprint.BlueprintChanges.ParameterChanged))
+                                Debug.Log("Parameter change");
                         }
                         EditorGUILayout.EndVertical();
                     }

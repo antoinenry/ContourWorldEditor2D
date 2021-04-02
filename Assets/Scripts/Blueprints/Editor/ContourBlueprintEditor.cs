@@ -22,6 +22,7 @@ public class ContourBlueprintEditor : Editor
             foreach (FieldInfo fieldInfo in fieldInfos)
             {
                 if (hidePositions && fieldInfo.Name == "positions") continue;
+                if (fieldInfo.Name == "changes" || fieldInfo.Name == "changedParameters") continue;
                 SerializedProperty fieldProperty = serializedObject.FindProperty(fieldInfo.Name);
                 LinkMaterialAndBlueprintAttribute linkAttribute = fieldInfo.GetCustomAttribute(typeof(LinkMaterialAndBlueprintAttribute)) as LinkMaterialAndBlueprintAttribute; ;
                 if (linkAttribute != null)
@@ -39,7 +40,7 @@ public class ContourBlueprintEditor : Editor
                             if (EditorGUI.EndChangeCheck())
                             {
                                 ContourBlueprint targetBlueprint = serializedObject.targetObject as ContourBlueprint;
-                                targetBlueprint.changedParameters.Add(fieldProperty.name);
+                                targetBlueprint.OnChangeParameter(fieldProperty.name);
                             }
                             break;
                     }

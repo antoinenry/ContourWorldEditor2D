@@ -296,7 +296,6 @@ public class ContourBlocInspector : Editor
             EditorGUILayout.Space();
         }
         // Toggle scene edit mode: enables edit bloc with handles in SceneGUI
-        //if (sceneGUIEditMode != EditorGUILayout.Foldout(sceneGUIEditMode, "EDIT"))
         if (sceneGUIEditMode != GUILayout.Toggle(sceneGUIEditMode, "Edit bloc",  "Button"))
         {
             sceneGUIEditMode = !sceneGUIEditMode;
@@ -579,6 +578,75 @@ public class ContourBlocInspector : Editor
     #endregion
 
     // -------------------------------------------
+    // HANDLE FUNCTIONS: methods to edit points and contours
+    // -------------------------------------------
+    #region Handle functions
+    private void StartCreateContour()
+    {
+        //RecordUndo("Create contour");
+        createContourMode = true;
+        targetBloc.AddContour();
+        // Select new contour only
+        UnselectAll();
+        SelectContour(targetBloc.GetContourCount() - 1, true);
+        SceneView.RepaintAll();
+        return;
+    }
+
+    private void EndContourCreation()
+    {
+        createContourMode = false;
+        ClearPointSelection();
+        SceneView.RepaintAll();
+    }
+
+    private void CancelContourCreation(int contourIndex)
+    {
+        targetBloc.RemoveContourAt(contourIndex);
+        targetBloc.DestroyAllContourlessPoints();
+        createContourMode = false;
+        UnselectAll();
+        SceneView.RepaintAll();
+    }
+
+    private void RemovePoints(List<int> pointIndices, List<int> contourIndices)
+    {
+        if (pointIndices == null || contourIndices == null) return;
+        int pointCount = pointIndices.Count;
+        if (pointCount == 0) return;
+        RecordUndo(pointCount == 1 ? "Delete position" : "Delete positions");
+        // Remove point only in selected contours
+        for (int i = 0; i < pointCount; i++)
+        {
+            int removedPointIndex = pointIndices[i];
+            targetBloc.RemovePointFromContours(removedPointIndex, contourIndices);
+        }
+        // Destroy points that are no longer in any contour
+        List<int> destroyPoints = pointIndices.FindAll(pti => targetBloc.GetContoursWithPoint(pti).Count == 0);
+        if (destroyPoints.Count > 0) targetBloc.DestroyPoints(destroyPoints);
+        // Destroy contours that no longer have points
+        List<int> emptyContourIndices = contourIndices.FindAll(cti => targetBloc.GetContour(cti, false).Count == 0);
+        targetBloc.RemoveContoursAt(emptyContourIndices);
+        // Clear selection
+        UnselectAll();
+        SceneView.RepaintAll();
+    }
+
+    private void MergePoints(List<int> pointIndices)
+    {
+        RecordUndo("Merge points");
+        // Merge selected points
+        targetBloc.MergePoints(pointIndices);
+        UnselectAll();
+        int newPointIndex = targetBloc.PointCount - 1;
+        SelectPoint(newPointIndex, true);
+        SelectAllContoursWithPoint(newPointIndex);
+        SceneView.RepaintAll();
+    }
+
+    #endregion
+
+    // -------------------------------------------
     // HANDLE TOOLBAR: shown in inspector to do operations on handle selection in SceneGUI  
     // -------------------------------------------
     #region Handle toolbar in inspector
@@ -593,62 +661,38 @@ public class ContourBlocInspector : Editor
         List<int> selectedPointsIndices = GetSelectedPointsIndices();
         int selectedPointCount = selectedPointsIndices.Count;
         List<int> selectedContourIndices = GetSelectedContourIndices();
-        int selectedContourCount = selectedContourIndices.Count;
-        // Button toggle to create a new contour (disables current selection)
-        GUI.enabled = GUI_enabled;
-        if (GUILayout.Button("New contour"))
+        // Get shortkeys
+        if (ApplyShortKeys(selectedPointsIndices, selectedContourIndices))
         {
-            //RecordUndo("Create contour");
-            createContourMode = true;
-            targetBloc.AddContour();
-            // Select new contour only
-            UnselectAll();
-            SelectContour(targetBloc.GetContourCount() - 1, true);
-            SceneView.RepaintAll();
             changeCheck = true;
             return;
         }
+        // Button toggle to create a new contour (disables current selection)
+        GUI.enabled = GUI_enabled;
+        if (GUILayout.Button(new GUIContent("New contour", "Draw a contour by placing new points and/or link existing points (N)")))
+        {
+            StartCreateContour();
+            changeCheck = true;
+        }
         // Button to select all points and contours
         GUI.enabled = GUI_enabled;
-        if (GUILayout.Button("Select all")) SelectAll();
+        if (GUILayout.Button(new GUIContent("Select all", "Selet all points and contours (A)"))) SelectAll();
         // Button to clear selection (disabled if no selection)
         GUI.enabled = selectedPointCount >= 1;
-        if (GUILayout.Button("Clear selection")) UnselectAll();
+        if (GUILayout.Button(new GUIContent("Clear selection", "Unselect all points and contours (Esc)"))) UnselectAll();
         // Button for removing selected points (enabled only if at least one point is selected)
         GUI.enabled = selectedPointCount >= 1;
-        if (GUILayout.Button("Remove"))
+        if (GUILayout.Button(new GUIContent("Remove", "Detach selected point from selected contours (Backspace)")))
         {
-            RecordUndo(selectedPointCount == 1 ? "Delete position" : "Delete positions");
-            // Remove point only in selected contours
-            for (int i = 0; i < selectedPointCount; i++)
-            {
-                int removedPointIndex = selectedPointsIndices[i];
-                targetBloc.RemovePointFromContours(removedPointIndex, selectedContourIndices);
-            }
-            // Destroy points that are no longer in any contour
-            List<int> destroyPoints = selectedPointsIndices.FindAll(pti => targetBloc.GetContoursWithPoint(pti).Count == 0);
-            if (destroyPoints.Count > 0) targetBloc.DestroyPoints(destroyPoints);
-            // Destroy contours that no longer have points
-            List<int> emptyContourIndices = selectedContourIndices.FindAll(cti => targetBloc.GetContour(cti, false).Count == 0);
-            targetBloc.RemoveContoursAt(emptyContourIndices);
-            // Clear selection
-            UnselectAll();
+            RemovePoints(selectedPointsIndices, selectedContourIndices);
             changeCheck = true;
-            SceneView.RepaintAll();
             return;
         }
         // Button for merging selected points (to link contours that share some points, disabled if less thant 2 points are selected)
         GUI.enabled = selectedPointCount >= 2;
-        if (GUILayout.Button("Merge"))
+        if (GUILayout.Button(new GUIContent("Merge", "Merge selected points into one (M)")))
         {
-            RecordUndo("Merge points");
-            // Merge selected points
-            targetBloc.MergePoints(selectedPointsIndices);
-            UnselectAll();
-            int newPointIndex = targetBloc.PointCount - 1;
-            SelectPoint(newPointIndex, true);
-            SelectAllContoursWithPoint(newPointIndex);
-            SceneView.RepaintAll();
+            MergePoints(selectedPointsIndices);
             changeCheck = true;
             return;
         }
@@ -664,47 +708,83 @@ public class ContourBlocInspector : Editor
         bool GUIenabled = GUI.enabled;
         Color GUIbackgroundColor = GUI.backgroundColor;
         // New contour is the only selected contour, stop contour creation if contour selection changes
+        List<int> selectedPointIndices = GetSelectedPointsIndices();
         List<int> selectedContourIndices = GetSelectedContourIndices();
         if (selectedContourIndices.Count != 1)
         {
             createContourMode = false;
             return;
         }
-        int newContourIndex = selectedContourIndices[0];
+        // Get shortkeys
+        if (ApplyShortKeys(selectedPointIndices, selectedContourIndices))
+        {
+            changeCheck = true;
+            return;
+        }
         // Begin special toolbar
         GUI.enabled = true;
         EditorGUILayout.BeginHorizontal("box");
         EditorGUILayout.LabelField("New contour");
         // Button to confirm contour creation (enabled if at least one point has been added)
-        List<int> selectedPointIndices = GetSelectedPointsIndices();
         GUI.enabled = selectedPointIndices != null && selectedPointIndices.Count > 0;
         GUI.backgroundColor = Color.green;
-        if (GUILayout.Button("OK"))
+        if (GUILayout.Button(new GUIContent("OK", "Confirm contour creation (Enter)")))
         {
-            createContourMode = false;
-            ClearPointSelection();
-            SceneView.RepaintAll();
+            EndContourCreation();
             changeCheck = true;
         }
         // Button to cancel contour creation (remove last contour)
         GUI.enabled = true;
         GUI.backgroundColor = Color.red;
-        if (GUILayout.Button("Cancel"))
+        if (GUILayout.Button(new GUIContent("Cancel", "Cancel contour creation and delete created points (Esc)")))
         {
-            targetBloc.RemoveContourAt(newContourIndex);
-            targetBloc.DestroyAllContourlessPoints();
-            createContourMode = false;
-            UnselectAll();
-            SceneView.RepaintAll();
+            CancelContourCreation(selectedContourIndices[0]);
             changeCheck = true;
         }
         EditorGUILayout.EndHorizontal();
         // Restore GUI color
         GUI.backgroundColor = GUIbackgroundColor;
         // Toggle grid mode
-        gridSnap = EditorGUILayout.FloatField("Grid snap", gridSnap);
+        gridSnap = EditorGUILayout.FloatField("Grid snap (+/-)", gridSnap);
         // Restore GUI.enabled
         GUI.enabled = GUIenabled;
+    }
+
+    private bool ApplyShortKeys(List<int> selectedPointIndices, List<int> selectedContourIndices)
+    {
+        // Get currently pressed key and execute shortcut (return true if a shortkey is used)
+        Event currentEvent = Event.current;
+        KeyCode currentKeyDown = currentEvent.type == EventType.KeyDown? currentEvent.keyCode : KeyCode.None;
+        // Shortcut functions
+        if (sceneGUIEditMode)
+        {
+            if (createContourMode)
+            {
+                switch (currentKeyDown)
+                {
+                    case KeyCode.None: return false;
+                    case KeyCode.Return: EndContourCreation(); break;
+                    case KeyCode.Escape: CancelContourCreation(selectedContourIndices[0]); break;
+                    case KeyCode.KeypadPlus: gridSnap += 1f; break;
+                    case KeyCode.KeypadMinus: gridSnap = Mathf.Max(gridSnap - 1f, 0f); break;
+                    default: return false;
+                }
+            }
+            else
+            {
+                switch (currentKeyDown)
+                {
+                    case KeyCode.None: return false;
+                    case KeyCode.N: StartCreateContour(); break;
+                    case KeyCode.A: SelectAll(); break;
+                    case KeyCode.Escape: UnselectAll(); break;
+                    case KeyCode.Backspace: RemovePoints(selectedPointIndices, selectedContourIndices); break;
+                    case KeyCode.M: MergePoints(selectedPointIndices); break;
+                    default: return false;
+                }
+            }
+        }        
+        return true;
     }
     #endregion
     
@@ -754,6 +834,8 @@ public class ContourBlocInspector : Editor
         int selectedPointCount = selectedPointsIndices.Count;
         List<int> selectedContourIndices = GetSelectedContourIndices();
         int selectedContourCount = selectedContourIndices.Count;
+        // Shortkeys
+        if (ApplyShortKeys(selectedPointsIndices, selectedContourIndices)) return;
         // Display a handle for each point position
         List<Vector2> targetPositions = targetBloc.GetPositions();
         if (targetPositions == null) return;
@@ -871,6 +953,8 @@ public class ContourBlocInspector : Editor
         // Get current contour
         List<int> pointIndicesInBloc = targetBloc.GetContour(newContourIndex, false);
         int newContourLength = pointIndicesInBloc.Count;
+        // Shortkeys
+        if (ApplyShortKeys(null, selectedContourIndices)) return;
         // General size and position values for displaying handles
         Vector3 blocPosition = targetBloc.transform.position;
         float handleSize = .15f * HandleUtility.GetHandleSize(blocPosition);

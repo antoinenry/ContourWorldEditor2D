@@ -76,18 +76,20 @@ public class ContourBlocBuilder : MonoBehaviour
         // Rebuild contours when needed
         if (bloc != null)
         {
-            // Changes in bloc that require complete rebuild
+            // 1: Changes in bloc that require complete rebuild
             if (bloc.changes.HasFlag(ContourBloc.BlocChanges.ContourAdded) || bloc.changes.HasFlag(ContourBloc.BlocChanges.ContourRemoved))
             {
                 RebuildAll();
+                bloc.changes = ContourBloc.BlocChanges.None;
             }
-            // Localized changes that allow selective rebuild
+            // 2: Position changes in bloc
             else if (bloc.changes.HasFlag(ContourBloc.BlocChanges.ContourChanged))
             {
                 // Find contours that were changed
                 for (int cti = 0, ctCount = ContourCount; cti < ctCount; cti++)
                 {
                     Contour contour = contours[cti];
+                    // Check for shape changes
                     if (contour.shape != null)
                     {
                         if (contour.shape.hasChanged)
@@ -104,17 +106,17 @@ public class ContourBlocBuilder : MonoBehaviour
                                     rd.CheckBlueprint();
                                 }
                             }
-                            // Force builder updates (better editor reactivity)
-                            foreach (ContourBuilder builder in builders)
-                                if (builder != null) builder.Update();
                         }
                         contour.shape.hasChanged = false;
                     }
                     contours[cti] = contour;
                 }
-            } 
-            bloc.changes = ContourBloc.BlocChanges.None;
+                bloc.changes = ContourBloc.BlocChanges.None;
+            }
         }
+        // Force builder updates (better editor reactivity)
+        foreach (ContourBuilder builder in builders)
+            if (builder != null) builder.Update();
     }
 
     public int ContourCount => contours != null ? contours.Count : 0;

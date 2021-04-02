@@ -65,7 +65,7 @@ public class ContourFaceReader : ContourMeshReader
             Vector2[] positions = blueprint.positions;
             // Check if blueprint matches reader mesh's length
             int positionCount = positions != null ? positions.Length : 0;
-            int vertexCount = Vertices.Count;
+            int vertexCount = Vertices != null ? Vertices.Count : 0;
             if (vertexCount == positionCount - 1)
             {
                 if (vertexCount > 0)
@@ -78,7 +78,6 @@ public class ContourFaceReader : ContourMeshReader
                         UVs[i] = Vertices[i];
                 }
             }
-            else throw new Exception("Blueprint and reader mismatch");
         }
         // Notify if there's a problem with the blueprint
         else throw new Exception("Can't read blueprint");
