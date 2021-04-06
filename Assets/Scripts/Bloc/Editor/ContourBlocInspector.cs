@@ -332,7 +332,11 @@ public class ContourBlocInspector : Editor
         changeCheck = false;
         EditorGUILayout.BeginHorizontal();
         // Toggle list view
-        showPointListInspector = EditorGUILayout.Foldout(showPointListInspector, "Points");
+        if (showPointListInspector = EditorGUILayout.Foldout(showPointListInspector, "Points"))
+        {
+            showPointListInspector = !showPointListInspector;
+            SceneView.RepaintAll();
+        }
         // Add point button
         if (GUILayout.Button("Add"))
         {
@@ -417,7 +421,11 @@ public class ContourBlocInspector : Editor
         changeCheck = false;
         EditorGUILayout.BeginHorizontal();
         // Toggle list view
-        showContourListInspector = EditorGUILayout.Foldout(showContourListInspector, "Contours");
+        if (showContourListInspector != EditorGUILayout.Foldout(showContourListInspector, "Contours"))
+        {
+            showContourListInspector = !showContourListInspector;
+            SceneView.RepaintAll();
+        }
         // Button to add a contour
         if (GUILayout.Button("Add"))
         {
