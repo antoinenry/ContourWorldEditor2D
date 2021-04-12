@@ -57,7 +57,7 @@ public class ContourLineReader : ContourMeshReader
         return false;
     }
 
-    protected override void ReadBlueprintPositions()
+    public override void ReadBlueprintPositions()
     {
         // Read contour positions only (assumes only modification on contour is some point moved)
         if (blueprint != null && blueprint is ContourMeshBlueprint && blueprint.material is ContourLineMaterial)

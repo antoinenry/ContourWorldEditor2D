@@ -43,23 +43,25 @@ public abstract class ContourBuilder : MonoBehaviour
         if (readers != null) readers.Clear();
     }
 
-    public void Update()
+    public virtual void Update()
     {
+        // Default update: rebuild all for any change in blueprints
+        // can be further optimized in children classes
         if (readers != null)
         {
-            ContourBlueprint.BlueprintChanges maxChange = ContourBlueprint.BlueprintChanges.None;
-            foreach(ContourReader rd in readers)
+            bool rebuild = false;
+            foreach (ContourReader rd in readers)
             {
                 if (rd == null || rd.Blueprint == null) continue;
-                maxChange |= rd.Blueprint.changes;
-                rd.Blueprint.changes = ContourBlueprint.BlueprintChanges.None;
+                if (rd.Blueprint.changes != ContourBlueprint.BlueprintChanges.None)
+                {
+                    rd.ReadBlueprint();
+                    rebuild = true;
+                    rd.Blueprint.changes = ContourBlueprint.BlueprintChanges.None;
+                    rd.Blueprint.changedParameters = "";
+                }
             }
-            if (maxChange.HasFlag(ContourBlueprint.BlueprintChanges.LengthChanged))
-                Build();
-            else if (maxChange.HasFlag(ContourBlueprint.BlueprintChanges.PositionMoved))
-                OnMovePositions();
-            else if (maxChange.HasFlag(ContourBlueprint.BlueprintChanges.ParameterChanged))
-                OnChangeBlueprintParameters();
+            if (rebuild) Build();
         }
     }
 
@@ -80,7 +82,7 @@ public abstract class ContourBuilder : MonoBehaviour
 
     public abstract void Build();
 
-    protected abstract void OnMovePositions();
+    protected abstract void UpdatePositions();
 
     protected virtual void OnChangeBlueprintParameters()
     {

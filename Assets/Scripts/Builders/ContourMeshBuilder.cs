@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System;
 using System.Collections.Generic;
 
 [RequireComponent(typeof(MeshFilter))]
@@ -9,6 +10,61 @@ public class ContourMeshBuilder : ContourBuilder
     private Mesh mesh;
     private MeshFilter filter;
     private MeshRenderer render;
+
+    [Flags]
+    private enum UpdateType { None = 0, All = ~0, Positions = 2, Normals = 4 }
+
+    public override void Update()
+    {
+        // Optimized update
+        if (readers != null)
+        {
+            // Evaluate what needs to be updated
+            UpdateType requiredUpdates = UpdateType.None;
+            foreach (ContourMeshReader rd in readers)
+            {
+                if (rd == null || rd.Blueprint == null) continue;
+                ContourBlueprint.BlueprintChanges bpChanges = rd.Blueprint.changes;
+                if (bpChanges != ContourBlueprint.BlueprintChanges.None)
+                {
+                    if (bpChanges.HasFlag(ContourBlueprint.BlueprintChanges.LengthChanged))
+                    {
+                        rd.ReadBlueprint();
+                        requiredUpdates = UpdateType.All;
+                    }
+                    if (bpChanges.HasFlag(ContourBlueprint.BlueprintChanges.PositionMoved))
+                    {
+                        rd.ReadBlueprintPositions();
+                        requiredUpdates |= UpdateType.Positions;
+                    }
+                    if (bpChanges.HasFlag(ContourBlueprint.BlueprintChanges.ParameterChanged))
+                    {
+                        string[] changedParameters = rd.Blueprint.changedParameters.Split(' ');
+                        foreach(string p in changedParameters)
+                        {
+                            switch(p)
+                            {
+                                case "normal":
+                                    rd.ReadBlueprintNormal();
+                                    requiredUpdates |= UpdateType.Normals;
+                                    break;
+                            }
+                        }
+                    }
+                    rd.Blueprint.changes = ContourBlueprint.BlueprintChanges.None;
+                    rd.Blueprint.changedParameters = "";
+                }
+            }
+            // Apply required updates
+            if (requiredUpdates == UpdateType.All)
+                Build();
+            else
+            {
+                if (requiredUpdates.HasFlag(UpdateType.Positions)) UpdatePositions();
+                if (requiredUpdates.HasFlag(UpdateType.Normals)) UpdateNormals();
+            }
+        }
+    }
 
     protected void UpdateComponents()
     {
@@ -34,6 +90,7 @@ public class ContourMeshBuilder : ContourBuilder
 
     public override void Build()
     {
+        Debug.Log("Build mesh");
         // Set submeshes
         submeshes = new List<ContourSubmeshBuilder>();
         foreach (ContourMeshReader reader in readers)
@@ -80,7 +137,7 @@ public class ContourMeshBuilder : ContourBuilder
         UpdateComponents();
     }
 
-    protected override void OnMovePositions()
+    protected override void UpdatePositions()
     {
         // Update mesh vertices
         List<Vector3> vertices = new List<Vector3>();
@@ -91,6 +148,15 @@ public class ContourMeshBuilder : ContourBuilder
         mesh.RecalculateBounds();
         // Update mesh filter and renderer
         UpdateComponents();
+    }
+
+    private void UpdateNormals()
+    {
+        // Update mesh normals
+        List<Vector3> normals = new List<Vector3>();
+        foreach (ContourSubmeshBuilder sub in submeshes)
+            normals.AddRange(sub.GetNormals());
+        mesh.SetNormals(normals);
     }
 
     protected override void OnChangeBlueprintParameters()

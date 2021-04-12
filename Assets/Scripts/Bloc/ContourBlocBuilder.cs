@@ -103,7 +103,6 @@ public class ContourBlocBuilder : MonoBehaviour
                                     if (rd == null) continue;
                                     ContourBlueprint bp = rd.Blueprint;
                                     if (bp != null) bp.SetPositions(contour.shape.positions);
-                                    rd.CheckBlueprint();
                                 }
                             }
                         }
@@ -113,10 +112,10 @@ public class ContourBlocBuilder : MonoBehaviour
                 }
                 bloc.changes = ContourBloc.BlocChanges.None;
             }
+            // Force builder updates (better editor reactivity)
+            foreach (ContourBuilder builder in builders)
+                if (builder != null) builder.Update();
         }
-        // Force builder updates (better editor reactivity)
-        foreach (ContourBuilder builder in builders)
-            if (builder != null) builder.Update();
     }
 
     public int ContourCount => contours != null ? contours.Count : 0;
@@ -236,7 +235,7 @@ public class ContourBlocBuilder : MonoBehaviour
                 reader = oldReaders[findReaderIndex];
                 oldReaders.RemoveAt(findReaderIndex);
                 blueprint = reader.Blueprint;
-                reader.CheckBlueprint();
+                reader.ReadBlueprint();
                 //reader.SetContourPositions(contour.GetPositions());
                 unusedBlueprints.Remove(blueprint);
             }

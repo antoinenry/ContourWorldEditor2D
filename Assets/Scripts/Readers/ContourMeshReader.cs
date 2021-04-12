@@ -27,18 +27,7 @@ public abstract class ContourMeshReader : ContourReader
         }
     }
 
-    protected override void OnBlueprintParameterChanged()
-    {
-        if (blueprint == null) return;
-        List<string> changedParameters = blueprint.changedParameters;
-        if (changedParameters == null) return;
-        if (changedParameters.Contains("normal"))
-            ReadBlueprintNormal();
-        if (changedParameters.Contains("color"))
-            ReadBlueprintColor();
-    }
-
-    protected void ReadBlueprintNormal()
+    public void ReadBlueprintNormal()
     {
         // Set normals: fetch value in blueprint
         if (blueprint != null && blueprint is ContourMeshBlueprint)
@@ -57,7 +46,7 @@ public abstract class ContourMeshReader : ContourReader
         else throw new Exception("Can't read blueprint");
     }
 
-    protected void ReadBlueprintColor()
+    public void ReadBlueprintColor()
     {
         // Set colors: fetch color in blueprint
         if (blueprint != null && blueprint is ContourMeshBlueprint)

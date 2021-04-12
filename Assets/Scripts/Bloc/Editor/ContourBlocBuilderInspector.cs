@@ -23,7 +23,7 @@ public class ContourBlocBuilderInspector : Editor
     private void OnEnable()
     {
         targetBuilder = target as ContourBlocBuilder;
-        SetBlueprintsVisible(showBluePrintComponents);
+        //SetBlueprintsVisible(showBluePrintComponents);
     }
 
     public override void OnInspectorGUI()
@@ -57,11 +57,13 @@ public class ContourBlocBuilderInspector : Editor
             // Show blue prints as a list, integrated in this inspector
             ContourListInspectorGUI();
             // Option to show all blueprints as individual components
-            EditorGUI.BeginChangeCheck();
-            showBluePrintComponents = EditorGUILayout.Toggle("Show components", showBluePrintComponents);
-            if (EditorGUI.EndChangeCheck()) SetBlueprintsVisible(showBluePrintComponents);
+            //EditorGUI.BeginChangeCheck();
+            //showBluePrintComponents = EditorGUILayout.Toggle("Show components", showBluePrintComponents);
+            //if (EditorGUI.EndChangeCheck()) SetBlueprintsVisible(showBluePrintComponents);
             EditorGUI.indentLevel--;
         }
+        else
+            SetBlueprintsVisible(false);
     }
 
     private void SetBlueprintsVisible(bool visible)
@@ -110,42 +112,44 @@ public class ContourBlocBuilderInspector : Editor
                 }
             }
             EditorGUILayout.EndHorizontal();
-            // Expanded inspector: contour blueprints
-            if (expand)
-            {
-                // Adjust inspector to blueprint count
-                ContourBlueprint[] blueprints = targetBuilder.GetContourBlueprints(cti);
-                int bpCount = blueprints.Length;
-                if (contourInspectors[cti].blueprintEditors == null) contourInspectors[cti].blueprintEditors = new Editor[bpCount];
-                else Array.Resize(ref contourInspectors[cti].blueprintEditors, bpCount);
-                // Show editor for each blueprint of this contour
-                EditorGUI.indentLevel++;
-                if (bpCount > 0)
-                {
-                    for (int bpi = 0; bpi < bpCount; bpi++)
-                    {
-                        EditorGUILayout.BeginVertical("box");
-                        ContourBlueprint bp = blueprints[bpi];
-                        if (bp == null)
-                            EditorGUILayout.HelpBox("Null blueprint", MessageType.Error);
-                        else
-                        {
-                            Editor[] bpEditors = contourInspectors[cti].blueprintEditors;
-                            CreateCachedEditor(bp, typeof(ContourBlueprintEditor), ref bpEditors[bpi]);
-                            ContourBlueprintEditor bpEditor = (bpEditors[bpi] as ContourBlueprintEditor);
-                            bpEditor.label = bpi.ToString();
-                            bpEditor.hidePositions = true;
-                            bpEditor.OnInspectorGUI();
-                            if (bp.changes.HasFlag(ContourBlueprint.BlueprintChanges.ParameterChanged))
-                                Debug.Log("Parameter change");
-                        }
-                        EditorGUILayout.EndVertical();
-                    }
-                }
-                else
-                    EditorGUILayout.HelpBox("This contour doesn't generate blueprints", MessageType.Info);
-                EditorGUI.indentLevel--;
-            }
+            // Expanded inspector: contour blueprints      
+            ContourBlueprint[] blueprints = targetBuilder.GetContourBlueprints(cti);
+            foreach (ContourBlueprint bp in blueprints)
+                bp.hideFlags = expand ? HideFlags.None : HideFlags.HideInInspector;
+            //if (expand)
+            //{
+            //    // Adjust inspector to blueprint count
+            //    ContourBlueprint[] blueprints = targetBuilder.GetContourBlueprints(cti);
+            //    int bpCount = blueprints.Length;
+            //    if (contourInspectors[cti].blueprintEditors == null) contourInspectors[cti].blueprintEditors = new Editor[bpCount];
+            //    else Array.Resize(ref contourInspectors[cti].blueprintEditors, bpCount);
+            //    // Show editor for each blueprint of this contour
+            //    EditorGUI.indentLevel++;
+            //    if (bpCount > 0)
+            //    {
+            //        for (int bpi = 0; bpi < bpCount; bpi++)
+            //        {
+            //            EditorGUILayout.BeginVertical("box");
+            //            ContourBlueprint bp = blueprints[bpi];
+            //            if (bp == null)
+            //                EditorGUILayout.HelpBox("Null blueprint", MessageType.Error);
+            //            else
+            //            {
+            //                EditorGUILayout.LabelField(bpi.ToString(), bp.GetType().Name);
+            //                Editor[] bpEditors = contourInspectors[cti].blueprintEditors;
+            //                CreateCachedEditor(bp, typeof(ContourBlueprintEditor), ref bpEditors[bpi]);
+            //                ContourBlueprintEditor bpEditor = (bpEditors[bpi] as ContourBlueprintEditor);
+            //                bpEditor.positionsDisplay = ContourBlueprintEditor.FieldDisplay.Hidden;
+            //                bpEditor.materialDisplay = ContourBlueprintEditor.FieldDisplay.ReadOnly;
+            //                bpEditor.OnInspectorGUI();
+            //            }
+            //            EditorGUILayout.EndVertical();
+            //        }
+            //    }
+            //    else
+            //        EditorGUILayout.HelpBox("This contour doesn't generate blueprints", MessageType.Info);
+            //    EditorGUI.indentLevel--;
+            //}
         }
     }
 

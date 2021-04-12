@@ -6,10 +6,11 @@ using UnityEngine;
 [Serializable]
 public class ContourBlueprint : MonoBehaviour
 {
+
     public Vector2[] positions;
     public ContourMaterial material;
-    [HideInInspector] public BlueprintChanges changes;
-    [HideInInspector] public List<string> changedParameters;
+    public BlueprintChanges changes;
+    public string changedParameters;
 
     [Flags]
     public enum BlueprintChanges { None = 0, PositionMoved = 1, LengthChanged = 2, ParameterChanged = 4 }
@@ -37,12 +38,5 @@ public class ContourBlueprint : MonoBehaviour
             }
             positions = newLength != 0 ? newPositions.ToArray() : new Vector2[0];
         }        
-    }
-
-    public void OnChangeParameter(string parameterName)
-    {
-        changes |= BlueprintChanges.ParameterChanged;
-        if (changedParameters == null) changedParameters = new List<string>();
-        if (!changedParameters.Contains(parameterName)) changedParameters.Add(parameterName);
     }
 }

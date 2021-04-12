@@ -32,7 +32,7 @@ public class ContourColliderBuilder : ContourBuilder
         return false;
     }
 
-    protected override void OnMovePositions()
+    protected override void UpdatePositions()
     {
         SetColliderPoints();
     }

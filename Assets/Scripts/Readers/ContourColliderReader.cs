@@ -55,7 +55,7 @@ public class ContourColliderReader : ContourReader
         return true;
     }
 
-    protected override void ReadBlueprintPositions()
+    public override void ReadBlueprintPositions()
     {
         // Read contour positions only (assumes only modification on contour is some point moved)
         if (blueprint != null && blueprint.material is ContourColliderMaterial)
