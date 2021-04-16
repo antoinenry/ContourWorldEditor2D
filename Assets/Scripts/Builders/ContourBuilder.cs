@@ -5,37 +5,34 @@ using System.Collections.Generic;
 [ExecuteInEditMode]
 public abstract class ContourBuilder : MonoBehaviour
 {
+    public List<ContourBlueprint> blueprints; 
     protected List<ContourReader> readers;
 
-    public static ContourBuilder NewBuilder(ContourReader reader, Transform setParent = null)
+    public static ContourBuilder NewBuilder(ContourBlueprint blueprint, Transform setParent = null)
     {
         // Create new gameobject
         GameObject builderGO = new GameObject("Contour builder");
         builderGO.transform.SetParent(setParent, false);
         // Add builder component according to reader type and return it
-        if(reader != null)
+        ContourBuilder newBuilder = null;
+        if(blueprint != null)
         {
+            ContourReader reader = ContourReader.NewReader(blueprint);
             if (reader is ContourMeshReader)
             {
                 builderGO.name = "Mesh builder";
-                return builderGO.AddComponent<ContourMeshBuilder>();
+                newBuilder = builderGO.AddComponent<ContourMeshBuilder>();
             }
             if (reader is ContourColliderReader)
             {
-                ContourColliderReader colliderReader = reader as ContourColliderReader;
                 builderGO.name = "Collider builder";
-                Type colliderType = colliderReader.ColliderType;
-                if (colliderType != null && typeof(Collider2D).IsAssignableFrom(colliderType))
-                {
-                    Collider2D colliderComponent = builderGO.AddComponent(colliderType) as Collider2D;
-                    colliderComponent.isTrigger = colliderReader.IsTrigger;
-                }
-                return builderGO.AddComponent<ContourColliderBuilder>();
+                newBuilder = builderGO.AddComponent<ContourColliderBuilder>();
             }
         }
         // If add component has failed, cancel gameobject creation and return null
-        DestroyImmediate(builderGO);
-        return null;
+        if (newBuilder == null) DestroyImmediate(builderGO);
+        else newBuilder.TryAddBlueprint(blueprint);
+        return newBuilder;
     }
 
     public void Reset()
@@ -47,40 +44,82 @@ public abstract class ContourBuilder : MonoBehaviour
     {
         // Default update: rebuild all for any change in blueprints
         // can be further optimized in children classes
-        if (readers != null)
+        if (blueprints != null)
         {
+            int blueprintCount = blueprints.Count;
+            if (readers == null || readers.Count != blueprintCount) ResetReaders();
             bool rebuild = false;
-            foreach (ContourReader rd in readers)
+            for (int bpi = 0; bpi < blueprintCount; bpi++)
             {
-                if (rd == null || rd.Blueprint == null) continue;
-                if (rd.Blueprint.changes != ContourBlueprint.BlueprintChanges.None)
+                ContourBlueprint bp = blueprints[bpi];
+                if (bp == null)
                 {
-                    rd.ReadBlueprint();
-                    rebuild = true;
-                    rd.Blueprint.changes = ContourBlueprint.BlueprintChanges.None;
-                    rd.Blueprint.changedParameters = "";
+                    readers[bpi] = null;
+                }
+                else if (readers[bpi] == null)
+                {
+                    readers[bpi] = ContourReader.NewReader(bp);
+                }
+                else if (bp.changes != ContourBlueprint.BlueprintChanges.None)
+                {
+                    ContourReader rd = readers[bpi];
+                    bool rdCanReadBp = rd.TryReadBlueprint(bp);
+                    if (rdCanReadBp)
+                    {
+                        rebuild = true;
+                        bp.changes = ContourBlueprint.BlueprintChanges.None;
+                        bp.changedParameters = "";
+                    }
+                    else
+                    {
+                        readers[bpi] = ContourReader.NewReader(bp);
+                    }
                 }
             }
-            if (rebuild) Build();
+            if (rebuild) RebuildAll();
         }
     }
 
-    public bool TryAddReader(ContourReader reader)
+    public virtual bool TryAddBlueprint(ContourBlueprint bp)
     {
-        if (CanBuildFrom(reader))
+        if (bp == null) return false;
+        ContourReader newReader = ContourReader.NewReader(bp);
+        if (CanBuildFrom(newReader))
         {
-            // Add reader to existing list (if not already in the list) or create a new list
-            if (readers == null) readers = new List<ContourReader>() { reader };
-            else if (!readers.Contains(reader)) readers.Add(reader);
+            // Add blueprint to existing list if not already in the list and if it is readable or create a new list
+            if (blueprints == null)
+            {
+                blueprints = new List<ContourBlueprint>() { bp };
+                readers = new List<ContourReader>() { newReader };
+            }
+            else if (!blueprints.Contains(bp))
+            {
+                int bpCount = blueprints.Count;
+                blueprints.Add(bp);
+                if (readers == null || readers.Count != bpCount) ResetReaders();
+                else readers.Add(newReader);
+            }
             return true;
         }
         else
             return false;
     }
 
-    public abstract bool CanBuildFrom(ContourReader reader);
+    public void ResetReaders()
+    {
+        if (blueprints == null) readers = null;
+        else
+        {
+            int bpCount = blueprints.Count;
+            readers = new List<ContourReader>(bpCount);
+            for (int i = 0; i < bpCount; i++)
+                readers.Add(ContourReader.NewReader(blueprints[i]));
+        }
+    }
 
-    public abstract void Build();
+    public abstract void RebuildAll();
+
+    protected abstract bool CanBuildFrom(ContourReader reader);
 
     protected abstract void UpdatePositions();
 

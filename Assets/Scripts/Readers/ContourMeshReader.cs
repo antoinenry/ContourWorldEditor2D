@@ -27,16 +27,16 @@ public abstract class ContourMeshReader : ContourReader
         }
     }
 
-    public void ReadBlueprintNormal()
+    public void ReadBlueprintNormal(ContourMeshBlueprint blueprint)
     {
         // Set normals: fetch value in blueprint
-        if (blueprint != null && blueprint is ContourMeshBlueprint)
+        if (blueprint != null)
         {
             int vertexCount = Vertices != null ? Vertices.Count : 0;
             int normalCount = Normals != null ? Normals.Count : 0;
             if (vertexCount == normalCount && vertexCount > 0)
             {
-                Vector3 normal = (blueprint as ContourMeshBlueprint).Normal;
+                Vector3 normal = blueprint.Normal;
                 for (int i = 0; i < normalCount; i++)
                     Normals[i] = normal;
             }
@@ -46,16 +46,16 @@ public abstract class ContourMeshReader : ContourReader
         else throw new Exception("Can't read blueprint");
     }
 
-    public void ReadBlueprintColor()
+    public void ReadBlueprintColor(ContourMeshBlueprint blueprint)
     {
         // Set colors: fetch color in blueprint
-        if (blueprint != null && blueprint is ContourMeshBlueprint)
+        if (blueprint != null)
         {
             int vertexCount = Vertices != null ? Vertices.Count : 0;
             int colorCount = Colors != null ? Colors.Count : 0;
             if (vertexCount == colorCount && vertexCount > 0)
             {
-                Color color = (blueprint as ContourMeshBlueprint).Color;
+                Color color = blueprint.Color;
                 for (int i = 0; i < colorCount; i++)
                     Colors[i] = color;
             }

@@ -168,6 +168,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 34c9720e5a70dfd4198f95ec7f9ce9e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  blueprints: []
 --- !u!23 &81122788
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -453,6 +454,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e194fbbca27bcb146b99e41c66a2990a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  blueprints: []
 --- !u!60 &327620870
 PolygonCollider2D:
   m_ObjectHideFlags: 0
@@ -490,100 +492,6 @@ PolygonCollider2D:
       - {x: -0.57620096, y: -0.9424763}
       - {x: -0.9119196, y: -0.56049967}
       - {x: -1.0441065, y: -0.08917284}
---- !u!1 &620221380
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 620221381}
-  - component: {fileID: 620221384}
-  - component: {fileID: 620221383}
-  - component: {fileID: 620221382}
-  m_Layer: 0
-  m_Name: Mesh builder
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &620221381
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 620221380}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 715582411}
-  m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &620221382
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 620221380}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 34c9720e5a70dfd4198f95ec7f9ce9e7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!23 &620221383
-MeshRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 620221380}
-  m_Enabled: 1
-  m_CastShadows: 1
-  m_ReceiveShadows: 1
-  m_DynamicOccludee: 1
-  m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
-  m_RayTracingMode: 2
-  m_RayTraceProcedural: 0
-  m_RenderingLayerMask: 1
-  m_RendererPriority: 0
-  m_Materials:
-  - {fileID: 2100000, guid: 4b5c3cc3943f5e948b55140a4847e8af, type: 2}
-  m_StaticBatchInfo:
-    firstSubMesh: 0
-    subMeshCount: 0
-  m_StaticBatchRoot: {fileID: 0}
-  m_ProbeAnchor: {fileID: 0}
-  m_LightProbeVolumeOverride: {fileID: 0}
-  m_ScaleInLightmap: 1
-  m_ReceiveGI: 1
-  m_PreserveUVs: 0
-  m_IgnoreNormalsForChartDetection: 0
-  m_ImportantGI: 0
-  m_StitchLightmapSeams: 1
-  m_SelectedEditorRenderState: 3
-  m_MinimumChartSize: 4
-  m_AutoUVMaxDistance: 0.5
-  m_AutoUVMaxAngle: 89
-  m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 0
-  m_AdditionalVertexStreams: {fileID: 0}
---- !u!33 &620221384
-MeshFilter:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 620221380}
-  m_Mesh: {fileID: 1972495635}
 --- !u!1 &659455264
 GameObject:
   m_ObjectHideFlags: 0
@@ -943,6 +851,7 @@ MonoBehaviour:
       - {x: -0.60144186, y: 0.3685727}
       - {x: -0.84933805, y: 0.4770651}
       hasChanged: 0
+    blueprints: []
   - paletteIndex: 4
     shape:
       positions:
@@ -953,6 +862,7 @@ MonoBehaviour:
       - {x: -0.8511491, y: -0.30599785}
       - {x: -0.84933805, y: 0.4770651}
       hasChanged: 0
+    blueprints: []
   - paletteIndex: 4
     shape:
       positions:
@@ -963,6 +873,7 @@ MonoBehaviour:
       - {x: -0.039037704, y: -0.93245316}
       - {x: -0.56268406, y: -0.83946705}
       hasChanged: 0
+    blueprints: []
   - paletteIndex: 4
     shape:
       positions:
@@ -974,6 +885,7 @@ MonoBehaviour:
       - {x: -0.2430079, y: -0.55389404}
       - {x: -0.60144186, y: 0.3685727}
       hasChanged: 0
+    blueprints: []
   - paletteIndex: 4
     shape:
       positions:
@@ -984,6 +896,7 @@ MonoBehaviour:
       - {x: 0.06523991, y: 0.6615691}
       - {x: 0.17120361, y: 1.0330307}
       hasChanged: 0
+    blueprints: []
   - paletteIndex: 4
     shape:
       positions:
@@ -994,6 +907,7 @@ MonoBehaviour:
       - {x: 0.6201258, y: 0.6068969}
       - {x: 1.0403333, y: 0.56021047}
       hasChanged: 0
+    blueprints: []
   - paletteIndex: 4
     shape:
       positions:
@@ -1004,6 +918,7 @@ MonoBehaviour:
       - {x: 0.8353648, y: -0.18508959}
       - {x: 0.9860697, y: -0.45776653}
       hasChanged: 0
+    blueprints: []
   - paletteIndex: 5
     shape:
       positions:
@@ -1021,6 +936,7 @@ MonoBehaviour:
       - {x: -1.0441065, y: -0.08917284}
       - {x: -0.987308, y: 0.53636026}
       hasChanged: 0
+    blueprints: []
   bloc: {fileID: 659455278}
   palette: {fileID: 11400000, guid: 0d4057cff8aa2034c90ccd21e4bc44ef, type: 2}
   builders:
@@ -1362,7 +1278,7 @@ Transform:
   m_LocalPosition: {x: 7, y: 4, z: 1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
-  - {fileID: 620221381}
+  - {fileID: 816265640}
   m_Father: {fileID: 687299563}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1379,19 +1295,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   positions:
-  - {x: -2.5690012, y: 3.3005657}
-  - {x: 2.1392994, y: 3.24796}
-  - {x: 4.9603343, y: 0.69653416}
-  - {x: 5.285837, y: -1.0723662}
-  - {x: 3.2177372, y: -3.1832104}
-  - {x: -1.1157408, y: -3.6040637}
-  - {x: -4.2392635, y: -2.1573792}
-  - {x: -4.449691, y: 0.51898634}
-  - {x: -2.5690012, y: 3.3005657}
+  - {x: -1.6557975, y: 1.7934823}
+  - {x: 1.6725616, y: 1.7416782}
+  - {x: 3.4338722, y: -0.6024189}
+  - {x: 1.2581358, y: -4.047336}
+  - {x: -1.1895685, y: -3.749467}
+  - {x: -3.0674367, y: -0.96504164}
+  - {x: -1.6557975, y: 1.7934823}
   material: {fileID: 11400000, guid: b016d1045857ac145b619d9820e17954, type: 2}
   changes: 0
   changedParameters: 
-  normal: {x: 0, y: 1, z: -0}
+  normal: {x: 0.7, y: 0.39, z: -0.59824747}
   color: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &715582416
 MonoBehaviour:
@@ -1409,20 +1323,20 @@ MonoBehaviour:
   - paletteIndex: 1
     shape:
       positions:
-      - {x: -2.5690012, y: 3.3005657}
-      - {x: 2.1392994, y: 3.24796}
-      - {x: 4.9603343, y: 0.69653416}
-      - {x: 5.285837, y: -1.0723662}
-      - {x: 3.2177372, y: -3.1832104}
-      - {x: -1.1157408, y: -3.6040637}
-      - {x: -4.2392635, y: -2.1573792}
-      - {x: -4.449691, y: 0.51898634}
-      - {x: -2.5690012, y: 3.3005657}
+      - {x: -1.6557975, y: 1.7934823}
+      - {x: 1.6725616, y: 1.7416782}
+      - {x: 3.4338722, y: -0.6024189}
+      - {x: 1.2581358, y: -4.047336}
+      - {x: -1.1895685, y: -3.749467}
+      - {x: -3.0674367, y: -0.96504164}
+      - {x: -1.6557975, y: 1.7934823}
       hasChanged: 0
+    blueprints:
+    - {fileID: 715582412}
   bloc: {fileID: 715582424}
   palette: {fileID: 11400000, guid: 0d4057cff8aa2034c90ccd21e4bc44ef, type: 2}
   builders:
-  - {fileID: 620221382}
+  - {fileID: 816265641}
 --- !u!114 &715582424
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1437,55 +1351,141 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   changes: 0
   points:
-  - position: {x: -2.5690012, y: 3.3005657}
+  - position: {x: -1.6557975, y: 1.7934823}
     occurences:
     - contourIndex: 0
       indexInContour: 0
     - contourIndex: 0
-      indexInContour: 8
-  - position: {x: 2.1392994, y: 3.24796}
+      indexInContour: 6
+  - position: {x: 1.6725616, y: 1.7416782}
     occurences:
     - contourIndex: 0
       indexInContour: 1
-  - position: {x: 3.2177372, y: -3.1832104}
-    occurences:
-    - contourIndex: 0
-      indexInContour: 4
-  - position: {x: -4.2392635, y: -2.1573792}
-    occurences:
-    - contourIndex: 0
-      indexInContour: 6
-  - position: {x: -4.449691, y: 0.51898634}
-    occurences:
-    - contourIndex: 0
-      indexInContour: 7
-  - position: {x: -1.1157408, y: -3.6040637}
-    occurences:
-    - contourIndex: 0
-      indexInContour: 5
-  - position: {x: 4.9603343, y: 0.69653416}
+  - position: {x: 3.4338722, y: -0.6024189}
     occurences:
     - contourIndex: 0
       indexInContour: 2
-  - position: {x: 5.285837, y: -1.0723662}
+  - position: {x: 1.2581358, y: -4.047336}
     occurences:
     - contourIndex: 0
       indexInContour: 3
+  - position: {x: -1.1895685, y: -3.749467}
+    occurences:
+    - contourIndex: 0
+      indexInContour: 4
+  - position: {x: -3.0674367, y: -0.96504164}
+    occurences:
+    - contourIndex: 0
+      indexInContour: 5
   bufferPoint:
     position: {x: 0, y: 0}
     occurences: []
   contours:
   - positions:
-    - {x: -2.5690012, y: 3.3005657}
-    - {x: 2.1392994, y: 3.24796}
-    - {x: 4.9603343, y: 0.69653416}
-    - {x: 5.285837, y: -1.0723662}
-    - {x: 3.2177372, y: -3.1832104}
-    - {x: -1.1157408, y: -3.6040637}
-    - {x: -4.2392635, y: -2.1573792}
-    - {x: -4.449691, y: 0.51898634}
-    - {x: -2.5690012, y: 3.3005657}
+    - {x: -1.6557975, y: 1.7934823}
+    - {x: 1.6725616, y: 1.7416782}
+    - {x: 3.4338722, y: -0.6024189}
+    - {x: 1.2581358, y: -4.047336}
+    - {x: -1.1895685, y: -3.749467}
+    - {x: -3.0674367, y: -0.96504164}
+    - {x: -1.6557975, y: 1.7934823}
     hasChanged: 0
+--- !u!1 &816265639
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 816265640}
+  - component: {fileID: 816265643}
+  - component: {fileID: 816265642}
+  - component: {fileID: 816265641}
+  m_Layer: 0
+  m_Name: Mesh builder
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &816265640
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 816265639}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 715582411}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &816265641
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 816265639}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34c9720e5a70dfd4198f95ec7f9ce9e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  blueprints:
+  - {fileID: 715582412}
+--- !u!23 &816265642
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 816265639}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 4b5c3cc3943f5e948b55140a4847e8af, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!33 &816265643
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 816265639}
+  m_Mesh: {fileID: 1417303880}
 --- !u!1 &849613008
 GameObject:
   m_ObjectHideFlags: 0
@@ -1531,6 +1531,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 34c9720e5a70dfd4198f95ec7f9ce9e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  blueprints: []
 --- !u!23 &849613011
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -2003,6 +2004,170 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+--- !u!43 &1417303880
+Mesh:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  serializedVersion: 10
+  m_SubMeshes:
+  - serializedVersion: 2
+    firstByte: 0
+    indexCount: 12
+    topology: 0
+    baseVertex: 0
+    firstVertex: 0
+    vertexCount: 6
+    localAABB:
+      m_Center: {x: 0.18321776, y: -1.1269269, z: 0}
+      m_Extent: {x: 3.2506545, y: 2.9204092, z: 0}
+  m_Shapes:
+    vertices: []
+    shapes: []
+    channels: []
+    fullWeights: []
+  m_BindPose: []
+  m_BoneNameHashes: 
+  m_RootBoneNameHash: 0
+  m_BonesAABB: []
+  m_VariableBoneCountWeights:
+    m_Data: 
+  m_MeshCompression: 0
+  m_IsReadable: 1
+  m_KeepVertices: 1
+  m_KeepIndices: 1
+  m_IndexFormat: 0
+  m_IndexBuffer: 000001000200000002000300000003000400000004000500
+  m_VertexData:
+    serializedVersion: 3
+    m_VertexCount: 6
+    m_Channels:
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 3
+    - stream: 0
+      offset: 12
+      format: 0
+      dimension: 3
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 24
+      format: 0
+      dimension: 4
+    - stream: 0
+      offset: 40
+      format: 0
+      dimension: 2
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    m_DataSize: 288
+    _typelessdata: 2cf1d3bfd490e53f000000003333333f14aec73ebf2619bf0000803f0000803f0000803f0000803f2cf1d3bfd490e53f8016d63f50efde3f000000003333333f14aec73ebf2619bf0000803f0000803f0000803f0000803f8016d63f50efde3f90c45b4020381abf000000003333333f14aec73ebf2619bf0000803f0000803f0000803f0000803f90c45b4020381abf980aa13fc78381c0000000003333333f14aec73ebf2619bf0000803f0000803f0000803f0000803f980aa13fc78381c0c84398bf44f76fc0000000003333333f14aec73ebf2619bf0000803f0000803f0000803f0000803fc84398bf44f76fc0e25044c0f80c77bf000000003333333f14aec73ebf2619bf0000803f0000803f0000803f0000803fe25044c0f80c77bf
+  m_CompressedMesh:
+    m_Vertices:
+      m_NumItems: 0
+      m_Range: 0
+      m_Start: 0
+      m_Data: 
+      m_BitSize: 0
+    m_UV:
+      m_NumItems: 0
+      m_Range: 0
+      m_Start: 0
+      m_Data: 
+      m_BitSize: 0
+    m_Normals:
+      m_NumItems: 0
+      m_Range: 0
+      m_Start: 0
+      m_Data: 
+      m_BitSize: 0
+    m_Tangents:
+      m_NumItems: 0
+      m_Range: 0
+      m_Start: 0
+      m_Data: 
+      m_BitSize: 0
+    m_Weights:
+      m_NumItems: 0
+      m_Data: 
+      m_BitSize: 0
+    m_NormalSigns:
+      m_NumItems: 0
+      m_Data: 
+      m_BitSize: 0
+    m_TangentSigns:
+      m_NumItems: 0
+      m_Data: 
+      m_BitSize: 0
+    m_FloatColors:
+      m_NumItems: 0
+      m_Range: 0
+      m_Start: 0
+      m_Data: 
+      m_BitSize: 0
+    m_BoneIndices:
+      m_NumItems: 0
+      m_Data: 
+      m_BitSize: 0
+    m_Triangles:
+      m_NumItems: 0
+      m_Data: 
+      m_BitSize: 0
+    m_UVInfo: 0
+  m_LocalAABB:
+    m_Center: {x: 0.18321776, y: -1.1269269, z: 0}
+    m_Extent: {x: 3.2506545, y: 2.9204092, z: 0}
+  m_MeshUsageFlags: 0
+  m_BakedConvexCollisionMesh: 
+  m_BakedTriangleCollisionMesh: 
+  m_MeshMetrics[0]: 1
+  m_MeshMetrics[1]: 1
+  m_MeshOptimizationFlags: 1
+  m_StreamData:
+    serializedVersion: 2
+    offset: 0
+    size: 0
+    path: 
 --- !u!1 &1444280817
 GameObject:
   m_ObjectHideFlags: 0
@@ -4330,6 +4495,7 @@ MonoBehaviour:
       - {x: -5.8920074, y: 1.5247874}
       - {x: -5.2836733, y: 2.289301}
       hasChanged: 0
+    blueprints: []
   - paletteIndex: 0
     shape:
       positions:
@@ -4342,6 +4508,7 @@ MonoBehaviour:
       - {x: -5.550584, y: -1.1675436}
       - {x: -6.2529287, y: -0.83097225}
       hasChanged: 0
+    blueprints: []
   - paletteIndex: 0
     shape:
       positions:
@@ -4354,6 +4521,7 @@ MonoBehaviour:
       - {x: -5.357113, y: -2.0153358}
       - {x: -5.550584, y: -1.1675436}
       hasChanged: 0
+    blueprints: []
   - paletteIndex: 0
     shape:
       positions:
@@ -4365,6 +4533,7 @@ MonoBehaviour:
       - {x: -3.1914403, y: -2.639231}
       - {x: -3.0214021, y: -1.8213904}
       hasChanged: 0
+    blueprints: []
   - paletteIndex: 0
     shape:
       positions:
@@ -4378,6 +4547,7 @@ MonoBehaviour:
       - {x: -0.78559244, y: -2.5758853}
       - {x: -2.2192657, y: -1.2052562}
       hasChanged: 0
+    blueprints: []
   - paletteIndex: 0
     shape:
       positions:
@@ -4389,6 +4559,7 @@ MonoBehaviour:
       - {x: -0.81839466, y: 0.40756094}
       - {x: -2.5443802, y: 0.49435687}
       hasChanged: 0
+    blueprints: []
   - paletteIndex: 0
     shape:
       positions:
@@ -4399,6 +4570,7 @@ MonoBehaviour:
       - {x: -2.6028965, y: -0.22874117}
       - {x: -3.498034, y: -0.1357398}
       hasChanged: 0
+    blueprints: []
   - paletteIndex: 0
     shape:
       positions:
@@ -4409,6 +4581,7 @@ MonoBehaviour:
       - {x: -3.0214021, y: -1.8213904}
       - {x: -4.25367, y: -1.10063}
       hasChanged: 0
+    blueprints: []
   - paletteIndex: 0
     shape:
       positions:
@@ -4422,6 +4595,7 @@ MonoBehaviour:
       - {x: -0.81839466, y: 0.40756094}
       - {x: -0.31273794, y: 1.5615354}
       hasChanged: 0
+    blueprints: []
   - paletteIndex: 2
     shape:
       positions:
@@ -4432,6 +4606,7 @@ MonoBehaviour:
       - {x: 2.149104, y: 0.4993328}
       - {x: 2.223538, y: 1.425912}
       hasChanged: 0
+    blueprints: []
   - paletteIndex: 2
     shape:
       positions:
@@ -4443,6 +4618,7 @@ MonoBehaviour:
       - {x: 2.9825215, y: -0.52373654}
       - {x: 3.8670912, y: 0.6925467}
       hasChanged: 0
+    blueprints: []
   - paletteIndex: 2
     shape:
       positions:
@@ -4454,6 +4630,7 @@ MonoBehaviour:
       - {x: 5.702573, y: -0.85545003}
       - {x: 5.8607364, y: 0.23637402}
       hasChanged: 0
+    blueprints: []
   - paletteIndex: 1
     shape:
       positions:
@@ -4465,6 +4642,7 @@ MonoBehaviour:
       - {x: 1.7695212, y: -0.09680474}
       - {x: 2.149104, y: 0.4993328}
       hasChanged: 0
+    blueprints: []
   - paletteIndex: 1
     shape:
       positions:
@@ -4476,6 +4654,7 @@ MonoBehaviour:
       - {x: 2.9841006, y: -3.2214303}
       - {x: 2.7493691, y: -2.0776582}
       hasChanged: 0
+    blueprints: []
   - paletteIndex: 1
     shape:
       positions:
@@ -4487,6 +4666,7 @@ MonoBehaviour:
       - {x: 3.9887197, y: -1.2092781}
       - {x: 5.702573, y: -0.85545003}
       hasChanged: 0
+    blueprints: []
   - paletteIndex: 0
     shape:
       positions:
@@ -4500,6 +4680,7 @@ MonoBehaviour:
       - {x: 3.8670912, y: 0.6925467}
       - {x: 2.9161792, y: 1.466545}
       hasChanged: 0
+    blueprints: []
   - paletteIndex: 0
     shape:
       positions:
@@ -4512,6 +4693,7 @@ MonoBehaviour:
       - {x: 5.484512, y: 1.2287272}
       - {x: 5.692047, y: 2.1002252}
       hasChanged: 0
+    blueprints: []
   - paletteIndex: 1
     shape:
       positions:
@@ -4523,6 +4705,7 @@ MonoBehaviour:
       - {x: -1.2168281, y: 2.16725}
       - {x: -2.5147095, y: 2.3280175}
       hasChanged: 0
+    blueprints: []
   - paletteIndex: 1
     shape:
       positions:
@@ -4536,6 +4719,7 @@ MonoBehaviour:
       - {x: -0.31273794, y: 1.5615354}
       - {x: -1.2168281, y: 2.16725}
       hasChanged: 0
+    blueprints: []
   - paletteIndex: 0
     shape:
       positions:
@@ -4546,6 +4730,7 @@ MonoBehaviour:
       - {x: -6.138049, y: 3.8674886}
       - {x: -6.0630603, y: 5.039402}
       hasChanged: 0
+    blueprints: []
   - paletteIndex: 0
     shape:
       positions:
@@ -4556,6 +4741,7 @@ MonoBehaviour:
       - {x: -4.0372887, y: 3.6224983}
       - {x: -4.769805, y: 5.525613}
       hasChanged: 0
+    blueprints: []
   - paletteIndex: 0
     shape:
       positions:
@@ -4567,6 +4753,7 @@ MonoBehaviour:
       - {x: -1.9537605, y: 3.403878}
       - {x: -2.3199127, y: 3.6740952}
       hasChanged: 0
+    blueprints: []
   - paletteIndex: 0
     shape:
       positions:
@@ -4578,6 +4765,7 @@ MonoBehaviour:
       - {x: 0.042359114, y: 2.998851}
       - {x: -0.51167893, y: 3.1875837}
       hasChanged: 0
+    blueprints: []
   - paletteIndex: 3
     shape:
       positions:
@@ -4599,6 +4787,7 @@ MonoBehaviour:
       - {x: -4.769805, y: 5.525613}
       - {x: -6.0630603, y: 5.039402}
       hasChanged: 0
+    blueprints: []
   - paletteIndex: 5
     shape:
       positions:
@@ -4626,6 +4815,7 @@ MonoBehaviour:
       - {x: -7.2718453, y: 4.864008}
       - {x: -5.200787, y: 5.736332}
       hasChanged: 0
+    blueprints: []
   - paletteIndex: 1
     shape:
       positions:
@@ -4637,6 +4827,7 @@ MonoBehaviour:
       - {x: 8.912469, y: -1.6138083}
       - {x: 8.820224, y: 0.0795407}
       hasChanged: 0
+    blueprints: []
   - paletteIndex: 2
     shape:
       positions:
@@ -4648,6 +4839,7 @@ MonoBehaviour:
       - {x: 5.8131447, y: -3.5644445}
       - {x: 6.476572, y: -1.6073345}
       hasChanged: 0
+    blueprints: []
   - paletteIndex: 2
     shape:
       positions:
@@ -4659,6 +4851,7 @@ MonoBehaviour:
       - {x: 8.2168665, y: -3.9922462}
       - {x: 8.912469, y: -1.6138083}
       hasChanged: 0
+    blueprints: []
   - paletteIndex: 2
     shape:
       positions:
@@ -4669,6 +4862,7 @@ MonoBehaviour:
       - {x: 9.903954, y: -2.3051577}
       - {x: 11.111094, y: -1.9851928}
       hasChanged: 0
+    blueprints: []
   - paletteIndex: 1
     shape:
       positions:
@@ -4680,6 +4874,7 @@ MonoBehaviour:
       - {x: 10.26755, y: -3.7450008}
       - {x: 11.404067, y: -4.174604}
       hasChanged: 0
+    blueprints: []
   - paletteIndex: 1
     shape:
       positions:
@@ -4693,6 +4888,7 @@ MonoBehaviour:
       - {x: 10.020305, y: -4.9666853}
       - {x: 9.501728, y: -6.061477}
       hasChanged: 0
+    blueprints: []
   - paletteIndex: 0
     shape:
       positions:
@@ -4704,6 +4900,7 @@ MonoBehaviour:
       - {x: 7.5839224, y: -5.380966}
       - {x: 6.485824, y: -5.133507}
       hasChanged: 0
+    blueprints: []
   - paletteIndex: 0
     shape:
       positions:
@@ -4716,6 +4913,7 @@ MonoBehaviour:
       - {x: 4.342548, y: -3.6529016}
       - {x: 5.8131447, y: -3.5644445}
       hasChanged: 0
+    blueprints: []
   - paletteIndex: 0
     shape:
       positions:
@@ -4726,6 +4924,7 @@ MonoBehaviour:
       - {x: 2.5173154, y: -4.4785357}
       - {x: 2.9841006, y: -3.2214303}
       hasChanged: 0
+    blueprints: []
   - paletteIndex: 1
     shape:
       positions:
@@ -4737,6 +4936,7 @@ MonoBehaviour:
       - {x: 1.5715065, y: -4.1576357}
       - {x: 1.5042894, y: -2.841366}
       hasChanged: 0
+    blueprints: []
   - paletteIndex: 1
     shape:
       positions:
@@ -4749,6 +4949,7 @@ MonoBehaviour:
       - {x: 1.5042894, y: -2.841366}
       - {x: 1.5715065, y: -4.1576357}
       hasChanged: 0
+    blueprints: []
   - paletteIndex: 2
     shape:
       positions:
@@ -4760,6 +4961,7 @@ MonoBehaviour:
       - {x: -2.5309815, y: -2.7491949}
       - {x: -1.7571211, y: -2.6249962}
       hasChanged: 0
+    blueprints: []
   - paletteIndex: 2
     shape:
       positions:
@@ -4771,6 +4973,7 @@ MonoBehaviour:
       - {x: -4.056042, y: -3.2396605}
       - {x: -3.1914403, y: -2.639231}
       hasChanged: 0
+    blueprints: []
   - paletteIndex: 1
     shape:
       positions:
@@ -4782,6 +4985,7 @@ MonoBehaviour:
       - {x: -6.4180555, y: -1.3654418}
       - {x: -6.2529287, y: -0.83097225}
       hasChanged: 0
+    blueprints: []
   - paletteIndex: 1
     shape:
       positions:
@@ -4793,6 +4997,7 @@ MonoBehaviour:
       - {x: -5.4564457, y: -3.5405037}
       - {x: -6.028306, y: -2.508365}
       hasChanged: 0
+    blueprints: []
   - paletteIndex: 3
     shape:
       positions:
@@ -4855,6 +5060,7 @@ MonoBehaviour:
       - {x: -3.6678512, y: 2.12085}
       - {x: -2.5147095, y: 2.3280175}
       hasChanged: 0
+    blueprints: []
   - paletteIndex: 0
     shape:
       positions:
@@ -4866,6 +5072,7 @@ MonoBehaviour:
       - {x: -0.4513744, y: -0.4940983}
       - {x: 0.51703286, y: -0.41975647}
       hasChanged: 0
+    blueprints: []
   - paletteIndex: 0
     shape:
       positions:
@@ -4876,6 +5083,7 @@ MonoBehaviour:
       - {x: 0.058163762, y: -2.1963358}
       - {x: 0.7773951, y: -0.80844975}
       hasChanged: 0
+    blueprints: []
   - paletteIndex: 0
     shape:
       positions:
@@ -4886,6 +5094,7 @@ MonoBehaviour:
       - {x: 0.8673121, y: -2.4816115}
       - {x: 1.4831388, y: -1.4772921}
       hasChanged: 0
+    blueprints: []
   - paletteIndex: 0
     shape:
       positions:
@@ -4896,6 +5105,7 @@ MonoBehaviour:
       - {x: 2.103466, y: -2.415382}
       - {x: 1.8152537, y: -1.5326445}
       hasChanged: 0
+    blueprints: []
   - paletteIndex: 0
     shape:
       positions:
@@ -4906,6 +5116,7 @@ MonoBehaviour:
       - {x: 1.4831388, y: -1.4772921}
       - {x: 1.2386656, y: -0.9191545}
       hasChanged: 0
+    blueprints: []
   - paletteIndex: 4
     shape:
       positions:
@@ -4916,6 +5127,7 @@ MonoBehaviour:
       - {x: 2.103466, y: -2.415382}
       - {x: 1.5042894, y: -2.841366}
       hasChanged: 0
+    blueprints: []
   - paletteIndex: 4
     shape:
       positions:
@@ -4926,6 +5138,7 @@ MonoBehaviour:
       - {x: 2.103466, y: -2.415382}
       - {x: 1.8062459, y: -2.195673}
       hasChanged: 0
+    blueprints: []
   - paletteIndex: 4
     shape:
       positions:
@@ -4936,6 +5149,7 @@ MonoBehaviour:
       - {x: 0.8673121, y: -2.4816115}
       - {x: 0.058163762, y: -2.1963358}
       hasChanged: 0
+    blueprints: []
   - paletteIndex: 4
     shape:
       positions:
@@ -4946,6 +5160,7 @@ MonoBehaviour:
       - {x: -0.4513744, y: -0.4940983}
       - {x: 0.51703286, y: -0.41975647}
       hasChanged: 0
+    blueprints: []
   - paletteIndex: 4
     shape:
       positions:
@@ -4956,6 +5171,7 @@ MonoBehaviour:
       - {x: -0.4513744, y: -0.4940983}
       - {x: -0.03711009, y: -0.80876344}
       hasChanged: 0
+    blueprints: []
   bloc: {fileID: 1625203210}
   palette: {fileID: 11400000, guid: 0d4057cff8aa2034c90ccd21e4bc44ef, type: 2}
   builders:
@@ -6455,6 +6671,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e194fbbca27bcb146b99e41c66a2990a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  blueprints: []
 --- !u!60 &1742117261
 PolygonCollider2D:
   m_ObjectHideFlags: 0
@@ -6597,6 +6814,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e194fbbca27bcb146b99e41c66a2990a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  blueprints: []
 --- !u!60 &1884707530
 PolygonCollider2D:
   m_ObjectHideFlags: 0
@@ -6827,170 +7045,6 @@ Mesh:
   m_LocalAABB:
     m_Center: {x: 0.097120404, y: 0.02778536, z: 0.005}
     m_Extent: {x: 1.647499, y: 1.593631, z: 0.005}
-  m_MeshUsageFlags: 0
-  m_BakedConvexCollisionMesh: 
-  m_BakedTriangleCollisionMesh: 
-  m_MeshMetrics[0]: 1
-  m_MeshMetrics[1]: 1
-  m_MeshOptimizationFlags: 1
-  m_StreamData:
-    serializedVersion: 2
-    offset: 0
-    size: 0
-    path: 
---- !u!43 &1972495635
-Mesh:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: 
-  serializedVersion: 10
-  m_SubMeshes:
-  - serializedVersion: 2
-    firstByte: 0
-    indexCount: 18
-    topology: 0
-    baseVertex: 0
-    firstVertex: 0
-    vertexCount: 8
-    localAABB:
-      m_Center: {x: 0.41807318, y: -0.15174901, z: 0}
-      m_Extent: {x: 4.867764, y: 3.4523149, z: 0}
-  m_Shapes:
-    vertices: []
-    shapes: []
-    channels: []
-    fullWeights: []
-  m_BindPose: []
-  m_BoneNameHashes: 
-  m_RootBoneNameHash: 0
-  m_BonesAABB: []
-  m_VariableBoneCountWeights:
-    m_Data: 
-  m_MeshCompression: 0
-  m_IsReadable: 1
-  m_KeepVertices: 1
-  m_KeepIndices: 1
-  m_IndexFormat: 0
-  m_IndexBuffer: 000001000200000002000300000003000400000004000500000005000600000006000700
-  m_VertexData:
-    serializedVersion: 3
-    m_VertexCount: 8
-    m_Channels:
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 3
-    - stream: 0
-      offset: 12
-      format: 0
-      dimension: 3
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    - stream: 0
-      offset: 24
-      format: 0
-      dimension: 4
-    - stream: 0
-      offset: 40
-      format: 0
-      dimension: 2
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    m_DataSize: 384
-    _typelessdata: 846a24c0783c534000000000000000000000803f000000800000803f0000803f0000803f0000803f846a24c0783c534048ea084094de4f4000000000000000000000803f000000800000803f0000803f0000803f0000803f48ea084094de4f400fbb9e401050323f00000000000000000000803f000000800000803f0000803f0000803f0000803f0fbb9e401050323f9425a9404c4389bf00000000000000000000803f000000800000803f0000803f0000803f0000803f9425a9404c4389bf68ef4d40b8b94bc000000000000000000000803f000000800000803f0000803f0000803f0000803f68ef4d40b8b94bc098d08ebffba866c000000000000000000000803f000000800000803f0000803f0000803f0000803f98d08ebffba866c00ca887c080120ac000000000000000000000803f000000800000803f0000803f0000803f0000803f0ca887c080120ac0de638ec04adc043f00000000000000000000803f000000800000803f0000803f0000803f0000803fde638ec04adc043f
-  m_CompressedMesh:
-    m_Vertices:
-      m_NumItems: 0
-      m_Range: 0
-      m_Start: 0
-      m_Data: 
-      m_BitSize: 0
-    m_UV:
-      m_NumItems: 0
-      m_Range: 0
-      m_Start: 0
-      m_Data: 
-      m_BitSize: 0
-    m_Normals:
-      m_NumItems: 0
-      m_Range: 0
-      m_Start: 0
-      m_Data: 
-      m_BitSize: 0
-    m_Tangents:
-      m_NumItems: 0
-      m_Range: 0
-      m_Start: 0
-      m_Data: 
-      m_BitSize: 0
-    m_Weights:
-      m_NumItems: 0
-      m_Data: 
-      m_BitSize: 0
-    m_NormalSigns:
-      m_NumItems: 0
-      m_Data: 
-      m_BitSize: 0
-    m_TangentSigns:
-      m_NumItems: 0
-      m_Data: 
-      m_BitSize: 0
-    m_FloatColors:
-      m_NumItems: 0
-      m_Range: 0
-      m_Start: 0
-      m_Data: 
-      m_BitSize: 0
-    m_BoneIndices:
-      m_NumItems: 0
-      m_Data: 
-      m_BitSize: 0
-    m_Triangles:
-      m_NumItems: 0
-      m_Data: 
-      m_BitSize: 0
-    m_UVInfo: 0
-  m_LocalAABB:
-    m_Center: {x: 0.41807318, y: -0.15174901, z: 0}
-    m_Extent: {x: 4.867764, y: 3.4523149, z: 0}
   m_MeshUsageFlags: 0
   m_BakedConvexCollisionMesh: 
   m_BakedTriangleCollisionMesh: 

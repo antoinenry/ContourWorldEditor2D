@@ -1,18 +1,19 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class ContourColliderBuilder : ContourBuilder
 {
     new private Collider2D collider2D;
 
-    public override void Build()
+    public override void RebuildAll()
     {
-        if (readers == null || collider2D == null)
-            return;
+        // Reread all blueprints
+        ResetReaders();
         // Set collider shape
         SetColliderPoints();
         // Set collider parameters (all readers should have the same parameter so we get values from the first one)
-        if (readers.Count > 0 && readers[0] != null)
+        if (readers != null && readers.Count > 0 && readers[0] != null)
         {
             ContourColliderReader topReader = readers[0] as ContourColliderReader;
             collider2D.isTrigger = topReader.IsTrigger;
@@ -20,21 +21,58 @@ public class ContourColliderBuilder : ContourBuilder
         }
     }
 
-    public override bool CanBuildFrom(ContourReader reader)
+    protected override bool CanBuildFrom(ContourReader reader)
     {
-        if (collider2D == null)
-            collider2D = GetComponent<Collider2D>();
-        if (reader != null && reader is ContourColliderReader && collider2D != null)
+        if (reader == null || reader is ContourColliderReader == false) return false;
+        if (collider2D == null) return true;
+        ContourColliderReader colliderReader = reader as ContourColliderReader;
+        return (colliderReader.ColliderType == collider2D.GetType() && colliderReader.IsTrigger == collider2D.isTrigger);
+    }
+
+    public override bool TryAddBlueprint(ContourBlueprint bp)
+    {
+        if (base.TryAddBlueprint(bp))
         {
-            ContourColliderReader colliderReader = reader as ContourColliderReader;
-            return (colliderReader.ColliderType == collider2D.GetType() && colliderReader.IsTrigger == collider2D.isTrigger);
+            UpdateColliderComponent();
+            return collider2D != null;
         }
-        return false;
+        else
+            return false;
     }
 
     protected override void UpdatePositions()
     {
         SetColliderPoints();
+    }
+
+    private void UpdateColliderComponent()
+    {
+        // Create or get collider component with correct type
+        ContourColliderReader colliderReader = (readers != null && readers.Count > 0) ? readers[0] as ContourColliderReader : null;
+        Type colliderType = colliderReader != null ? colliderReader.ColliderType : null;
+        // Delete existing collider if it doesn't match blueprint's needs
+        if (collider2D != null)
+        {
+            if (collider2D.GetType() != colliderType)
+            {
+                DestroyImmediate(collider2D);
+                collider2D = null;
+            }
+        }
+        // Add collider if needed
+        if (collider2D == null)
+        {
+            if (colliderType != null && typeof(Collider2D).IsAssignableFrom(colliderType))
+            {
+                if (collider2D == null)
+                    collider2D = gameObject.AddComponent(colliderType) as Collider2D;
+            }
+        }
+        // Set collider parameters
+        if (collider2D != null)
+        {
+            collider2D.isTrigger = colliderReader.IsTrigger;
+        }
     }
 
     private void SetColliderPoints()

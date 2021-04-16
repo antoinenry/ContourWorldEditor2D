@@ -14,59 +14,60 @@ public class ContourMeshBuilder : ContourBuilder
     [Flags]
     private enum UpdateType { None = 0, All = ~0, Positions = 2, Normals = 4 }
 
-    public override void Update()
-    {
-        // Optimized update
-        if (readers != null)
-        {
-            // Evaluate what needs to be updated
-            UpdateType requiredUpdates = UpdateType.None;
-            foreach (ContourMeshReader rd in readers)
-            {
-                if (rd == null || rd.Blueprint == null) continue;
-                ContourBlueprint.BlueprintChanges bpChanges = rd.Blueprint.changes;
-                if (bpChanges != ContourBlueprint.BlueprintChanges.None)
-                {
-                    if (bpChanges.HasFlag(ContourBlueprint.BlueprintChanges.LengthChanged))
-                    {
-                        rd.ReadBlueprint();
-                        requiredUpdates = UpdateType.All;
-                    }
-                    if (bpChanges.HasFlag(ContourBlueprint.BlueprintChanges.PositionMoved))
-                    {
-                        rd.ReadBlueprintPositions();
-                        requiredUpdates |= UpdateType.Positions;
-                    }
-                    if (bpChanges.HasFlag(ContourBlueprint.BlueprintChanges.ParameterChanged))
-                    {
-                        string[] changedParameters = rd.Blueprint.changedParameters.Split(' ');
-                        foreach(string p in changedParameters)
-                        {
-                            switch(p)
-                            {
-                                case "normal":
-                                    rd.ReadBlueprintNormal();
-                                    requiredUpdates |= UpdateType.Normals;
-                                    break;
-                            }
-                        }
-                    }
-                    rd.Blueprint.changes = ContourBlueprint.BlueprintChanges.None;
-                    rd.Blueprint.changedParameters = "";
-                }
-            }
-            // Apply required updates
-            if (requiredUpdates == UpdateType.All)
-                Build();
-            else
-            {
-                if (requiredUpdates.HasFlag(UpdateType.Positions)) UpdatePositions();
-                if (requiredUpdates.HasFlag(UpdateType.Normals)) UpdateNormals();
-            }
-        }
-    }
+    //public override void Update()
+    //{
+    //    // Optimized update
+    //    if (readers != null)
+    //    {
+    //        // Evaluate what needs to be updated
+    //        UpdateType requiredUpdates = UpdateType.None;
+    //        foreach (ContourMeshReader rd in readers)
+    //        {
+    //            if (rd == null || rd.Blueprint == null) continue;
+    //            ContourBlueprint.BlueprintChanges bpChanges = rd.Blueprint.changes;
+    //            if (bpChanges != ContourBlueprint.BlueprintChanges.None)
+    //            {
+    //                if (bpChanges.HasFlag(ContourBlueprint.BlueprintChanges.LengthChanged))
+    //                {
+    //                    rd.ReadBlueprint();
+    //                    requiredUpdates = UpdateType.All;
+    //                }
+    //                if (bpChanges.HasFlag(ContourBlueprint.BlueprintChanges.PositionMoved))
+    //                {
+    //                    rd.ReadBlueprintPositions();
+    //                    requiredUpdates |= UpdateType.Positions;
+    //                }
+    //                if (bpChanges.HasFlag(ContourBlueprint.BlueprintChanges.ParameterChanged))
+    //                {
+    //                    string[] changedParameters = rd.Blueprint.changedParameters.Split(' ');
+    //                    foreach(string p in changedParameters)
+    //                    {
+    //                        switch(p)
+    //                        {
+    //                            case "normal":
+    //                                rd.ReadBlueprintNormal();
+    //                                requiredUpdates |= UpdateType.Normals;
+    //                                break;
+    //                        }
+    //                    }
+    //                }
+    //                rd.Blueprint.changes = ContourBlueprint.BlueprintChanges.None;
+    //                rd.Blueprint.changedParameters = "";
+    //            }
+    //        }
 
-    protected void UpdateComponents()
+    //        // Apply required updates
+    //        if (requiredUpdates == UpdateType.All)
+    //            RebuildAll();
+    //        else
+    //        {
+    //            if (requiredUpdates.HasFlag(UpdateType.Positions)) UpdatePositions();
+    //            if (requiredUpdates.HasFlag(UpdateType.Normals)) UpdateNormals();
+    //        }
+    //    }
+    //}
+
+    private void UpdateMeshComponents()
     {
         if (filter == null)
             filter = GetComponent<MeshFilter>();
@@ -83,24 +84,28 @@ public class ContourMeshBuilder : ContourBuilder
         }
     }
 
-    public override bool CanBuildFrom(ContourReader reader)
+    protected override bool CanBuildFrom(ContourReader reader)
     {
         return reader != null && reader is ContourMeshReader;
     }
 
-    public override void Build()
+    public override void RebuildAll()
     {
-        Debug.Log("Build mesh");
+        // Reread all blueprints
+        ResetReaders();
         // Set submeshes
         submeshes = new List<ContourSubmeshBuilder>();
-        foreach (ContourMeshReader reader in readers)
+        if (readers != null)
         {
-            if (reader == null) continue;
-            int subBuilderIndex = submeshes.FindIndex(sub => sub.submeshMaterial == reader.MeshMaterial);
-            if (subBuilderIndex == -1)
-                submeshes.Add(new ContourSubmeshBuilder(reader));
-            else
-                submeshes[subBuilderIndex].readers.Add(reader);
+            foreach (ContourMeshReader reader in readers)
+            {
+                if (reader == null) continue;
+                int subBuilderIndex = submeshes.FindIndex(sub => sub.submeshMaterial == reader.MeshMaterial);
+                if (subBuilderIndex == -1)
+                    submeshes.Add(new ContourSubmeshBuilder(reader));
+                else
+                    submeshes[subBuilderIndex].readers.Add(reader);
+            }
         }
         // Build mesh
         mesh = new Mesh();
@@ -134,7 +139,7 @@ public class ContourMeshBuilder : ContourBuilder
         // Set bounds
         mesh.RecalculateBounds();
         // Update mesh filter and renderer
-        UpdateComponents();
+        UpdateMeshComponents();
     }
 
     protected override void UpdatePositions()
@@ -147,7 +152,7 @@ public class ContourMeshBuilder : ContourBuilder
         // Set bounds
         mesh.RecalculateBounds();
         // Update mesh filter and renderer
-        UpdateComponents();
+        UpdateMeshComponents();
     }
 
     private void UpdateNormals()
@@ -161,6 +166,6 @@ public class ContourMeshBuilder : ContourBuilder
 
     protected override void OnChangeBlueprintParameters()
     {
-        Build();
+        RebuildAll();
     }
 }

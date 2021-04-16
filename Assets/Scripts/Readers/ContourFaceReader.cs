@@ -5,7 +5,7 @@ using System.Collections.Generic;
 [Serializable]
 public class ContourFaceReader : ContourMeshReader
 {
-    protected override bool TryReadBlueprint(ContourBlueprint blueprint)
+    public override bool TryReadBlueprint(ContourBlueprint blueprint)
     {
         // Read if possible
         if (blueprint != null && blueprint is ContourMeshBlueprint && blueprint.material is ContourFaceMaterial)
@@ -56,7 +56,7 @@ public class ContourFaceReader : ContourMeshReader
         return false;
     }
 
-    public override void ReadBlueprintPositions()
+    public override void ReadBlueprintPositions(ContourBlueprint blueprint)
     {
         // Read contour positions only (assumes only modification on contour is some point moved)
         if (blueprint != null && blueprint is ContourMeshBlueprint && blueprint.material is ContourFaceMaterial)

@@ -6,7 +6,6 @@ using UnityEngine;
 [Serializable]
 public class ContourBlueprint : MonoBehaviour
 {
-
     public Vector2[] positions;
     public ContourMaterial material;
     public BlueprintChanges changes;
@@ -38,5 +37,12 @@ public class ContourBlueprint : MonoBehaviour
             }
             positions = newLength != 0 ? newPositions.ToArray() : new Vector2[0];
         }        
+    }
+
+    public bool IsLoop => positions != null && positions.Length > 2 && positions[0] == positions[positions.Length - 1];
+
+    private void OnDestroy()
+    {
+        Debug.Log("Destroy blueprint");
     }
 }
