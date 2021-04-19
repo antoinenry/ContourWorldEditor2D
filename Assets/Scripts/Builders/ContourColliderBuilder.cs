@@ -6,6 +6,45 @@ public class ContourColliderBuilder : ContourBuilder
 {
     new private Collider2D collider2D;
 
+    [Flags]
+    private enum UpdateType { None = 0, All = ~0, Positions = 2 }
+
+    public override void Update()
+    {
+        int bpCount = blueprints != null ? blueprints.Count : 0;
+        if (readers == null || readers.Count != blueprints.Count) ResetReaders();
+        // Optimized update
+        UpdateType requiredUpdates = UpdateType.None;
+        for (int i = 0; i < bpCount; i++)
+        {
+            ContourBlueprint bp = blueprints[i];
+            ContourReader rd = readers[i];
+            if (bp == null || rd == null) continue;
+            ContourBlueprint.BlueprintChanges bpChanges = bp.changes;
+            if (bpChanges != ContourBlueprint.BlueprintChanges.None)
+            {
+                if (bpChanges.HasFlag(ContourBlueprint.BlueprintChanges.LengthChanged))
+                {
+                    rd.TryReadBlueprint(bp);
+                    requiredUpdates = UpdateType.All;
+                }
+                if (bpChanges.HasFlag(ContourBlueprint.BlueprintChanges.PositionMoved))
+                {
+                    rd.ReadBlueprintPositions(bp);
+                    requiredUpdates |= UpdateType.Positions;
+                }
+                bp.changes = ContourBlueprint.BlueprintChanges.None;
+            }
+        }
+        // Apply required updates
+        if (requiredUpdates == UpdateType.All)
+            RebuildAll();
+        else
+        {
+            if (requiredUpdates.HasFlag(UpdateType.Positions)) UpdatePositions();
+        }
+    }
+
     public override void RebuildAll()
     {
         // Reread all blueprints
