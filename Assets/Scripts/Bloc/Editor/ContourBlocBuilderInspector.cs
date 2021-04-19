@@ -23,7 +23,7 @@ public class ContourBlocBuilderInspector : Editor
     private void OnEnable()
     {
         targetBuilder = target as ContourBlocBuilder;
-        //SetBlueprintsVisible(showBluePrintComponents);
+        //SetBlueprintsVisible(false);
     }
 
     public override void OnInspectorGUI()
@@ -62,8 +62,8 @@ public class ContourBlocBuilderInspector : Editor
             //if (EditorGUI.EndChangeCheck()) SetBlueprintsVisible(showBluePrintComponents);
             EditorGUI.indentLevel--;
         }
-        //else
-        //    SetBlueprintsVisible(false);
+        else
+            SetBlueprintsVisible(false);
     }
 
     private void SetBlueprintsVisible(bool visible)
@@ -112,10 +112,13 @@ public class ContourBlocBuilderInspector : Editor
                 }
             }
             EditorGUILayout.EndHorizontal();
-            // Expanded inspector: contour blueprints      
-            //ContourBlueprint[] blueprints = targetBuilder.GetContourBlueprints(cti);
-            //foreach (ContourBlueprint bp in blueprints)
-            //    bp.hideFlags = expand ? HideFlags.None : HideFlags.HideInInspector;
+            //Expanded inspector: contour blueprints
+            ContourBlueprint[] blueprints = targetBuilder.contours[cti].blueprints;
+            foreach (ContourBlueprint bp in blueprints)
+            {
+                bp.hideFlags = expand ? HideFlags.None : HideFlags.HideInInspector;
+                EditorUtility.SetDirty(bp);
+            }
             //if (expand)
             //{
             //    // Adjust inspector to blueprint count

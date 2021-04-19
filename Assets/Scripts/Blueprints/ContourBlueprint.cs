@@ -40,9 +40,4 @@ public class ContourBlueprint : MonoBehaviour
     }
 
     public bool IsLoop => positions != null && positions.Length > 2 && positions[0] == positions[positions.Length - 1];
-
-    private void OnDestroy()
-    {
-        Debug.Log("Destroy blueprint");
-    }
 }

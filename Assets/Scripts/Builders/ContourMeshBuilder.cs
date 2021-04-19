@@ -12,19 +12,28 @@ public class ContourMeshBuilder : ContourBuilder
     private MeshRenderer render;
 
     [Flags]
-    private enum UpdateType { None = 0, All = ~0, Positions = 2, Normals = 4 }
+    private enum UpdateType { None = 0, All = ~0, Positions = 2, Normals = 4, Colors = 8 }
 
     public override void Update()
     {
         int bpCount = blueprints != null ? blueprints.Count : 0;
-        if (readers == null || readers.Count != blueprints.Count) ResetReaders();
+        if (readers == null || readers.Count != blueprints.Count || blueprints.Contains(null)) ResetReaders();
         // Optimized update
         UpdateType requiredUpdates = UpdateType.None;
         for (int i = 0; i < bpCount; i++)
         {
             ContourBlueprint bp = blueprints[i];
+            if (bp == null)
+            {
+                Debug.LogWarning("Null blueprint");
+                continue;
+            }
             ContourReader rd = readers[i];
-            if (bp == null || rd == null) continue;
+            if (rd == null)
+            {
+                Debug.LogWarning("Null blueprint");
+                continue;
+            }
             ContourBlueprint.BlueprintChanges bpChanges = bp.changes;
             if (bpChanges != ContourBlueprint.BlueprintChanges.None)
             {
@@ -49,6 +58,10 @@ public class ContourMeshBuilder : ContourBuilder
                                 (rd as ContourMeshReader).ReadBlueprintNormal(bp as ContourMeshBlueprint);
                                 requiredUpdates |= UpdateType.Normals;
                                 break;
+                            case "color":
+                                (rd as ContourMeshReader).ReadBlueprintColor(bp as ContourMeshBlueprint);
+                                requiredUpdates |= UpdateType.Colors;
+                                break;
                         }
                     }
                 }
@@ -63,6 +76,7 @@ public class ContourMeshBuilder : ContourBuilder
         {
             if (requiredUpdates.HasFlag(UpdateType.Positions)) UpdatePositions();
             if (requiredUpdates.HasFlag(UpdateType.Normals)) UpdateNormals();
+            if (requiredUpdates.HasFlag(UpdateType.Colors)) UpdateColors();
         }
     }
 
@@ -161,6 +175,15 @@ public class ContourMeshBuilder : ContourBuilder
         foreach (ContourSubmeshBuilder sub in submeshes)
             normals.AddRange(sub.GetNormals());
         mesh.SetNormals(normals);
+    }
+
+    private void UpdateColors()
+    {
+        // Update mesh normals
+        List<Color> colors = new List<Color>();
+        foreach (ContourSubmeshBuilder sub in submeshes)
+            colors.AddRange(sub.GetColors());
+        mesh.SetColors(colors);
     }
 
     protected override void OnChangeBlueprintParameters()

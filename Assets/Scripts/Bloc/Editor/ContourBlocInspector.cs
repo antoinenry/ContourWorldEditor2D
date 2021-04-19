@@ -48,7 +48,6 @@ public class ContourBlocInspector : Editor
 
     private void OnUndoRedo()
     {
-        Debug.Log("Undo/Redo");
         ClearContourSelection();
         ClearPointSelection();
         SetTarget();

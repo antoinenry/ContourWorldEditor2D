@@ -105,6 +105,7 @@ public abstract class ContourBuilder : MonoBehaviour
         if (blueprints == null) readers = null;
         else
         {
+            blueprints.RemoveAll(bp => bp == null);
             int bpCount = blueprints.Count;
             readers = new List<ContourReader>(bpCount);
             for (int i = 0; i < bpCount; i++)
