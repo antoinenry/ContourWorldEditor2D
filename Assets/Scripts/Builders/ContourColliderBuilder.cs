@@ -63,10 +63,7 @@ public class ContourColliderBuilder : ContourBuilder
         if (collider2D == null)
         {
             if (colliderType != null && typeof(Collider2D).IsAssignableFrom(colliderType))
-            {
-                if (collider2D == null)
-                    collider2D = gameObject.AddComponent(colliderType) as Collider2D;
-            }
+                collider2D = gameObject.AddComponent(colliderType) as Collider2D;
         }
         // Set collider parameters
         if (collider2D != null)

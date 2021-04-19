@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System;
 using System.Collections.Generic;
 
 [ExecuteInEditMode]
@@ -88,17 +87,13 @@ public abstract class ContourBuilder : MonoBehaviour
         {
             // Add blueprint to existing list if not already in the list and if it is readable or create a new list
             if (blueprints == null)
-            {
                 blueprints = new List<ContourBlueprint>() { bp };
-                readers = new List<ContourReader>() { newReader };
-            }
             else if (!blueprints.Contains(bp))
-            {
-                int bpCount = blueprints.Count;
                 blueprints.Add(bp);
-                if (readers == null || readers.Count != bpCount) ResetReaders();
-                else readers.Add(newReader);
-            }
+            // Update readers accordingly
+            int bpCount = blueprints.Count;
+            if (readers != null && readers.Count == bpCount - 1) readers.Add(newReader);
+            else ResetReaders();
             return true;
         }
         else
