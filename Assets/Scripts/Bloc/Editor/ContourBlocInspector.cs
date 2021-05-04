@@ -48,11 +48,15 @@ public class ContourBlocInspector : Editor
 
     private void OnUndoRedo()
     {
+        // Ensure selection doesn't create error
         ClearContourSelection();
         ClearPointSelection();
+        // Update target
         SetTarget();
         SetTargetDirty();
-        targetBloc.changes = ~ContourBloc.BlocChanges.None;
+        // Update ContourBuilder
+        ContourBlocBuilder targetBuilder = targetBloc.GetComponent<ContourBlocBuilder>();
+        if (targetBuilder != null) targetBuilder.RebuildAll();
     }
 
     private void SetTarget()
@@ -322,7 +326,6 @@ public class ContourBlocInspector : Editor
         if (changeCheck) return;
         // Inspect contours in bloc
         ContourListInspectorGUI(out changeCheck);
-        if (changeCheck) return;
     }
 
     // Point list inspector (returns true if a change is made)
@@ -331,21 +334,21 @@ public class ContourBlocInspector : Editor
         changeCheck = false;
         EditorGUILayout.BeginHorizontal();
         // Toggle list view
-        if (showPointListInspector = EditorGUILayout.Foldout(showPointListInspector, "Points"))
+        if (showPointListInspector != EditorGUILayout.Foldout(showPointListInspector, "Points"))
         {
             showPointListInspector = !showPointListInspector;
             SceneView.RepaintAll();
         }
         // Add point button
-        if (GUILayout.Button("Add"))
-        {
-            targetBloc.AddPoint(Vector2.zero);
-            showPointListInspector = true;
-            // Cancel current selection and select added point
-            UnselectAll();
-            SelectPoint(targetBloc.PointCount - 1, true);
-            changeCheck = true;
-        }
+        //if (GUILayout.Button("Add"))
+        //{
+        //    targetBloc.AddPoint(Vector2.zero);
+        //    showPointListInspector = true;
+        //    // Cancel current selection and select added point
+        //    UnselectAll();
+        //    SelectPoint(targetBloc.PointCount - 1, true);
+        //    changeCheck = true;
+        //}
         EditorGUILayout.EndHorizontal();
         if (changeCheck) return;
         if (showPointListInspector)
@@ -426,13 +429,13 @@ public class ContourBlocInspector : Editor
             SceneView.RepaintAll();
         }
         // Button to add a contour
-        if (GUILayout.Button("Add"))
-        {
-            targetBloc.AddContour();
-            UnselectAll();
-            SelectContour(countourCount - 1, true);
-            changeCheck = true;
-        }
+        //if (GUILayout.Button("Add"))
+        //{
+        //    targetBloc.AddContour();
+        //    UnselectAll();
+        //    SelectContour(countourCount - 1, true);
+        //    changeCheck = true;
+        //}
         EditorGUILayout.EndHorizontal();
         if (changeCheck) return;
         if (showContourListInspector)
@@ -812,11 +815,12 @@ public class ContourBlocInspector : Editor
                 // Normal handles for selecting and moving points
                 HandlesSceneGUI();
         }
+        // Contour gizmos
+        List<List<int>> contours = targetBloc.GetAllContours(false);
+        int contourCount = contours.Count;
+        // With labels
         if (showContourListInspector)
-        {
-            // Contour gizmos
-            List<List<int>> contours = targetBloc.GetAllContours(false);
-            int contourCount = contours.Count;
+        {            
             // Draw label for each contour and higlight selected contours
             Handles.color = Color.white;
             for (int cti = 0, ctCount = contours != null ? contours.Count : 0; cti < ctCount; cti++)
@@ -826,6 +830,13 @@ public class ContourBlocInspector : Editor
             foreach (int cti in GetSelectedContourIndices())
                 if (cti < contourCount)
                     DrawContour(contours[cti], cti.ToString());
+        }
+        // Without labels
+        else
+        {
+            Handles.color = Color.gray;
+            for (int cti = 0, ctCount = contours != null ? contours.Count : 0; cti < ctCount; cti++)
+                DrawContour(contours[cti]);
         }
     }    
 

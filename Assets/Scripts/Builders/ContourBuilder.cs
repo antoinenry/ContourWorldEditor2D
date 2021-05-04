@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-[ExecuteInEditMode]
+[ExecuteAlways]
 public abstract class ContourBuilder : MonoBehaviour
 {
     public List<ContourBlueprint> blueprints; 
@@ -39,7 +39,12 @@ public abstract class ContourBuilder : MonoBehaviour
         if (readers != null) readers.Clear();
     }
 
-    public virtual void Update()
+    private void Update()
+    {
+        Build();
+    }
+
+    public virtual void Build()
     {
         // Default update: rebuild all for any change in blueprints
         // can be further optimized in children classes
@@ -48,6 +53,7 @@ public abstract class ContourBuilder : MonoBehaviour
             int blueprintCount = blueprints.Count;
             if (readers == null || readers.Count != blueprintCount) ResetReaders();
             bool rebuild = false;
+            bool updatePositions = false;
             for (int bpi = 0; bpi < blueprintCount; bpi++)
             {
                 ContourBlueprint bp = blueprints[bpi];
@@ -59,23 +65,41 @@ public abstract class ContourBuilder : MonoBehaviour
                 {
                     readers[bpi] = ContourReader.NewReader(bp);
                 }
-                else if (bp.changes != ContourBlueprint.BlueprintChanges.None)
+                else if (bp.blueprintChanges != ContourBlueprint.BlueprintChange.None)
                 {
-                    ContourReader rd = readers[bpi];
-                    bool rdCanReadBp = rd.TryReadBlueprint(bp);
-                    if (rdCanReadBp)
+                    if (bp.blueprintChanges.HasFlag(ContourBlueprint.BlueprintChange.MaterialChanged))
+                    {
+
+                        rebuild = true;
+                    }
+                    if (bp.blueprintChanges.HasFlag(ContourBlueprint.BlueprintChange.ParameterChanged))
+                    {
+                        OnChangeBlueprintParameters();
+                    }
+                }
+                else if (bp.ShapeChanges != ContourShape.ShapeChanged.None)
+                {
+                    if (bp.ShapeChanges.HasFlag(ContourShape.ShapeChanged.LengthChanged))
                     {
                         rebuild = true;
-                        bp.changes = ContourBlueprint.BlueprintChanges.None;
-                        bp.changedParameters = "";
                     }
-                    else
+                    else if (bp.ShapeChanges.HasFlag(ContourShape.ShapeChanged.PositionMoved))
                     {
-                        readers[bpi] = ContourReader.NewReader(bp);
+                        readers[bpi].ReadBlueprintPositions(bp);
+                        updatePositions = true;
                     }
                 }
             }
-            if (rebuild) RebuildAll();
+            if (rebuild)
+            {
+                Debug.Log("RebuildAll");
+                RebuildAll();
+            }
+            if (updatePositions)
+            {
+                Debug.Log("UpdatePositions");
+                UpdatePositions();
+            }
         }
     }
 

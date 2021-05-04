@@ -1,21 +1,62 @@
-﻿using UnityEngine;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 [Serializable]
 public class ContourShape
 {
-    public List<Vector2> positions;
-    public bool hasChanged;
+    public ShapeChanged changes;
+
+    [SerializeField] private List<Vector2> positions;
+
+    [Flags]
+    public enum ShapeChanged { None = 0, PositionMoved = 1, LengthChanged = 2 }
 
     public ContourShape(List<Vector2> positions)
     {
         this.positions = positions;
     }
 
+    public int Length => positions != null ? positions.Count : 0;
+
     public Vector2[] GetPositions()
     {
         if (positions != null) return positions.ToArray();
-        else return null;
+        else return new Vector2[0];
+    }
+
+    public Vector2 GetPosition(int index)
+    {
+        return positions[index];
+    }
+
+    public void SetPosition(int index, Vector2 value)
+    {
+        positions[index] = value;
+        changes |= ShapeChanged.PositionMoved;
+    }
+
+    public void AddPosition(Vector2 value)
+    {
+        positions.Add(value);
+        changes |= ShapeChanged.LengthChanged;
+    }
+
+    public void InsertPosition(int index, Vector2 value)
+    {
+        positions.Insert(index, value);
+        changes |= ShapeChanged.LengthChanged;
+    }
+
+    public void RemovePosition(int index)
+    {
+        positions.RemoveAt(index);
+        changes |= ShapeChanged.LengthChanged;
+    }
+
+    public void RemovePositions(int index, int count)
+    {
+        positions.RemoveRange(index, count);
+        changes |= ShapeChanged.LengthChanged;
     }
 }

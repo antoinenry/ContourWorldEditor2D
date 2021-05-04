@@ -2,13 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[ExecuteAlways]
 public class ContourBloc : MonoBehaviour
 {
-    [Flags]
-    public enum BlocChanges { None = 0, ContourChanged = 1, ContourAdded = 2, ContourRemoved = 4 }
-
-    public BlocChanges changes;
-
     [Serializable]
     private struct PointOccurence
     {
@@ -25,11 +21,16 @@ public class ContourBloc : MonoBehaviour
         public int OccurenceCount => occurences == null ? 0 : occurences.Count;
     }
 
+    [Flags]
+    public enum BlocChanges { None = 0, ContourAdded = 1, ContourRemoved = 2 }
+
     [SerializeField] private List<Point> points;
     [SerializeField] private Point bufferPoint;
-    [SerializeField] private List<ContourShape> contours;
+    [SerializeField] private List<ContourShape> contourShapes;
 
-    public List<ContourShape> ContourShapes => contours != null ? contours : new List<ContourShape>();
+    public BlocChanges changes { get; private set; }
+
+    public List<ContourShape> ContourShapes => contourShapes != null ? contourShapes : new List<ContourShape>();
 
     public int PointCount => points == null ? 0 : points.Count;
 
@@ -37,7 +38,15 @@ public class ContourBloc : MonoBehaviour
     {
         points = new List<Point>();
         bufferPoint = new Point() { occurences = new List<PointOccurence>() };
-        contours = new List<ContourShape>();
+        contourShapes = new List<ContourShape>();
+    }
+
+    private void LateUpdate()
+    {
+        changes = BlocChanges.None;
+        if (contourShapes != null)
+            foreach (ContourShape shape in contourShapes)
+                if (shape != null) shape.changes = ContourShape.ShapeChanged.None;
     }
 
     public List<Vector2> GetPositions()
@@ -156,11 +165,7 @@ public class ContourBloc : MonoBehaviour
         // Set point position in contours
         if (movedPoint.OccurenceCount > 0)
             foreach(PointOccurence occ in movedPoint.occurences)
-            {
-                contours[occ.contourIndex].positions[occ.indexInContour] = position;
-                contours[occ.contourIndex].hasChanged = true;
-                changes |= BlocChanges.ContourChanged;
-            }
+                contourShapes[occ.contourIndex].SetPosition(occ.indexInContour, position);
     }
 
     public List<int> GetContoursWithPoint(int pointIndex)
@@ -201,9 +206,7 @@ public class ContourBloc : MonoBehaviour
                 // Add contour to point
                 points[pointIndex].occurences.Add(new PointOccurence() { contourIndex = contourIndex, indexInContour = indexInContour });
                 // Add position to contour
-                contours[contourIndex].positions.Add(GetPosition(pointIndex));
-                contours[contourIndex].hasChanged = true;
-                changes |= BlocChanges.ContourChanged;
+                contourShapes[contourIndex].AddPosition(GetPosition(pointIndex));
             }
         }
     }
@@ -239,9 +242,7 @@ public class ContourBloc : MonoBehaviour
         // Add contour to point
         points[pointIndex].occurences.Add(new PointOccurence() { contourIndex = contourIndex, indexInContour = insertAt });
         // Add position to contour
-        contours[contourIndex].positions.Insert(insertAt, GetPosition(pointIndex));
-        contours[contourIndex].hasChanged = true;
-        changes |= BlocChanges.ContourChanged;
+        contourShapes[contourIndex].InsertPosition(insertAt, GetPosition(pointIndex));
     }
 
     public void InsertPointInContours(List<int> contourIndices, int pointA, int pointB)
@@ -325,9 +326,7 @@ public class ContourBloc : MonoBehaviour
             if (pointIndex != -1)
             {
                 points[pointIndex].occurences.RemoveAll(occ => occ.contourIndex == contourIndex);
-                contours[contourIndex].positions.RemoveAt(findPointIndexInContour);
-                contours[contourIndex].hasChanged = true;
-                changes |= BlocChanges.ContourChanged;
+                contourShapes[contourIndex].RemovePosition(findPointIndexInContour);
             }
             // Or remove point from buffer
             else
@@ -389,9 +388,7 @@ public class ContourBloc : MonoBehaviour
         if (newLength < currentContourLength)
         {
             // Remove positions from contour
-            contours[contourIndex].positions.RemoveRange(newLength, currentContourLength - newLength);
-            contours[contourIndex].hasChanged = true;
-            changes |= BlocChanges.ContourChanged;
+            contourShapes[contourIndex].RemovePositions(newLength, currentContourLength - newLength);
             // If contour is looped, preserve loop - unless specified otherwise
             if (preserveLoop && IsContourLooped(contourIndex))
             {
@@ -455,8 +452,7 @@ public class ContourBloc : MonoBehaviour
     public void DestroyAllPointlessContours()
     {
         // Get rid of empty contours
-        contours.RemoveAll(contour => contour.positions == null || contour.positions.Count == 0);
-        changes |= BlocChanges.ContourRemoved;
+        contourShapes.RemoveAll(contour => contour.Length == 0);
         // Destroy contour indices in bloc
         List<List<int>> contourPointIndices = GetAllContours(false);
         if (contourPointIndices == null) return;
@@ -518,16 +514,13 @@ public class ContourBloc : MonoBehaviour
             // If point was undefined, add/insert a new position in contour
             if (pointIndex == -1)
             {
-                if (indexInContour == contours[contourIndex].positions.Count)
-                    contours[contourIndex].positions.Add(new Vector2());
+                if (indexInContour == contourShapes[contourIndex].Length)
+                    contourShapes[contourIndex].AddPosition(new Vector2());
                 else
-                    contours[contourIndex].positions.Insert(indexInContour, new Vector2());
-                contours[contourIndex].hasChanged = true;
+                    contourShapes[contourIndex].InsertPosition(indexInContour, new Vector2());
             }
             // Set position in contour
-            contours[contourIndex].positions[indexInContour] = GetPosition(newPointIndex);
-            contours[contourIndex].hasChanged = true;
-            changes |= BlocChanges.ContourChanged;
+            contourShapes[contourIndex].SetPosition(indexInContour, GetPosition(newPointIndex));
         }
         else
         {
@@ -540,12 +533,12 @@ public class ContourBloc : MonoBehaviour
     public void AddContour()
     {
         // Create empty contour (contour with one undefined point)
-        int contourCount = GetContourCount();
-        bufferPoint.occurences.Add(new PointOccurence() { contourIndex = contourCount, indexInContour = 0 });
-        if (contours == null) contours = new List<ContourShape>();
+        int oldContourCount = GetContourCount();
+        bufferPoint.occurences.Add(new PointOccurence() { contourIndex = oldContourCount, indexInContour = 0 });
+        if (contourShapes == null) contourShapes = new List<ContourShape>();
         ContourShape newContour = new ContourShape(new List<Vector2>());
+        contourShapes.Add(newContour);
         changes |= BlocChanges.ContourAdded;
-        contours.Add(newContour);
     }
 
     public void RemoveContourAt(int contourIndex)
@@ -579,7 +572,7 @@ public class ContourBloc : MonoBehaviour
             }
         }
         // Remove contour
-        contours.RemoveAt(contourIndex);
+        contourShapes.RemoveAt(contourIndex);
         changes |= BlocChanges.ContourRemoved;
     }
 
@@ -596,6 +589,7 @@ public class ContourBloc : MonoBehaviour
                     contourIndices[j]--;
             }
         }
+        changes |= BlocChanges.ContourRemoved;
     }
 
     public void MergePoints(List<int> pointIndices)
@@ -612,11 +606,7 @@ public class ContourBloc : MonoBehaviour
             newPoint.occurences.AddRange(occurences);
             // Set all corresponding positions in contours to the same value
             foreach (PointOccurence occ in occurences)
-            {
-                contours[occ.contourIndex].positions[occ.indexInContour] = newPoint.position;
-                contours[occ.contourIndex].hasChanged = true;
-                changes |= BlocChanges.ContourChanged;
-            }
+                contourShapes[occ.contourIndex].SetPosition(occ.indexInContour, newPoint.position);
         }
         // Add new point
         points.Add(newPoint);
@@ -659,42 +649,19 @@ public class ContourBloc : MonoBehaviour
         DrawContourGizmos();
     }
 
-    //private void OnDrawGizmosSelected()
-    //{
-    //    Gizmos.color = Color.white;
-    //    DrawContourGizmos();
-    //}
-
     private void DrawContourGizmos()
     {
         Vector3 blocPosition = transform.position;
         // Draw contours
-        if (contours != null)
-            foreach(ContourShape contour in contours)
-                for(int pti = 0, ptCount = contour.positions.Count; pti < ptCount - 1; pti++)
-                    Gizmos.DrawLine((Vector3)contour.positions[pti] + blocPosition, (Vector3)contour.positions[pti + 1] + blocPosition);
+        if (contourShapes != null)
+            foreach(ContourShape contour in contourShapes)
+                for(int pti = 0, ptCount = contour.Length; pti < ptCount - 1; pti++)
+                    Gizmos.DrawLine((Vector3)contour.GetPosition(pti) + blocPosition, (Vector3)contour.GetPosition(pti + 1) + blocPosition);
         // Draw unused points
         if (points != null)
             foreach(Point pt in points)
                 if (pt.OccurenceCount == 0)
                     Gizmos.DrawIcon((Vector3)pt.position + blocPosition, "cross.png");
-
-        //int pointCount = PointCount;
-        //List<List<int>> contours = GetAllContours(false);
-        //bool[] pointIsUsed = new bool[pointCount];
-        //foreach(List<int> contour in contours)
-        //{
-        //    if (contour == null) continue;
-        //        for (int i = 0, iend = contour.Count - 1; i < iend; i++)
-        //        {
-        //            Gizmos.DrawLine((Vector3)points[contour[i]].position + blocPosition, (Vector3)points[contour[i + 1]].position + blocPosition);
-        //            pointIsUsed[contour[i]] = true;
-        //            pointIsUsed[contour[i + 1]] = true;
-        //        }
-        //}
-        //for (int pti = 0; pti < pointCount; pti++)
-        //    if (!pointIsUsed[pti])
-        //        Gizmos.DrawIcon((Vector3)points[pti].position + blocPosition, "cross.png");
     }
     #endregion
 }

@@ -14,71 +14,71 @@ public class ContourMeshBuilder : ContourBuilder
     [Flags]
     private enum UpdateType { None = 0, All = ~0, Positions = 2, Normals = 4, Colors = 8 }
 
-    public override void Update()
-    {
-        int bpCount = blueprints != null ? blueprints.Count : 0;
-        if (readers == null || readers.Count != blueprints.Count || blueprints.Contains(null)) ResetReaders();
-        // Optimized update
-        UpdateType requiredUpdates = UpdateType.None;
-        for (int i = 0; i < bpCount; i++)
-        {
-            ContourBlueprint bp = blueprints[i];
-            if (bp == null)
-            {
-                Debug.LogWarning("Null blueprint");
-                continue;
-            }
-            ContourReader rd = readers[i];
-            if (rd == null)
-            {
-                Debug.LogWarning("Null blueprint");
-                continue;
-            }
-            ContourBlueprint.BlueprintChanges bpChanges = bp.changes;
-            if (bpChanges != ContourBlueprint.BlueprintChanges.None)
-            {
-                if (bpChanges.HasFlag(ContourBlueprint.BlueprintChanges.LengthChanged))
-                {
-                    rd.TryReadBlueprint(bp);
-                    requiredUpdates = UpdateType.All;
-                }
-                if (bpChanges.HasFlag(ContourBlueprint.BlueprintChanges.PositionMoved))
-                {
-                    rd.ReadBlueprintPositions(bp);
-                    requiredUpdates |= UpdateType.Positions;
-                }
-                if (bpChanges.HasFlag(ContourBlueprint.BlueprintChanges.ParameterChanged))
-                {
-                    string[] changedParameters = bp.changedParameters.Split(' ');
-                    foreach (string p in changedParameters)
-                    {
-                        switch (p)
-                        {
-                            case "normal":
-                                (rd as ContourMeshReader).ReadBlueprintNormal(bp as ContourMeshBlueprint);
-                                requiredUpdates |= UpdateType.Normals;
-                                break;
-                            case "color":
-                                (rd as ContourMeshReader).ReadBlueprintColor(bp as ContourMeshBlueprint);
-                                requiredUpdates |= UpdateType.Colors;
-                                break;
-                        }
-                    }
-                }
-                bp.changes = ContourBlueprint.BlueprintChanges.None;
-                bp.changedParameters = "";
-            }
-        }
-        // Apply required updates
-        if (requiredUpdates == UpdateType.All)
-            RebuildAll();
-        else
-        {
-            if (requiredUpdates.HasFlag(UpdateType.Positions)) UpdatePositions();
-            if (requiredUpdates.HasFlag(UpdateType.Normals)) UpdateNormals();
-            if (requiredUpdates.HasFlag(UpdateType.Colors)) UpdateColors();
-        }
-    }
+    //public override void Build()
+    //{
+    //    int bpCount = blueprints != null ? blueprints.Count : 0;
+    //    if (readers == null || readers.Count != blueprints.Count || blueprints.Contains(null)) ResetReaders();
+    //    // Optimized update
+    //    UpdateType requiredUpdates = UpdateType.None;
+    //    for (int i = 0; i < bpCount; i++)
+    //    {
+    //        ContourBlueprint bp = blueprints[i];
+    //        if (bp == null)
+    //        {
+    //            Debug.LogWarning("Null blueprint");
+    //            continue;
+    //        }
+    //        ContourReader rd = readers[i];
+    //        if (rd == null)
+    //        {
+    //            Debug.LogWarning("Null blueprint");
+    //            continue;
+    //        }
+    //        ContourBlueprint.BlueprintChanges bpChanges = bp.changes;
+    //        if (bpChanges != ContourBlueprint.BlueprintChanges.None)
+    //        {
+    //            if (bpChanges.HasFlag(ContourBlueprint.BlueprintChanges.LengthChanged))
+    //            {
+    //                rd.TryReadBlueprint(bp);
+    //                requiredUpdates = UpdateType.All;
+    //            }
+    //            if (bpChanges.HasFlag(ContourBlueprint.BlueprintChanges.PositionMoved))
+    //            {
+    //                rd.ReadBlueprintPositions(bp);
+    //                requiredUpdates |= UpdateType.Positions;
+    //            }
+    //            if (bpChanges.HasFlag(ContourBlueprint.BlueprintChanges.ParameterChanged))
+    //            {
+    //                string[] changedParameters = bp.changedParameters.Split(' ');
+    //                foreach (string p in changedParameters)
+    //                {
+    //                    switch (p)
+    //                    {
+    //                        case "normal":
+    //                            (rd as ContourMeshReader).ReadBlueprintNormal(bp as ContourMeshBlueprint);
+    //                            requiredUpdates |= UpdateType.Normals;
+    //                            break;
+    //                        case "color":
+    //                            (rd as ContourMeshReader).ReadBlueprintColor(bp as ContourMeshBlueprint);
+    //                            requiredUpdates |= UpdateType.Colors;
+    //                            break;
+    //                    }
+    //                }
+    //            }
+    //            bp.changes = ContourBlueprint.BlueprintChanges.None;
+    //            bp.changedParameters = "";
+    //        }
+    //    }
+    //    // Apply required updates
+    //    if (requiredUpdates == UpdateType.All)
+    //        RebuildAll();
+    //    else
+    //    {
+    //        if (requiredUpdates.HasFlag(UpdateType.Positions)) UpdatePositions();
+    //        if (requiredUpdates.HasFlag(UpdateType.Normals)) UpdateNormals();
+    //        if (requiredUpdates.HasFlag(UpdateType.Colors)) UpdateColors();
+    //    }
+    //}
 
     private void UpdateMeshComponents()
     {

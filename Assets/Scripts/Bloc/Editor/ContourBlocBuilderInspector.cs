@@ -89,7 +89,9 @@ public class ContourBlocBuilderInspector : Editor
             // Minimal inspector: palette option name
             EditorGUILayout.BeginHorizontal();
             EditorGUI.BeginChangeCheck();
-            bool expand = EditorGUILayout.Foldout(contourInspectors[cti].inspectorState.HasFlag(ContourInspector.State.Expand), "Contour " + cti);
+            GUIStyle foldoutStyle = new GUIStyle(EditorStyles.foldout);
+            foldoutStyle.focused.textColor = Color.blue;
+            bool expand = EditorGUILayout.Foldout(contourInspectors[cti].inspectorState.HasFlag(ContourInspector.State.Expand), "Contour " + cti, foldoutStyle);
             if (EditorGUI.EndChangeCheck())
             {
                 if (expand) contourInspectors[cti].inspectorState |= ContourInspector.State.Expand;
@@ -119,40 +121,39 @@ public class ContourBlocBuilderInspector : Editor
                 bp.hideFlags = expand ? HideFlags.None : HideFlags.HideInInspector;
                 EditorUtility.SetDirty(bp);
             }
-            //if (expand)
-            //{
-            //    // Adjust inspector to blueprint count
-            //    ContourBlueprint[] blueprints = targetBuilder.GetContourBlueprints(cti);
-            //    int bpCount = blueprints.Length;
-            //    if (contourInspectors[cti].blueprintEditors == null) contourInspectors[cti].blueprintEditors = new Editor[bpCount];
-            //    else Array.Resize(ref contourInspectors[cti].blueprintEditors, bpCount);
-            //    // Show editor for each blueprint of this contour
-            //    EditorGUI.indentLevel++;
-            //    if (bpCount > 0)
-            //    {
-            //        for (int bpi = 0; bpi < bpCount; bpi++)
-            //        {
-            //            EditorGUILayout.BeginVertical("box");
-            //            ContourBlueprint bp = blueprints[bpi];
-            //            if (bp == null)
-            //                EditorGUILayout.HelpBox("Null blueprint", MessageType.Error);
-            //            else
-            //            {
-            //                EditorGUILayout.LabelField(bpi.ToString(), bp.GetType().Name);
-            //                Editor[] bpEditors = contourInspectors[cti].blueprintEditors;
-            //                CreateCachedEditor(bp, typeof(ContourBlueprintEditor), ref bpEditors[bpi]);
-            //                ContourBlueprintEditor bpEditor = (bpEditors[bpi] as ContourBlueprintEditor);
-            //                bpEditor.positionsDisplay = ContourBlueprintEditor.FieldDisplay.Hidden;
-            //                bpEditor.materialDisplay = ContourBlueprintEditor.FieldDisplay.ReadOnly;
-            //                bpEditor.OnInspectorGUI();
-            //            }
-            //            EditorGUILayout.EndVertical();
-            //        }
-            //    }
-            //    else
-            //        EditorGUILayout.HelpBox("This contour doesn't generate blueprints", MessageType.Info);
-            //    EditorGUI.indentLevel--;
-            //}
+            if (expand)
+            {
+                // Adjust inspector to blueprint count
+                int bpCount = blueprints.Length;
+                if (contourInspectors[cti].blueprintEditors == null) contourInspectors[cti].blueprintEditors = new Editor[bpCount];
+                else Array.Resize(ref contourInspectors[cti].blueprintEditors, bpCount);
+                // Show editor for each blueprint of this contour
+                EditorGUI.indentLevel++;
+                if (bpCount > 0)
+                {
+                    for (int bpi = 0; bpi < bpCount; bpi++)
+                    {
+                        EditorGUILayout.BeginVertical("box");
+                        ContourBlueprint bp = blueprints[bpi];
+                        if (bp == null)
+                            EditorGUILayout.HelpBox("Null blueprint", MessageType.Error);
+                        else
+                        {
+                            EditorGUILayout.LabelField(bpi.ToString(), bp.GetType().Name);
+                            Editor[] bpEditors = contourInspectors[cti].blueprintEditors;
+                            CreateCachedEditor(bp, typeof(ContourBlueprintEditor), ref bpEditors[bpi]);
+                            ContourBlueprintEditor bpEditor = (bpEditors[bpi] as ContourBlueprintEditor);
+                            bpEditor.positionsDisplay = ContourBlueprintEditor.FieldDisplay.Hidden;
+                            bpEditor.materialDisplay = ContourBlueprintEditor.FieldDisplay.ReadOnly;
+                            bpEditor.OnInspectorGUI();
+                        }
+                        EditorGUILayout.EndVertical();
+                    }
+                }
+                else
+                    EditorGUILayout.HelpBox("This contour doesn't generate blueprints", MessageType.Info);
+                EditorGUI.indentLevel--;
+            }
         }
     }
 

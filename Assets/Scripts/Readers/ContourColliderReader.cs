@@ -15,7 +15,7 @@ public class ContourColliderReader : ContourReader
         if (blueprint != null && blueprint.material is ContourColliderMaterial)
         {
             // Check blueprint for positions and material
-            Vector2[] positions = blueprint.positions;
+            Vector2[] positions = blueprint.Positions;
             if (positions == null || positions.Length < 2 || blueprint.material == null)
             {
                 Clear();
@@ -46,7 +46,7 @@ public class ContourColliderReader : ContourReader
                 return false;
             }
             // Get positions
-            Positions = new List<Vector2>(blueprint.positions);
+            Positions = new List<Vector2>(blueprint.Positions);
             if (ColliderType == typeof(PolygonCollider2D)) Positions.RemoveAt(positionCount - 1);
             // Get collider parameters
             IsTrigger = contourMaterial.isTrigger;
@@ -61,7 +61,7 @@ public class ContourColliderReader : ContourReader
         if (blueprint != null && blueprint.material is ContourColliderMaterial)
         {
             // Get positions
-            Vector2[] positions = blueprint.positions;
+            Vector2[] positions = blueprint.Positions;
             // Check if blueprint matches reader mesh's length
             int colliderLength = Positions != null ? Positions.Count : 0;
             bool lengthCheck;
@@ -72,7 +72,7 @@ public class ContourColliderReader : ContourReader
             if (lengthCheck)
             {                
                 for (int i = 0; i < colliderLength; i++)
-                    Positions[i] = blueprint.positions[i];
+                    Positions[i] = blueprint.Positions[i];
             }
             else throw new Exception("Blueprint and reader mismatch");
         }

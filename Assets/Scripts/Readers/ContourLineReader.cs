@@ -11,7 +11,7 @@ public class ContourLineReader : ContourMeshReader
         {
             ContourMeshBlueprint meshBlueprint = blueprint as ContourMeshBlueprint;
             // Get positions
-            Vector2[] positions = blueprint.positions;
+            Vector2[] positions = blueprint.Positions;
             if (positions == null) return false;
             // Get material
             ContourLineMaterial contourMaterial = blueprint.material as ContourLineMaterial;
@@ -63,7 +63,7 @@ public class ContourLineReader : ContourMeshReader
         if (blueprint != null && blueprint is ContourMeshBlueprint && blueprint.material is ContourLineMaterial)
         {
             // Get positions
-            Vector2[] positions = blueprint.positions;
+            Vector2[] positions = blueprint.Positions;
             // Check if blueprint matches reader mesh's length
             int positionCount = positions != null ? positions.Length : 0;
             int vertexCount = Vertices.Count;

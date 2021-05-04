@@ -53,7 +53,7 @@ public class ContourBlueprintEditor : Editor
                             EditorGUILayout.PropertyField(fieldProperty);
                             if (EditorGUI.EndChangeCheck())
                             {
-                                serializedObject.FindProperty("changes").intValue |= (int)ContourBlueprint.BlueprintChanges.ParameterChanged;
+                                serializedObject.FindProperty("blueprintChanges").enumValueIndex |= (int)ContourBlueprint.BlueprintChange.ParameterChanged;
                                 string[] changedParameters = serializedObject.FindProperty("changedParameters").stringValue.Split(' ');
                                 if (Array.IndexOf(changedParameters, fieldProperty.name) == -1)
                                     serializedObject.FindProperty("changedParameters").stringValue += " " + fieldProperty.name;
