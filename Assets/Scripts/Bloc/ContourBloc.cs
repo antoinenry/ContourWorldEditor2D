@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[DefaultExecutionOrder(2)]
 [ExecuteAlways]
 public class ContourBloc : MonoBehaviour
 {
@@ -41,7 +42,7 @@ public class ContourBloc : MonoBehaviour
         contourShapes = new List<ContourShape>();
     }
 
-    private void LateUpdate()
+    private void Update()
     {
         changes = BlocChanges.None;
         if (contourShapes != null)

@@ -1,11 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
+[DefaultExecutionOrder(0)]
 [ExecuteAlways]
 public abstract class ContourBuilder : MonoBehaviour
 {
-    public List<ContourBlueprint> blueprints; 
-    protected List<ContourReader> readers;
+    [SerializeField] protected List<ContourBlueprint> blueprints;
+    [SerializeField] protected List<ContourReader> readers;
 
     public static ContourBuilder NewBuilder(ContourBlueprint blueprint, Transform setParent = null)
     {
@@ -69,7 +70,6 @@ public abstract class ContourBuilder : MonoBehaviour
                 {
                     if (bp.blueprintChanges.HasFlag(ContourBlueprint.BlueprintChange.MaterialChanged))
                     {
-
                         rebuild = true;
                     }
                     if (bp.blueprintChanges.HasFlag(ContourBlueprint.BlueprintChange.ParameterChanged))

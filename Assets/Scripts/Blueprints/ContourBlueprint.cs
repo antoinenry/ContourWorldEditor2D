@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using UnityEngine;
 
+[DefaultExecutionOrder(1)]
 [ExecuteAlways]
 [Serializable]
 public class ContourBlueprint : MonoBehaviour
@@ -18,9 +18,9 @@ public class ContourBlueprint : MonoBehaviour
     [Flags]
     public enum BlueprintChange { None = 0, MaterialChanged = 1, ParameterChanged = 2 }
 
-    private void LateUpdate()
+    private void Update()
     {
-        //if (shape != null) shape.changes = ContourShape.ShapeChanged.None;
+        if (shape != null) shape.changes = ContourShape.ShapeChanged.None;
         blueprintChanges = BlueprintChange.None;
         changedParameters = "";
     }
