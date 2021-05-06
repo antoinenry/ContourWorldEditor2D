@@ -26,7 +26,7 @@ public class ContourColliderReader : ContourReader
             ContourColliderMaterial contourMaterial = blueprint.material as ContourColliderMaterial;
             // Set collider type
             ColliderType = null;
-            switch(contourMaterial.type)
+            switch (contourMaterial.type)
             {
                 // Edge is always possible
                 case ContourColliderMaterial.ColliderType.Edge:
@@ -51,8 +51,11 @@ public class ContourColliderReader : ContourReader
             // Get collider parameters
             IsTrigger = contourMaterial.isTrigger;
             PhysicsMaterial = contourMaterial.physicsMaterial;
+            // Success
+            return true;
         }
-        return true;
+        // Failed
+        return false;
     }
 
     public override void ReadBlueprintPositions(ContourBlueprint blueprint)

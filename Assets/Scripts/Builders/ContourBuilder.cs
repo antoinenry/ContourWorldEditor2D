@@ -18,15 +18,22 @@ public abstract class ContourBuilder : MonoBehaviour
         if(blueprint != null)
         {
             ContourReader reader = ContourReader.NewReader(blueprint);
+            //builderGO.name = reader.BuilderName;
+            //builderGO.AddComponent(reader.BuilderType);
             if (reader is ContourMeshReader)
             {
                 builderGO.name = "Mesh builder";
                 newBuilder = builderGO.AddComponent<ContourMeshBuilder>();
             }
-            if (reader is ContourColliderReader)
+            else if (reader is ContourColliderReader)
             {
                 builderGO.name = "Collider builder";
                 newBuilder = builderGO.AddComponent<ContourColliderBuilder>();
+            }
+            else if (reader is ContourAnimationReader)
+            {
+                builderGO.name = "Animation builder";
+                newBuilder = builderGO.AddComponent<ContourAnimationBuilder>();
             }
         }
         // If add component has failed, cancel gameobject creation and return null

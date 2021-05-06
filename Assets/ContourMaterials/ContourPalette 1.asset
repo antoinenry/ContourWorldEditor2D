@@ -30,6 +30,8 @@ MonoBehaviour:
   - name: hot
     contourMaterials:
     - {fileID: 11400000, guid: ee64587917c68e64287249bf33b12657, type: 2}
+    - {fileID: 11400000, guid: e22d6107beee893468a4a40de98097a8, type: 2}
+    - {fileID: 11400000, guid: feddcb6a21ddc89428430e5fe4b023e0, type: 2}
   - name: atmo
     contourMaterials:
     - {fileID: 11400000, guid: feddcb6a21ddc89428430e5fe4b023e0, type: 2}
