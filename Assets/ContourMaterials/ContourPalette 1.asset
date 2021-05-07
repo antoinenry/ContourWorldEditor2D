@@ -31,10 +31,14 @@ MonoBehaviour:
     contourMaterials:
     - {fileID: 11400000, guid: ee64587917c68e64287249bf33b12657, type: 2}
     - {fileID: 11400000, guid: e22d6107beee893468a4a40de98097a8, type: 2}
-    - {fileID: 11400000, guid: feddcb6a21ddc89428430e5fe4b023e0, type: 2}
   - name: atmo
     contourMaterials:
     - {fileID: 11400000, guid: feddcb6a21ddc89428430e5fe4b023e0, type: 2}
     - {fileID: 11400000, guid: 19dae8a1381fc014b815c7628c3b2cab, type: 2}
     - {fileID: 11400000, guid: 80df1d58f3b8bbb4f85d285a63675482, type: 2}
     - {fileID: 11400000, guid: bcaed89fc10030541ae280df0049fdfc, type: 2}
+  - name: hot_outline
+    contourMaterials:
+    - {fileID: 11400000, guid: feddcb6a21ddc89428430e5fe4b023e0, type: 2}
+    - {fileID: 11400000, guid: bcaed89fc10030541ae280df0049fdfc, type: 2}
+    - {fileID: 11400000, guid: e22d6107beee893468a4a40de98097a8, type: 2}

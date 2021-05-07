@@ -4,6 +4,10 @@ using System.Collections.Generic;
 
 public abstract class ContourMeshReader : ContourReader
 {
+    public override Type BuilderType => typeof(ContourMeshBuilder);
+
+    public override string BuilderName => "Mesh Builder";
+
     public Material MeshMaterial { get; protected set; }
     public List<Vector3> Vertices { get; protected set; }
     public List<int> Triangles { get; protected set; }

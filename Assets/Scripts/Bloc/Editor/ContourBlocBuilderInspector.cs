@@ -119,7 +119,7 @@ public class ContourBlocBuilderInspector : Editor
             foreach (ContourBlueprint bp in blueprints)
             {
                 bp.hideFlags = expand ? HideFlags.None : HideFlags.HideInInspector;
-                EditorUtility.SetDirty(bp);
+                //EditorUtility.SetDirty(bp);
             }
             if (expand)
             {

@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class ContourColliderBuilder : ContourBuilder
 {
+    [SerializeField]
     new private Collider2D collider2D;
 
     [Flags]

@@ -7,8 +7,8 @@ using UnityEngine;
 public class ContourBlueprint : MonoBehaviour
 {
     public ContourShape shape;
+    public string changedParameters; 
     public ContourMaterial material;
-    public string changedParameters;
 
     public Vector2[] Positions => shape != null ? shape.GetPositions() : null;
 
@@ -23,5 +23,10 @@ public class ContourBlueprint : MonoBehaviour
         if (shape != null) shape.changes = ContourShape.ShapeChanged.None;
         blueprintChanges = BlueprintChange.None;
         changedParameters = "";
+    }
+
+    protected virtual void SetShape(ContourShape shape)
+    {
+        this.shape = shape;
     }
 }

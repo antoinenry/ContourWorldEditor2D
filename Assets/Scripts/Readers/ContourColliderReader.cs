@@ -9,6 +9,10 @@ public class ContourColliderReader : ContourReader
     public bool IsTrigger { get; private set; }
     public PhysicsMaterial2D PhysicsMaterial { get; private set; }
 
+    public override Type BuilderType => typeof(ContourColliderBuilder);
+
+    public override string BuilderName => "Collider Builder";
+
     public override bool TryReadBlueprint(ContourBlueprint blueprint)
     {
         // Read if possible

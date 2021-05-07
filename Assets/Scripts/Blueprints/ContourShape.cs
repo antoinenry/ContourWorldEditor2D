@@ -17,7 +17,7 @@ public class ContourShape
         this.positions = positions;
     }
 
-    public int Length => positions != null ? positions.Count : 0;
+    public int Length => positions != null ? positions.Count : 0;    
 
     public Vector2[] GetPositions()
     {
@@ -58,5 +58,15 @@ public class ContourShape
     {
         positions.RemoveRange(index, count);
         changes |= ShapeChanged.LengthChanged;
+    }
+
+    public Vector2 GetCenter()
+    {
+        Vector2 center = Vector2.zero;
+        if (positions == null) return center;
+        int length = Length;
+        for (int i = 0; i < length; i++)
+            center += positions[i];
+        return center / length;
     }
 }

@@ -24,7 +24,7 @@ public abstract class ContourReader
 
     public abstract bool Clear();
 
-    //public abstract Type BuilderType { get; }
+    public abstract Type BuilderType { get; }
 
-    //public abstract string BuilderName { get; }
+    public abstract string BuilderName { get; }
 }
