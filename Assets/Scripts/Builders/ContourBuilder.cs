@@ -54,7 +54,7 @@ public abstract class ContourBuilder : MonoBehaviour
 
     public virtual void Build()
     {
-        // Default update: rebuild all for any change in blueprints
+        // Default update
         // can be further optimized in children classes
         if (blueprints != null)
         {
@@ -81,7 +81,7 @@ public abstract class ContourBuilder : MonoBehaviour
                     }
                     if (bp.blueprintChanges.HasFlag(ContourBlueprint.BlueprintChange.ParameterChanged))
                     {
-                        OnChangeBlueprintParameters();
+                        OnChangeBlueprintParameters(bpi);
                     }
                 }
                 else if (bp.ShapeChanges != ContourShape.ShapeChanged.None)
@@ -99,12 +99,10 @@ public abstract class ContourBuilder : MonoBehaviour
             }
             if (rebuild)
             {
-                Debug.Log("RebuildAll");
                 RebuildAll();
             }
             if (updatePositions)
             {
-                Debug.Log("UpdatePositions");
                 UpdatePositions();
             }
         }
@@ -150,7 +148,7 @@ public abstract class ContourBuilder : MonoBehaviour
 
     protected abstract void UpdatePositions();
 
-    protected virtual void OnChangeBlueprintParameters()
+    protected virtual void OnChangeBlueprintParameters(int blueprintIndex)
     {
         return;
     }
