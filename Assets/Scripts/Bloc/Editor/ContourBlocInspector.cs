@@ -403,7 +403,7 @@ public class ContourBlocInspector : Editor
         else
             EditorGUILayout.LabelField("Point " + pointIndex.ToString());        
         // Field to edit point's position
-        Vector2 getPosition = targetBloc.GetPosition(pointIndex);
+        Vector2 getPosition = targetBloc.GetLocalPosition(pointIndex);
         Vector2 editedPosition = EditorGUILayout.Vector2Field("", getPosition);
         if (editedPosition != getPosition)
         {
@@ -581,6 +581,15 @@ public class ContourBlocInspector : Editor
                 }
                 EditorGUILayout.EndHorizontal();
                 EditorGUILayout.EndScrollView();
+            }
+            // To edit normal
+            Vector3 contourNormal = targetBloc.GetContourNormal(contourIndex);
+            Vector3 editContourNormal = EditorGUILayout.Vector3Field("Normal", contourNormal);
+            if (contourNormal != editContourNormal)
+            {
+                targetBloc.SetContourNormal(contourIndex, editContourNormal);
+                SceneView.RepaintAll();
+                changeCheck = true;
             }
         }
     }
@@ -845,8 +854,7 @@ public class ContourBlocInspector : Editor
         // Synchronize with inspector
         SetSceneSelectionFromInspector();
         // General size and position values for displaying handles
-        Vector3 blocPosition = targetBloc.transform.position;
-        float handleSize = .15f * HandleUtility.GetHandleSize(blocPosition);
+        float handleSize = .15f * HandleUtility.GetHandleSize(targetBloc.transform.position);
         // Get selection
         List<int> selectedPointsIndices = GetSelectedPointsIndices();
         int selectedPointCount = selectedPointsIndices.Count;
@@ -855,17 +863,16 @@ public class ContourBlocInspector : Editor
         // Shortkeys
         if (ApplyShortKeys(selectedPointsIndices, selectedContourIndices)) return;
         // Display a handle for each point position
-        List<Vector2> targetPositions = targetBloc.GetPositions();
-        if (targetPositions == null) return;
-        for (int i = 0, iend = targetPositions.Count; i < iend; i++)
+        List<Vector3> pointWorldPositions = targetBloc.GetWorldPositions();
+        if (pointWorldPositions == null) return;
+        for (int i = 0, iend = pointWorldPositions.Count; i < iend; i++)
         {
             // Handle position is in world space
-            Vector3 worldPos = blocPosition + (Vector3)targetPositions[i];
             // Handle if point is already selected
             if (IsPointSelected(i))
             {
                 Handles.color = Color.yellow;
-                if (Handles.Button(worldPos, Quaternion.identity, 2f * handleSize, handleSize, Handles.SphereHandleCap))
+                if (Handles.Button(pointWorldPositions[i], Quaternion.identity, 2f * handleSize, handleSize, Handles.SphereHandleCap))
                 {
                     // If clicked while holding Ctrl, remove point from selection
                     if (Event.current.modifiers.HasFlag(EventModifiers.Control))
@@ -893,7 +900,7 @@ public class ContourBlocInspector : Editor
             else
             {
                 Handles.color = Color.white;
-                if (Handles.Button(worldPos, Quaternion.identity, handleSize, handleSize, Handles.CircleHandleCap))
+                if (Handles.Button(pointWorldPositions[i], Quaternion.identity, handleSize, handleSize, Handles.CircleHandleCap))
                 {
                     // If clicked without Ctrl, cancel current selection
                     if (!Event.current.modifiers.HasFlag(EventModifiers.Control)) UnselectAll();
@@ -913,9 +920,9 @@ public class ContourBlocInspector : Editor
         if (selectedPointCount > 0)
         {
             // Place a handle on one selected point
-            Vector3 handlePosition = (Vector3)targetBloc.GetPosition(selectedPointsIndices[0]) + blocPosition;
+            Vector3 handlePosition = pointWorldPositions[selectedPointsIndices[0]];
             // Create position handle and detect if it's moved
-            Vector2 handleMove = Handles.PositionHandle(handlePosition, Quaternion.identity) - handlePosition;
+            Vector2 handleMove = Quaternion.Inverse(targetBloc.transform.rotation) * (Handles.PositionHandle(handlePosition, Quaternion.identity) - handlePosition);
             if (handleMove != Vector2.zero)
             {
                 // Translate all selected points, following the handle
@@ -925,25 +932,27 @@ public class ContourBlocInspector : Editor
                 foreach (int selectedPointIndex in selectedPointsIndices)
                     targetBloc.DetachPointFromContours(selectedPointIndex, unselectedContourIndices);
                 // Move selected points
+                List<Vector2> pointLocalPositions = targetBloc.GetLocalPositions();
                 foreach (int selectedPointIndex in selectedPointsIndices)
-                    targetBloc.MovePoint(selectedPointIndex, targetPositions[selectedPointIndex] + handleMove);
+                    targetBloc.MovePoint(selectedPointIndex, pointLocalPositions[selectedPointIndex] + handleMove);
                 // Apply modifications in inspector
                 SetTargetDirty();
             }
         }
-        // Handles on segments for inserting points (in selected contours only)
-        List<List<int>> contours = targetBloc.GetAllContours(false);  
+        // Segment and normal handles (in selected contours only)
+        List<List<int>> contours = targetBloc.GetAllContours(false);        
         Handles.color = Color.yellow;
-        foreach(int cti in selectedContourIndices)
+        foreach (int cti in selectedContourIndices)
         {
             List<int> contourPoints = contours[cti];
             if (contourPoints == null) continue;
             int contourLength = contourPoints.Count;
+            Vector3 contourCenterPosition = Vector3.zero;
             for (int i = 0; i < contourLength - 1; i++)
             {
-                // Draw handle in the middle of each segment
-                Vector3 handlePosition = ((Vector3)targetPositions[contourPoints[i]] + (Vector3)targetPositions[contourPoints[i + 1]]) / 2f + blocPosition;
-                if (Handles.Button(handlePosition, Quaternion.identity, .5f * handleSize, handleSize, Handles.CubeHandleCap))
+                // Draw handle in the middle of each segment, for inserting points in contour
+                Vector3 segmentHandlePosition = (pointWorldPositions[contourPoints[i]] + pointWorldPositions[contourPoints[i + 1]]) / 2f;
+                if (Handles.Button(segmentHandlePosition, Quaternion.identity, .5f * handleSize, handleSize, Handles.CubeHandleCap))
                 {
                     RecordUndo("Insert point");
                     // Insert point on segment, in selected contour, and select only this point
@@ -954,6 +963,28 @@ public class ContourBlocInspector : Editor
                     // Apply modifications in inspector
                     SetTargetDirty();
                 }
+                // Calculate center of contour to place normal handle later
+                contourCenterPosition += pointWorldPositions[contourPoints[i]];
+            }
+            // Finish calculating the center of the contour
+            contourCenterPosition = (contourCenterPosition + pointWorldPositions[contourPoints[contourLength - 1]]) / contourLength;
+            // Normal handles for editing normals
+            Vector3 contourNormal = targetBloc.GetContourNormal(cti);
+            Handles.DrawLine(contourCenterPosition, contourCenterPosition + contourNormal, handleSize);
+            // Place a handle on one selected point
+            Vector3 handlePosition = contourCenterPosition + contourNormal;
+            // Create normal handle and detect if it's moved
+            Vector2 handleMove = Quaternion.Inverse(targetBloc.transform.rotation) * (Handles.PositionHandle(handlePosition, Quaternion.identity) - handlePosition);
+            if (handleMove != Vector2.zero)
+            {
+                RecordUndo("Move normal");
+                // Move normal freely
+                contourNormal += (Vector3)handleMove;
+                // Adjust Z
+                float z = -Mathf.Sqrt(1f - Mathf.Pow(contourNormal.x, 2f) - Mathf.Pow(contourNormal.y, 2f));
+                // Set normal in contour (this will normalize the vector)
+                targetBloc.SetContourNormal(cti, contourNormal);
+                SetTargetDirty();
             }
         }
     }
@@ -974,8 +1005,7 @@ public class ContourBlocInspector : Editor
         // Shortkeys
         if (ApplyShortKeys(null, selectedContourIndices)) return;
         // General size and position values for displaying handles
-        Vector3 blocPosition = targetBloc.transform.position;
-        float handleSize = .15f * HandleUtility.GetHandleSize(blocPosition);
+        float handleSize = .15f * HandleUtility.GetHandleSize(targetBloc.transform.position);
         // To create contour, we can select existing points and create new ones
         // First, a handle that follows the mouse, to create new points
         Handles.color = Color.green;
@@ -993,7 +1023,7 @@ public class ContourBlocInspector : Editor
         {
             //RecordUndo("Create contour");
             // Add new point to bloc and to new contour
-            targetBloc.AddPoint(createPointPosition - (Vector2)blocPosition);
+            targetBloc.AddPoint(createPointPosition, true);
             int newPointIndex = targetBloc.PointCount - 1;
             targetBloc.AddPointToContour(newContourIndex, newPointIndex);
             // Select added point
@@ -1002,19 +1032,17 @@ public class ContourBlocInspector : Editor
             return;
         }
         // Then, handles to select existing points
-        List<Vector2> targetPositions = targetBloc.GetPositions();
+        List<Vector3> targetPositions = targetBloc.GetWorldPositions();
         if (targetPositions != null)
         {
             // One handle for every existing point
             for (int pti = 0, iend = targetPositions.Count; pti < iend; pti++)
             {
-                // Handles are in world space
-                Vector3 pointPositionWorldSpace = blocPosition + (Vector3)targetPositions[pti];
                 // Last point in contour is treated differently
                 if (newContourLength > 0 && pti == pointIndicesInBloc[newContourLength - 1])
                 {
                     // Last point can't be added but can be removed to easily cancel adding a point
-                    if (Handles.Button(pointPositionWorldSpace, Quaternion.identity, 2f * handleSize, handleSize, Handles.SphereHandleCap))
+                    if (Handles.Button(targetPositions[pti], Quaternion.identity, 2f * handleSize, handleSize, Handles.SphereHandleCap))
                     {
                         //RecordUndo("Create contour");
                         // Remove point by trimming contour
@@ -1023,14 +1051,14 @@ public class ContourBlocInspector : Editor
                         return;
                     }
                     // Draw a dotted line to show future segment
-                    Handles.DrawDottedLine(pointPositionWorldSpace, createPointPosition, handleSize * 10f);
+                    Handles.DrawDottedLine(targetPositions[pti], createPointPosition, handleSize * 10f);
                 }
                 // First point in contour is also treated differently
                 else if(newContourLength > 0 && pti == pointIndicesInBloc[0])
                 {
                     Handles.color = Color.green;
                     // If first point is clicked again, it ends contour creation and set contour as a loop
-                    if (Handles.Button(pointPositionWorldSpace, Quaternion.identity, handleSize, handleSize, Handles.CircleHandleCap))
+                    if (Handles.Button(targetPositions[pti], Quaternion.identity, handleSize, handleSize, Handles.CircleHandleCap))
                     {
                         //RecordUndo("Create contour");
                         targetBloc.LoopContour(newContourIndex, true);
@@ -1046,7 +1074,7 @@ public class ContourBlocInspector : Editor
                 else
                 {
                     Handles.color = IsPointSelected(pti) ? Color.green : Color.white;
-                    if (Handles.Button(pointPositionWorldSpace, Quaternion.identity, handleSize, handleSize, Handles.CircleHandleCap))
+                    if (Handles.Button(targetPositions[pti], Quaternion.identity, handleSize, handleSize, Handles.CircleHandleCap))
                     {
                         //RecordUndo("Create contour");
                         // Add point to selection
@@ -1066,26 +1094,24 @@ public class ContourBlocInspector : Editor
 
     private void DrawContour(List<int> pointIndices, string label = null)
     {
-        Vector3 blocPosition = targetBloc.transform.position;
-        List<Vector2> pointPositions = targetBloc.GetPositions();
-        float handleSize = handleScale * HandleUtility.GetHandleSize(blocPosition);
+        List<Vector3> pointPositions = targetBloc.GetWorldPositions();
+        float handleSize = handleScale * HandleUtility.GetHandleSize(targetBloc.transform.position);
         int contourLength = pointIndices.Count;
         if (contourLength == 0) return;
         if (contourLength == 1)
-            Handles.SphereHandleCap(0, (Vector3)pointPositions[pointIndices[0]] + blocPosition, Quaternion.identity, handleSize, EventType.Repaint);
+            Handles.SphereHandleCap(0, pointPositions[pointIndices[0]], Quaternion.identity, handleSize, EventType.Repaint);
         else
         {
             Vector3 labelPosition = Vector3.zero;
             for (int i = 0; i < contourLength - 1; i++)
             {
-                Handles.DrawLine((Vector3)pointPositions[pointIndices[i]] + blocPosition, (Vector3)pointPositions[pointIndices[i + 1]] + blocPosition);
-                if (label != null) labelPosition += (Vector3)pointPositions[pointIndices[i]];
+                Handles.DrawLine(pointPositions[pointIndices[i]], pointPositions[pointIndices[i + 1]]);
+                if (label != null) labelPosition += pointPositions[pointIndices[i]];
             }
             if (label != null)
             {
-                labelPosition += (Vector3)pointPositions[pointIndices[contourLength - 1]];
+                labelPosition += pointPositions[pointIndices[contourLength - 1]];
                 labelPosition /= contourLength;
-                labelPosition += blocPosition;
                 Handles.Label(labelPosition, label);
             }
         }

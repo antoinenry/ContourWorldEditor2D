@@ -49,7 +49,10 @@ public class ContourAnimationBuilder : ContourBuilder
         {
             if (shape == null) return;
             for (int i = 0, iend = shape.Length; i < iend; i++)
-                shape.SetPosition(i, animatedPoints[i].position);
+            {
+                if (shape.CanAnimatePoint(i))
+                    shape.SetPosition(i, animatedPoints[i].position);
+            }
         }
     }
 

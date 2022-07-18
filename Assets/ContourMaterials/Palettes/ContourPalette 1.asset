@@ -42,3 +42,6 @@ MonoBehaviour:
     - {fileID: 11400000, guid: feddcb6a21ddc89428430e5fe4b023e0, type: 2}
     - {fileID: 11400000, guid: bcaed89fc10030541ae280df0049fdfc, type: 2}
     - {fileID: 11400000, guid: e22d6107beee893468a4a40de98097a8, type: 2}
+  - name: justacollider
+    contourMaterials:
+    - {fileID: 11400000, guid: 0a99f4cd51ad5e043bda40c371c38234, type: 2}

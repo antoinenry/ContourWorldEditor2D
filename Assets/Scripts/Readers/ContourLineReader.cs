@@ -115,11 +115,14 @@ public class ContourLineReader : ContourMeshReader
         // Set uvs: repeat texture along segments
         int positionCount = positions.Length;
         UVs = new List<Vector2>(positionCount * 2);
-        float coveredLength = 0f;
+        // Line width
         float yTop = .5f + uvScale.y / 2f;
         float yBot = .5f - uvScale.y / 2f;
+        // Start at U = 0
         UVs.Add(new Vector2(0f, yTop));
         UVs.Add(new Vector2(0f, yBot));
+        // Unfold texture along positions
+        float coveredLength = 0f;
         for (int i = 1; i < positionCount; i++)
         {
             coveredLength += Vector2.Distance(positions[i - 1], positions[i]) * uvScale.x;

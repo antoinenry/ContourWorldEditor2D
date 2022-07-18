@@ -20,8 +20,11 @@ public class ContourColliderBuilder : ContourBuilder
         if (readers != null && readers.Count > 0 && readers[0] != null)
         {
             ContourColliderReader topReader = readers[0] as ContourColliderReader;
-            collider2D.isTrigger = topReader.IsTrigger;
-            collider2D.sharedMaterial = topReader.PhysicsMaterial;
+            if (topReader != null && collider2D != null)
+            {
+                collider2D.isTrigger = topReader.IsTrigger;
+                collider2D.sharedMaterial = topReader.PhysicsMaterial;
+            }
         }
     }
 
@@ -67,13 +70,13 @@ public class ContourColliderBuilder : ContourBuilder
             polygonCollider.pathCount = readerCount;
             for (int ri = 0; ri < readerCount; ri++)
             {
+                polygonCollider.SetPath(ri, new Vector2[0]);
                 if (readers[ri] != null && readers[ri] is ContourColliderReader)
                 {
                     ContourColliderReader colliderReader = readers[ri] as ContourColliderReader;
-                    polygonCollider.SetPath(ri, colliderReader.Positions);
+                    if (colliderReader.Positions != null)
+                        polygonCollider.SetPath(ri, colliderReader.Positions);
                 }
-                else
-                    polygonCollider.SetPath(ri, new Vector2[0]);
             }
         }
     }

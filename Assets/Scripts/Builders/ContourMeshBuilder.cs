@@ -102,7 +102,7 @@ public class ContourMeshBuilder : ContourBuilder
         UpdateMeshComponents();
     }
 
-    private void UpdateNormals()
+    protected override void UpdateNormals()
     {
         // Update mesh normals
         List<Vector3> normals = new List<Vector3>();
@@ -118,26 +118,5 @@ public class ContourMeshBuilder : ContourBuilder
         foreach (ContourSubmeshBuilder sub in submeshes)
             colors.AddRange(sub.GetColors());
         mesh.SetColors(colors);
-    }
-
-    protected override void OnChangeBlueprintParameters(int blueprintIndex)
-    {
-        ContourMeshBlueprint bp = blueprints[blueprintIndex] as ContourMeshBlueprint;
-        ContourMeshReader rd = readers[blueprintIndex] as ContourMeshReader;
-        string[] changedParameters = bp.changedParameters.Split(' ');
-        foreach(string p in changedParameters)
-        {
-            switch(p)
-            {
-                case "normal":
-                    rd.ReadBlueprintNormal(bp);
-                    UpdateNormals();
-                    break;
-                case "color":
-                    rd.ReadBlueprintColor(bp);
-                    UpdateColors();
-                    break;
-            }
-        }
     }
 }

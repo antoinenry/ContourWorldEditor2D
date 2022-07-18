@@ -9,10 +9,22 @@ public class UnitVectorDrawer : PropertyDrawer
         if (property.propertyType == SerializedPropertyType.Vector3)
         {
             Vector3 vectorValue = property.vector3Value;
+            Rect rect = position;
+            float GUIbuttonWidthRatio = .1f;
+            // Auto-normalized value
+            rect.width = (1f - GUIbuttonWidthRatio) * position.width;
             EditorGUI.BeginChangeCheck();
-            vectorValue = EditorGUI.Vector3Field(position, label.text, property.vector3Value);
+            vectorValue = EditorGUI.Vector3Field(rect, label.text, vectorValue);
             if (EditorGUI.EndChangeCheck())
                 property.vector3Value = AdjustVector(vectorValue);
+            // Randomizer
+            rect.x += rect.width;
+            rect.width = GUIbuttonWidthRatio * position.width;
+            if (GUI.Button(rect, "R"))
+            {
+                vectorValue = RandomizeVector(vectorValue);
+                property.vector3Value = AdjustVector(vectorValue);
+            }
         }
         else
             EditorGUI.HelpBox(position, "Use UnitVector attribute with Vector3", MessageType.Error);
@@ -45,6 +57,25 @@ public class UnitVectorDrawer : PropertyDrawer
                 break;
         }
         return adjustedValue;
+    }
+
+    private Vector3 RandomizeVector(Vector3 value)
+    {
+        UnitVectorAttribute unitVector = attribute as UnitVectorAttribute;
+        Vector3 randomVector = new Vector3(Random.Range(-1f, 1f), Random.Range(-1f, 1f), Random.Range(-1f, 1f));
+        switch (unitVector.autoAdjust)
+        {
+            case UnitVectorAttribute.AutoAdjustBehaviour.AdjustX:
+                randomVector.x = value.x;
+                break;
+            case UnitVectorAttribute.AutoAdjustBehaviour.AdjustY:
+                randomVector.y = value.y;
+                break;
+            case UnitVectorAttribute.AutoAdjustBehaviour.AdjustZ:
+                randomVector.z = value.z;
+                break;
+        }
+        return randomVector;
     }
 
     private float AdjustCoordinate(float coord, float other1, float other2)

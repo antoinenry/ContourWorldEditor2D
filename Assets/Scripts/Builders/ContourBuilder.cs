@@ -19,22 +19,7 @@ public abstract class ContourBuilder : MonoBehaviour
         {
             ContourReader reader = ContourReader.NewReader(blueprint);
             builderGO.name = reader.BuilderName;
-            newBuilder = builderGO.AddComponent(reader.BuilderType) as ContourMeshBuilder;
-            //if (reader is ContourMeshReader)
-            //{
-            //    builderGO.name = "Mesh builder";
-            //    newBuilder = builderGO.AddComponent<ContourMeshBuilder>();
-            //}
-            //else if (reader is ContourColliderReader)
-            //{
-            //    builderGO.name = "Collider builder";
-            //    newBuilder = builderGO.AddComponent<ContourColliderBuilder>();
-            //}
-            //else if (reader is ContourAnimationReader)
-            //{
-            //    builderGO.name = "Animation builder";
-            //    newBuilder = builderGO.AddComponent<ContourAnimationBuilder>();
-            //}
+            newBuilder = builderGO.AddComponent(reader.BuilderType) as ContourBuilder;
         }
         // If add component has failed, cancel gameobject creation and return null
         if (newBuilder == null) DestroyImmediate(builderGO);
@@ -60,8 +45,6 @@ public abstract class ContourBuilder : MonoBehaviour
         {
             int blueprintCount = blueprints.Count;
             if (readers == null || readers.Count != blueprintCount) ResetReaders();
-            bool rebuild = false;
-            bool updatePositions = false;
             for (int bpi = 0; bpi < blueprintCount; bpi++)
             {
                 ContourBlueprint bp = blueprints[bpi];
@@ -73,37 +56,27 @@ public abstract class ContourBuilder : MonoBehaviour
                 {
                     readers[bpi] = ContourReader.NewReader(bp);
                 }
-                else if (bp.blueprintChanges != ContourBlueprint.BlueprintChange.None)
+                else
                 {
-                    if (bp.blueprintChanges.HasFlag(ContourBlueprint.BlueprintChange.MaterialChanged))
+                    ContourShape.ShapeChanged shapeChanges = bp.ShapeChanges;
+                    if (shapeChanges != ContourShape.ShapeChanged.None)
                     {
-                        rebuild = true;
-                    }
-                    if (bp.blueprintChanges.HasFlag(ContourBlueprint.BlueprintChange.ParameterChanged))
-                    {
-                        OnChangeBlueprintParameters(bpi);
+                        if (shapeChanges.HasFlag(ContourShape.ShapeChanged.LengthChanged))
+                        {
+                            RebuildAll();
+                        }
+                        else if (shapeChanges.HasFlag(ContourShape.ShapeChanged.PositionMoved))
+                        {
+                            readers[bpi].ReadBlueprintPositions(bp);
+                            UpdatePositions();
+                        }
+                        if (shapeChanges.HasFlag(ContourShape.ShapeChanged.NormalChanged))
+                        {
+                            readers[bpi].ReadBlueprintNormal(bp);
+                            UpdateNormals();
+                        }
                     }
                 }
-                else if (bp.ShapeChanges != ContourShape.ShapeChanged.None)
-                {
-                    if (bp.ShapeChanges.HasFlag(ContourShape.ShapeChanged.LengthChanged))
-                    {
-                        rebuild = true;
-                    }
-                    else if (bp.ShapeChanges.HasFlag(ContourShape.ShapeChanged.PositionMoved))
-                    {
-                        readers[bpi].ReadBlueprintPositions(bp);
-                        updatePositions = true;
-                    }
-                }
-            }
-            if (rebuild)
-            {
-                RebuildAll();
-            }
-            if (updatePositions)
-            {
-                UpdatePositions();
             }
         }
     }
@@ -142,13 +115,22 @@ public abstract class ContourBuilder : MonoBehaviour
         }
     }
 
-    public abstract void RebuildAll();
+    public virtual void RebuildAll()
+    {
+        return;
+    }
 
-    protected abstract bool CanBuildFrom(ContourReader reader);
+    protected virtual bool CanBuildFrom(ContourReader reader)
+    {
+        return false;
+    }
 
-    protected abstract void UpdatePositions();
+    protected virtual void UpdatePositions()
+    {
+        return;
+    }
 
-    protected virtual void OnChangeBlueprintParameters(int blueprintIndex)
+    protected virtual void UpdateNormals()
     {
         return;
     }

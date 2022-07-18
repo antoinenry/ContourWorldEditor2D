@@ -9,6 +9,7 @@ public class ContourBlocBuilderInspector : Editor
     private static bool showBluePrintComponents;
     private static ContourBlocBuilder targetBuilder;
     private static ContourInspector[] contourInspectors;
+    private static int defaultPaletteIndex;
     //private static Editor[] blueprintEditors;
 
     private struct ContourInspector
@@ -49,6 +50,9 @@ public class ContourBlocBuilderInspector : Editor
             targetBuilder.palette = palette;
             EditorUtility.SetDirty(targetBuilder);
         }
+        // Defaut material selector (when creating new contour)
+        string[] paletteOptions = targetBuilder.GetPaletteOptionNames();
+        defaultPaletteIndex = EditorGUILayout.Popup("Default contour material", defaultPaletteIndex, paletteOptions);
         // Edit blueprints
         showBlueprintList = EditorGUILayout.Foldout(showBlueprintList, "Blueprints");
         if (showBlueprintList)
@@ -104,7 +108,13 @@ public class ContourBlocBuilderInspector : Editor
             if (targetBuilder.palette != null)
             {
                 EditorGUI.BeginChangeCheck();
-                int paletteIndex = EditorGUILayout.Popup(targetBuilder.GetPaletteIndex(cti), paletteOptions);
+                int paletteIndex = targetBuilder.GetPaletteIndex(cti);
+                if (paletteIndex == -1)
+                {
+                    paletteIndex = defaultPaletteIndex;
+                    targetBuilder.SetPaletteIndex(cti, paletteIndex);
+                }
+                paletteIndex = EditorGUILayout.Popup(paletteIndex, paletteOptions);
                 if (EditorGUI.EndChangeCheck())
                 {
                     Undo.RecordObject(targetBuilder, "Set contour material");

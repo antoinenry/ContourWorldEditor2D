@@ -31,16 +31,16 @@ public abstract class ContourMeshReader : ContourReader
         }
     }
 
-    public void ReadBlueprintNormal(ContourMeshBlueprint blueprint)
+    public override void ReadBlueprintNormal(ContourBlueprint blueprint)
     {
         // Set normals: fetch value in blueprint
-        if (blueprint != null)
+        if (blueprint != null && blueprint is ContourMeshBlueprint)
         {
             int vertexCount = Vertices != null ? Vertices.Count : 0;
             int normalCount = Normals != null ? Normals.Count : 0;
             if (vertexCount == normalCount && vertexCount > 0)
             {
-                Vector3 normal = blueprint.Normal;
+                Vector3 normal = (blueprint as ContourMeshBlueprint).Normal;
                 for (int i = 0; i < normalCount; i++)
                     Normals[i] = normal;
             }

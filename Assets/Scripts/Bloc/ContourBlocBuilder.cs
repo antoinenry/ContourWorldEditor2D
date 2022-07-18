@@ -55,7 +55,9 @@ public class ContourBlocBuilder : MonoBehaviour
         if (bloc != null)
         {
             if (bloc.changes.HasFlag(ContourBloc.BlocChanges.ContourAdded) || bloc.changes.HasFlag(ContourBloc.BlocChanges.ContourRemoved))
+            {
                 RebuildAll();
+            }
         }
     }
 
@@ -124,6 +126,7 @@ public class ContourBlocBuilder : MonoBehaviour
                 // Then we try to fing a match by positions (usefull for first update)
                 if (contour.shape == null) contour = contours.Find(ct => Enumerable.SequenceEqual(ct.shape.GetPositions(), shape.GetPositions()));
                 // If no match, contour will have default values
+                if (contour.shape == null) contour.paletteIndex = -1;
                 contour.shape = shape;
                 //contour.UpdatePositions();
                 updatedContours.Add(contour);
@@ -138,17 +141,19 @@ public class ContourBlocBuilder : MonoBehaviour
         // Reset blueprints for each contour
         for (int cti = 0, ctCount = ContourCount; cti < ctCount; cti++)
                 ResetContourBlueprints(cti);
-        // Destroy all unused blueprints
+        // Put all existing blueprints in an "unused" pool
         List<ContourBlueprint> unusedBlueprints = new List<ContourBlueprint>();
         GetComponents(unusedBlueprints);
+        // Check all contours for blueprints (these are "used" blueprints)
         if (contours != null)
         {
             foreach (Contour contour in contours)
-                foreach (ContourBlueprint usedBlueprint in contour.blueprints)
-                    unusedBlueprints.Remove(usedBlueprint);
+                foreach (ContourBlueprint bp in contour.blueprints)
+                    unusedBlueprints.Remove(bp);
         }
+        // Destroy all unused blueprints
         foreach (ContourBlueprint bp in unusedBlueprints)
-            DestroyImmediate(bp);
+            DestroyImmediate(bp);                
     }
 
     private void ResetContourBlueprints(int contourIndex)

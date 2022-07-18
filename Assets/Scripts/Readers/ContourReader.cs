@@ -18,11 +18,13 @@ public abstract class ContourReader
         return newReader;
     }
 
-    public abstract void ReadBlueprintPositions(ContourBlueprint blueprint);
+    public virtual void ReadBlueprintPositions(ContourBlueprint blueprint) { return; }
 
-    public abstract bool TryReadBlueprint(ContourBlueprint blueprint);
+    public virtual void ReadBlueprintNormal(ContourBlueprint blueprint) { return; }
 
-    public abstract bool Clear();
+    public virtual bool TryReadBlueprint(ContourBlueprint blueprint) { return false; }
+
+    public virtual bool Clear() { return false; }
 
     public abstract Type BuilderType { get; }
 

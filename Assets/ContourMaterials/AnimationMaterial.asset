@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0a364f7fcda663443856d8387e07b1cc, type: 3}
   m_Name: AnimationMaterial
   m_EditorClassIdentifier: 
-  amplitude: 0.1
+  amplitude: 0.2
   cycleDuration: 10
-  phase: 30
+  phase: 45

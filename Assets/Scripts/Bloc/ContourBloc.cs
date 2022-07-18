@@ -50,13 +50,24 @@ public class ContourBloc : MonoBehaviour
                 if (shape != null) shape.changes = ContourShape.ShapeChanged.None;
     }
 
-    public List<Vector2> GetPositions()
+    public List<Vector2> GetLocalPositions()
     {
-        if (points == null) return null;
+        if (points == null) return new List<Vector2>();
         else return points.ConvertAll(pt => pt.position);
     }
 
-    public Vector2 GetPosition(int index)
+    public List<Vector3> GetWorldPositions()
+    {
+        if (points == null) return new List<Vector3>();
+        else
+        {
+            Vector3 blocPosition = transform.position;
+            Quaternion blocRotation = transform.rotation;
+            return points.ConvertAll(pt => blocPosition + blocRotation * pt.position);
+        }
+    }
+
+    public Vector2 GetLocalPosition(int index)
     {
         if (points == null || index < 0 || index >= points.Count)
         {
@@ -65,6 +76,17 @@ public class ContourBloc : MonoBehaviour
         }
         
         return points[index].position;
+    }
+
+    public Vector3 GetWorldPosition(int index)
+    {
+        if (points == null || index < 0 || index >= points.Count)
+        {
+            Debug.LogError("Point index is out of bounds.");
+            return Vector2.zero;
+        }
+
+        return transform.rotation * points[index].position + transform.position;
     }
 
     public int GetContourCount()
@@ -144,11 +166,12 @@ public class ContourBloc : MonoBehaviour
         return pointIndices;
     }
 
-    public void AddPoint(Vector2 position)
+    public void AddPoint(Vector2 pointPosition, bool isWorldSpace = false)
     {
         // Create point at position, not in any contour (no occurences)
         if (points == null) points = new List<Point>(1);
-        Point newPoint = new Point() { position = position, occurences = new List<PointOccurence>() };
+        Vector2 localPointPosition = isWorldSpace ? (Vector2)(Quaternion.Inverse(transform.rotation) * (pointPosition - (Vector2)transform.position)) : pointPosition;
+        Point newPoint = new Point() { position = localPointPosition, occurences = new List<PointOccurence>() };
         points.Add(newPoint);
     }
 
@@ -207,7 +230,7 @@ public class ContourBloc : MonoBehaviour
                 // Add contour to point
                 points[pointIndex].occurences.Add(new PointOccurence() { contourIndex = contourIndex, indexInContour = indexInContour });
                 // Add position to contour
-                contourShapes[contourIndex].AddPosition(GetPosition(pointIndex));
+                contourShapes[contourIndex].AddPosition(GetLocalPosition(pointIndex));
             }
         }
     }
@@ -243,7 +266,7 @@ public class ContourBloc : MonoBehaviour
         // Add contour to point
         points[pointIndex].occurences.Add(new PointOccurence() { contourIndex = contourIndex, indexInContour = insertAt });
         // Add position to contour
-        contourShapes[contourIndex].InsertPosition(insertAt, GetPosition(pointIndex));
+        contourShapes[contourIndex].InsertPosition(insertAt, GetLocalPosition(pointIndex));
     }
 
     public void InsertPointInContours(List<int> contourIndices, int pointA, int pointB)
@@ -521,7 +544,7 @@ public class ContourBloc : MonoBehaviour
                     contourShapes[contourIndex].InsertPosition(indexInContour, new Vector2());
             }
             // Set position in contour
-            contourShapes[contourIndex].SetPosition(indexInContour, GetPosition(newPointIndex));
+            contourShapes[contourIndex].SetPosition(indexInContour, GetLocalPosition(newPointIndex));
         }
         else
         {
@@ -537,7 +560,7 @@ public class ContourBloc : MonoBehaviour
         int oldContourCount = GetContourCount();
         bufferPoint.occurences.Add(new PointOccurence() { contourIndex = oldContourCount, indexInContour = 0 });
         if (contourShapes == null) contourShapes = new List<ContourShape>();
-        ContourShape newContour = new ContourShape(new List<Vector2>());
+        ContourShape newContour = new ContourShape();
         contourShapes.Add(newContour);
         changes |= BlocChanges.ContourAdded;
     }
@@ -643,26 +666,37 @@ public class ContourBloc : MonoBehaviour
         else SetContourLength(contourIndex, contourLength - 1, false);
     }
 
-    #region Gizmos
-    private void OnDrawGizmos()
+    public Vector3 GetContourNormal(int contourIndex)
     {
-        Gizmos.color = Color.gray;
-        DrawContourGizmos();
+        return contourShapes[contourIndex].Normal;
     }
 
-    private void DrawContourGizmos()
+    public void SetContourNormal(int contourIndex, Vector3 normalValue)
     {
-        Vector3 blocPosition = transform.position;
-        // Draw contours
-        if (contourShapes != null)
-            foreach(ContourShape contour in contourShapes)
-                for(int pti = 0, ptCount = contour.Length; pti < ptCount - 1; pti++)
-                    Gizmos.DrawLine((Vector3)contour.GetPosition(pti) + blocPosition, (Vector3)contour.GetPosition(pti + 1) + blocPosition);
-        // Draw unused points
-        if (points != null)
-            foreach(Point pt in points)
-                if (pt.OccurenceCount == 0)
-                    Gizmos.DrawIcon((Vector3)pt.position + blocPosition, "cross.png");
+        contourShapes[contourIndex].Normal = normalValue;
     }
+
+    #region Gizmos
+    //private void OnDrawGizmos()
+    //{
+    //    Gizmos.color = Color.gray;
+    //    DrawContourGizmos();
+    //}
+
+    //private void DrawContourGizmos()
+    //{
+    //    Vector3 blocPosition = transform.position;
+    //    Quaternion blocRotation = transform.rotation;
+    //    // Draw contours
+    //    if (contourShapes != null)
+    //        foreach(ContourShape contour in contourShapes)
+    //            for(int pti = 0, ptCount = contour.Length; pti < ptCount - 1; pti++)
+    //                Gizmos.DrawLine(blocRotation * contour.GetPosition(pti) + blocPosition, blocRotation * contour.GetPosition(pti + 1) + blocPosition);
+    //    // Draw unused points
+    //    if (points != null)
+    //        foreach(Point pt in points)
+    //            if (pt.OccurenceCount == 0)
+    //                Gizmos.DrawIcon(blocRotation * pt.position + blocPosition, "cross.png");
+    //}
     #endregion
 }
