@@ -16,9 +16,9 @@ public class ContourBlocBuilder : MonoBehaviour
     [Serializable]
     public struct Contour
     {
-        public int paletteIndex;
         public ContourShape shape;
         public ContourBlueprint[] blueprints;
+        public int paletteIndex;
 
         public Contour(ContourShape shape)
         {
@@ -30,7 +30,7 @@ public class ContourBlocBuilder : MonoBehaviour
         public Vector2[] GetPositions()
         {
             Vector2[] shapePositions = shape.GetPositions();
-            return shapePositions != null ? shapePositions : new Vector2[0]; //positions;            
+            return shapePositions != null ? shapePositions : new Vector2[0];     
         }
     }
 
@@ -47,6 +47,7 @@ public class ContourBlocBuilder : MonoBehaviour
     private void OnEnable()
     {
         RebuildAll();
+        FixStaticContours();
     }
 
     private void Update()
@@ -251,5 +252,20 @@ public class ContourBlocBuilder : MonoBehaviour
         builders = new List<ContourBuilder>(newBuilders);
         // Rebuild all
         foreach (ContourBuilder b in builders) b.RebuildAll();
+    }
+
+    public void FixStaticContours()
+    {
+        if (contours == null) return;
+        foreach(Contour contour in contours)
+        {
+            if(contour.shape != null) contour.shape.SetPointsStatic(false);
+        }
+        foreach (Contour contour in contours)
+        {
+            if (contour.blueprints == null) continue;
+            bool isContourAnimated = Array.FindIndex(contour.blueprints, bp => bp != null && bp is ContourAnimationBlueprint) != -1;
+            if (isContourAnimated == false && contour.shape != null) contour.shape.SetPointsStatic(true);
+        }
     }
 }

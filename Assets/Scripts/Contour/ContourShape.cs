@@ -7,18 +7,11 @@ public class ContourShape
 {
     public ShapeChanged changes;
 
-    [SerializeField] private Point[] points;
+    [SerializeField] private ContourPoint[] points;
     [SerializeField] private Vector3 normal;
 
     [Flags]
-    public enum ShapeChanged { None = 0, PositionMoved = 1, LengthChanged = 2, NormalChanged = 4 }
-
-    [Serializable]
-    public class Point
-    {
-        public Vector2 position;
-        public bool preventAnimation;
-    }
+    public enum ShapeChanged { None = 0, PositionMoved = 1, LengthChanged = 2, NormalChanged = 4 }       
 
     public ContourShape()
     {
@@ -30,54 +23,62 @@ public class ContourShape
 
     public int Length => points != null ? points.Length : 0;    
 
-    public Vector2[] GetPositions()
-    {
-        if (points != null) return new List<Point>(points).ConvertAll(pt => pt.position).ToArray();
-        else return new Vector2[0];
-    }
-
     public Vector2 GetPosition(int index)
     {
         return points[index].position;
     }
 
-    public void SetPosition(int index, Vector2 value)
+    public void SetPosition(int index, Vector2 position)
     {
-        Point pt = points[index];
-        pt.position = value;
-        points[index] = pt;
+        points[index].position = position;
         changes |= ShapeChanged.PositionMoved;
     }
 
-    public void AddPosition(Vector2 value)
+    public Vector2[] GetPositions()
     {
-        List<Point> ptList = points != null ? new List<Point>(points) : new List<Point>(1);
-        ptList.Add(new Point() { position = value });
+        if (points != null) return Array.ConvertAll(points, pt=> pt.position);
+        else return new Vector2[0];
+    }
+
+    public ContourPoint GetPoint(int index)
+    {
+        return points[index];
+    }
+
+    public void AddPoint(ContourPoint pt)
+    {
+        List<ContourPoint> ptList = points != null ? new List<ContourPoint>(points) : new List<ContourPoint>(1);
+        ptList.Add(pt);
         points = ptList.ToArray();
         changes |= ShapeChanged.LengthChanged;
     }
 
-    public void InsertPosition(int index, Vector2 value)
+    public void InsertPoint(int index, ContourPoint pt)
     {
-        List<Point> ptList = points != null ? new List<Point>(points) : new List<Point>(1);
-        ptList.Insert(index, new Point() { position = value });
+        List<ContourPoint> ptList = points != null ? new List<ContourPoint>(points) : new List<ContourPoint>(1);
+        ptList.Insert(index, pt);
         points = ptList.ToArray();
         changes |= ShapeChanged.LengthChanged;
     }
 
-    public void RemovePosition(int index)
+    public void ReplacePoint(int index, ContourPoint pt)
     {
-        if (points == null) return;
-        List<Point> ptList = new List<Point>(points);
+        bool positionChanged = points[index].position != pt.position;
+        points[index] = pt;
+        if (positionChanged) changes |= ShapeChanged.PositionMoved;
+    }
+
+    public void RemovePoint(int index)
+    {
+        List<ContourPoint> ptList = new List<ContourPoint>(points);
         ptList.RemoveAt(index);
         points = ptList.ToArray();
         changes |= ShapeChanged.LengthChanged;
     }
 
-    public void RemovePositions(int index, int count)
+    public void RemovePoints(int index, int count)
     {
-        if (points == null) return;
-        List<Point> ptList = new List<Point>(points);
+        List<ContourPoint> ptList = new List<ContourPoint>(points);
         ptList.RemoveRange(index, count);
         points = ptList.ToArray();
         changes |= ShapeChanged.LengthChanged;
@@ -91,22 +92,6 @@ public class ContourShape
         for (int i = 0; i < length; i++)
             center += points[i].position;
         return center / length;
-    }
-
-    public bool CanAnimatePoint(int index)
-    {
-        return !points[index].preventAnimation;
-    }
-
-    public void SetCanAnimatePoint(int index, bool value)
-    {
-        points[index].preventAnimation = !value;
-    }
-
-    public void SetCanAnimatePoints(bool value)
-    {
-        for(int i = 0; i < Length; i++)
-            points[i].preventAnimation = !value;
     }
 
     #endregion
@@ -127,6 +112,28 @@ public class ContourShape
                 changes |= ShapeChanged.NormalChanged;
             }
         }
+    }
+    #endregion
+
+    #region Animation
+    public void SetPointsStatic(bool value)
+    {
+        foreach (ContourPoint pt in points) pt.isStatic = value;
+    }
+
+    public void SetPointStatic(int index, bool value)
+    {
+        points[index].isStatic = value;
+    }
+
+    public List<int> GetNonStaticPointsIndices()
+    {
+        if (points == null) return new List<int>(0);
+        int length = Length;
+        List<int> indices = new List<int>(length);
+        for(int i = 0; i < length; i++)
+            if (points[i].isStatic == false) indices.Add(i);
+        return indices;
     }
     #endregion
 }

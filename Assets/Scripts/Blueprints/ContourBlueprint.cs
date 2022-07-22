@@ -20,9 +20,4 @@ public class ContourBlueprint : MonoBehaviour
     {
         if (shape != null) shape.changes = ContourShape.ShapeChanged.None;
     }
-
-    protected virtual void SetShape(ContourShape shape)
-    {
-        this.shape = shape;
-    }
 }
