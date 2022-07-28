@@ -5,33 +5,30 @@ using System.Collections.Generic;
 [Serializable]
 public class ContourFaceReader : ContourMeshReader
 {
+    public override bool CanReadBlueprint(ContourBlueprint blueprint)
+    {
+        return blueprint != null && blueprint.material != null && blueprint.material is ContourFaceMaterial && blueprint.IsLoop;
+    }
+
     public override bool TryReadBlueprint(ContourBlueprint blueprint)
     {
+        // If contour is not looped, correct it
+        if (blueprint != null && blueprint.material != null && blueprint.material is ContourFaceMaterial && !blueprint.IsLoop)
+            blueprint.shape.LoopContour();
         // Read if possible
-        if (blueprint != null && blueprint is ContourMeshBlueprint && blueprint.material is ContourFaceMaterial)
+        if (CanReadBlueprint(blueprint))
         {
-            ContourMeshBlueprint meshBlueprint = blueprint as ContourMeshBlueprint;
-            // Get positions
+            // Get positions and material
             Vector2[] positions = blueprint.Positions;
-            if (positions == null) return false;
-            // Get material
             ContourFaceMaterial contourMaterial = blueprint.material as ContourFaceMaterial;
-            if (contourMaterial == null) return false;
             MeshMaterial = contourMaterial.meshMaterial;
-            // To build a face, there must be enough positions and contour must be a loop
-            int positionCount = positions != null ? positions.Length : 0;
-            if (positionCount < 3 || positions[0] != positions[positionCount - 1])
-            {
-                Clear();
-                return false;
-            }
             // Set vertices: copy positions x,y and set z to value in contourMaterial (last position is ignored because of loop)
-            int vertexCount = positionCount - 1;
+            int vertexCount = positions.Length - 1;
             Vector3 zOffset = contourMaterial.zOffset * Vector3.forward;
             Vertices = new List<Vector3>(vertexCount);
             for (int i = 0; i < vertexCount; i++)
                 Vertices.Add((Vector3)positions[i] + zOffset);
-            // Set triangles: simple convex triangulation
+            // Set triangles: simple triangulation (convex shape only)
             int triangleCount = Mathf.Max(vertexCount - 2, 0);
             Triangles = new List<int>(triangleCount * 3);
             for (int i = 0; i < triangleCount; i++)
@@ -42,11 +39,11 @@ public class ContourFaceReader : ContourMeshReader
                 UVs.Add(Vertices[i]);
             // Set normals: fetch value in blueprint
             Normals = new List<Vector3>(vertexCount);
-            Vector3 normal = meshBlueprint.Normal;
+            Vector3 normal = blueprint.Normal;
             for (int i = 0; i < vertexCount; i++)
-                Normals.Add(normal);            
-            // Set colors: fetch color in blueprint
-            Color color = meshBlueprint.Color;
+                Normals.Add(normal);
+            // Set colors: fetch color in material
+            Color color = contourMaterial.color;
             Colors = new List<Color>(vertexCount);
             for (int i = 0; i < vertexCount; i++)
                 Colors.Add(color);
@@ -56,10 +53,10 @@ public class ContourFaceReader : ContourMeshReader
         return false;
     }
 
-    public override void ReadBlueprintPositions(ContourBlueprint blueprint)
+    public override bool ReadBlueprintPositions(ContourBlueprint blueprint)
     {
         // Read contour positions only (assumes only modification on contour is some point moved)
-        if (blueprint != null && blueprint is ContourMeshBlueprint && blueprint.material is ContourFaceMaterial)
+        if (CanReadBlueprint(blueprint))
         {
             // Get positions
             Vector2[] positions = blueprint.Positions;
@@ -78,8 +75,14 @@ public class ContourFaceReader : ContourMeshReader
                         UVs[i] = Vertices[i];
                 }
             }
+            return true;
+        }
+        else if (blueprint != null && blueprint.material != null && blueprint.material is ContourFaceMaterial && !blueprint.IsLoop)
+        {
+            blueprint.shape.LoopContour();
+            return true;
         }
         // Notify if there's a problem with the blueprint
-        else throw new Exception("Can't read blueprint");
+        else return false;
     }
 }

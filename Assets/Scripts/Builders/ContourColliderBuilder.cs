@@ -4,107 +4,167 @@ using UnityEngine;
 
 public class ContourColliderBuilder : ContourBuilder
 {
-    [SerializeField]
-    new private Collider2D collider2D;
+    [Serializable]
+    private class SubColliderBuilder
+    {
+        public Collider2D collider;
+        public List<ContourColliderReader> readers;
 
-    [Flags]
-    private enum UpdateType { None = 0, All = ~0, Positions = 2 }
+        public Type ColliderType => collider != null ? collider.GetType() : null;
+        public bool IsTrigger  => collider != null ? collider.isTrigger : false;
+
+        public PhysicsMaterial2D PhysicMaterial => collider != null ? collider.sharedMaterial : null;
+
+        public SubColliderBuilder(ContourColliderReader reader, ContourColliderBuilder overBuilder)
+        {
+            if(reader != null && overBuilder != null)
+            {
+                readers = new List<ContourColliderReader>() { reader };
+                if (reader.ColliderType != null)
+                {
+                    collider = overBuilder.gameObject.AddComponent(reader.ColliderType) as Collider2D;
+                    collider.isTrigger = reader.IsTrigger;
+                    collider.sharedMaterial = reader.PhysicsMaterial;
+                }
+            }
+        }
+
+        public bool ColliderIsCompatibleWith(ContourColliderReader reader)
+        {
+            if (collider != null)
+            {
+                return (reader != null
+                    && ColliderType == reader.ColliderType
+                    && IsTrigger == reader.IsTrigger
+                    && PhysicMaterial == reader.PhysicsMaterial);
+            }
+            else return false;
+        }
+
+        public bool CanAddReader(ContourColliderReader reader)
+        {
+            // Check general compatibility
+            if (!ColliderIsCompatibleWith(reader))
+                return false;
+            // Exception for edge collider: can only create one contour..
+            if (ColliderType == typeof(EdgeCollider2D))
+                return readers == null || readers.Count == 0;
+            else
+                return true;
+        }
+
+        public bool TrySetColliderPoints()
+        {
+            int readerCount = readers != null ? readers.Count : 0;
+            if (readerCount == 0 || collider == null)
+                return false;
+            if (collider is PolygonCollider2D)
+            {
+                PolygonCollider2D polygon = collider as PolygonCollider2D;
+                polygon.pathCount = readerCount;
+                for (int i = 0; i < readerCount; i++)
+                {
+                    if (ColliderIsCompatibleWith(readers[i]))
+                    {
+                        List<Vector2> positions = readers[i] != null ? readers[i].Points : null;
+                        polygon.SetPath(i, positions != null ? positions.ToArray() : new Vector2[0]);
+                    }
+                    else
+                        return false;
+                }
+                return true;
+            }
+            else if (collider is EdgeCollider2D)
+            {
+                EdgeCollider2D edge = collider as EdgeCollider2D;
+                // Edge collider can only build one contour
+                if (readerCount == 1 && ColliderIsCompatibleWith(readers[0]))
+                {
+                    List<Vector2> positions = readers[0] != null ? readers[0].Points : new List<Vector2>(0);
+                    edge.SetPoints(positions);
+                    return true;
+                }
+                else
+                    return false;
+            }
+            else return false;
+        }
+    }
+
+    private List<SubColliderBuilder> subBuilders;
 
     public override void RebuildAll()
     {
-        // Reread all blueprints
         ResetReaders();
-        // Set collider shape
-        UpdatePositions();
-        // Set collider parameters (all readers should have the same parameter so we get values from the first one)
-        if (readers != null && readers.Count > 0 && readers[0] != null)
+        // Find all collider components
+        List<Collider2D> unusedColliders = new List<Collider2D>();
+        GetComponents(unusedColliders);
+        // Reset subbuilders
+        subBuilders = new List<SubColliderBuilder>();
+        if (readers != null)
         {
-            ContourColliderReader topReader = readers[0] as ContourColliderReader;
-            if (topReader != null && collider2D != null)
+            foreach (ContourColliderReader reader in readers)
             {
-                collider2D.isTrigger = topReader.IsTrigger;
-                collider2D.sharedMaterial = topReader.PhysicsMaterial;
+                if (reader == null) continue;
+                int subBuilderIndex = subBuilders.FindIndex(sub => sub.CanAddReader(reader));
+                SubColliderBuilder subBuilderMatch;
+                if (subBuilderIndex == -1)
+                {
+                    subBuilderMatch = new SubColliderBuilder(reader, this);
+                    if (subBuilderMatch.collider != null) subBuilders.Add(subBuilderMatch);
+                }
+                else
+                {
+                    subBuilderMatch = subBuilders[subBuilderIndex];
+                    if (subBuilderMatch.readers == null) subBuilderMatch.readers = new List<ContourColliderReader>(1);
+                    subBuilderMatch.readers.Add(reader);
+                }
+                unusedColliders.Remove(subBuilderMatch.collider);
             }
         }
+        // Remove unused collider components
+        foreach (Component c in unusedColliders)
+            DestroyImmediate(c);
+        // Set collider points
+        foreach (SubColliderBuilder sub in subBuilders)
+            if (sub.TrySetColliderPoints() == false)
+                Debug.LogError("Could not set collider points");
     }
 
     protected override bool CanBuildFrom(ContourReader reader)
     {
-        if (reader == null || reader is ContourColliderReader == false) return false;
-        if (collider2D == null) return true;
-        ContourColliderReader colliderReader = reader as ContourColliderReader;
-        return (colliderReader.ColliderType == collider2D.GetType() && colliderReader.IsTrigger == collider2D.isTrigger);
-    }
-
-    public override bool TryAddBlueprint(ContourBlueprint bp)
-    {
-        if (base.TryAddBlueprint(bp))
+        if (reader == null || !(reader is ContourColliderReader)) return false;
+        ContourColliderReader ccr = reader as ContourColliderReader;
+        if (ccr.ColliderType == null)
+            return false;
+        else if (ccr.ColliderType == typeof(PolygonCollider2D))
         {
-            UpdateColliderComponent();
-            return collider2D != null;
+            int pointCount = ccr.Points != null ? ccr.Points.Count : 0;
+            return pointCount > 1 && ccr.Points[0] == ccr.Points[pointCount - 1];
         }
         else
-            return false;
+            return true;
     }
 
     protected override void UpdatePositions()
     {
-        // Set collider shape
-        if (collider2D is EdgeCollider2D)
+        if (readers == null || readers.Contains(null))
+            RebuildAll();
+        else if (subBuilders != null)
         {
-            // Edge collider: can build only one contour (one continuous line)
-            EdgeCollider2D edgeCollider = collider2D as EdgeCollider2D;
-            if (readers.Count == 1 && readers[0] is ContourColliderReader)
+            foreach (SubColliderBuilder sub in subBuilders)
             {
-                ContourColliderReader colliderReader = readers[0] as ContourColliderReader;
-                edgeCollider.SetPoints(colliderReader.Positions);
-            }
-            else
-                edgeCollider.SetPoints(new List<Vector2>());
-        }
-        else if (collider2D is PolygonCollider2D)
-        {
-            // Polygon collider: can build several contours (but only loops)
-            PolygonCollider2D polygonCollider = collider2D as PolygonCollider2D;
-            int readerCount = readers.Count;
-            polygonCollider.pathCount = readerCount;
-            for (int ri = 0; ri < readerCount; ri++)
-            {
-                polygonCollider.SetPath(ri, new Vector2[0]);
-                if (readers[ri] != null && readers[ri] is ContourColliderReader)
+                if (sub != null)
                 {
-                    ContourColliderReader colliderReader = readers[ri] as ContourColliderReader;
-                    if (colliderReader.Positions != null)
-                        polygonCollider.SetPath(ri, colliderReader.Positions);
+                    if (sub.TrySetColliderPoints() == false)
+                        RebuildAll();
                 }
             }
         }
-    }
-
-    private void UpdateColliderComponent()
-    {
-        // Create or get collider component with correct type
-        ContourColliderReader colliderReader = (readers != null && readers.Count > 0) ? readers[0] as ContourColliderReader : null;
-        Type colliderType = colliderReader != null ? colliderReader.ColliderType : null;
-        // Delete existing collider if it doesn't match blueprint's needs
-        if (collider2D != null)
+        else
         {
-            if (collider2D.GetType() != colliderType)
-            {
-                DestroyImmediate(collider2D);
-                collider2D = null;
-            }
-        }
-        // Add collider if needed
-        if (collider2D == null)
-        {
-            if (colliderType != null && typeof(Collider2D).IsAssignableFrom(colliderType))
-                collider2D = gameObject.AddComponent(colliderType) as Collider2D;
-        }
-        // Set collider parameters
-        if (collider2D != null)
-        {
-            collider2D.isTrigger = colliderReader.IsTrigger;
-        }
+            //RebuildAll();
+            Debug.Log("subBuilders == null");
+        }        
     }
 }

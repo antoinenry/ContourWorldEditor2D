@@ -5,13 +5,13 @@ using UnityEngine;
 [Serializable]
 public class ContourShape
 {
-    public ShapeChanged changes;
+    public Changes changes;
 
     [SerializeField] private ContourPoint[] points;
     [SerializeField] private Vector3 normal;
 
     [Flags]
-    public enum ShapeChanged { None = 0, PositionMoved = 1, LengthChanged = 2, NormalChanged = 4 }       
+    public enum Changes { None = 0, PositionMoved = 1, LengthChanged = 2, NormalChanged = 4 }       
 
     public ContourShape()
     {
@@ -21,7 +21,8 @@ public class ContourShape
 
     #region Positions
 
-    public int Length => points != null ? points.Length : 0;    
+    public int Length => points != null ? points.Length : 0;
+    public bool IsLoop => Length > 1 && points[0] != null && points[Length - 1] != null && points[0].position == points[Length - 1].position;
 
     public Vector2 GetPosition(int index)
     {
@@ -31,7 +32,7 @@ public class ContourShape
     public void SetPosition(int index, Vector2 position)
     {
         points[index].position = position;
-        changes |= ShapeChanged.PositionMoved;
+        changes |= Changes.PositionMoved;
     }
 
     public Vector2[] GetPositions()
@@ -50,7 +51,7 @@ public class ContourShape
         List<ContourPoint> ptList = points != null ? new List<ContourPoint>(points) : new List<ContourPoint>(1);
         ptList.Add(pt);
         points = ptList.ToArray();
-        changes |= ShapeChanged.LengthChanged;
+        changes |= Changes.LengthChanged;
     }
 
     public void InsertPoint(int index, ContourPoint pt)
@@ -58,14 +59,14 @@ public class ContourShape
         List<ContourPoint> ptList = points != null ? new List<ContourPoint>(points) : new List<ContourPoint>(1);
         ptList.Insert(index, pt);
         points = ptList.ToArray();
-        changes |= ShapeChanged.LengthChanged;
+        changes |= Changes.LengthChanged;
     }
 
     public void ReplacePoint(int index, ContourPoint pt)
     {
         bool positionChanged = points[index].position != pt.position;
         points[index] = pt;
-        if (positionChanged) changes |= ShapeChanged.PositionMoved;
+        if (positionChanged) changes |= Changes.PositionMoved;
     }
 
     public void RemovePoint(int index)
@@ -73,7 +74,7 @@ public class ContourShape
         List<ContourPoint> ptList = new List<ContourPoint>(points);
         ptList.RemoveAt(index);
         points = ptList.ToArray();
-        changes |= ShapeChanged.LengthChanged;
+        changes |= Changes.LengthChanged;
     }
 
     public void RemovePoints(int index, int count)
@@ -81,7 +82,7 @@ public class ContourShape
         List<ContourPoint> ptList = new List<ContourPoint>(points);
         ptList.RemoveRange(index, count);
         points = ptList.ToArray();
-        changes |= ShapeChanged.LengthChanged;
+        changes |= Changes.LengthChanged;
     }
 
     public Vector2 GetCenter()
@@ -92,6 +93,14 @@ public class ContourShape
         for (int i = 0; i < length; i++)
             center += points[i].position;
         return center / length;
+    }
+
+    public void LoopContour()
+    {
+        if (Length > 1)
+        {
+            ReplacePoint(0, points[Length - 1]);
+        }
     }
 
     #endregion
@@ -109,7 +118,7 @@ public class ContourShape
             if (normal != value.normalized)
             {
                 normal = value.normalized;
-                changes |= ShapeChanged.NormalChanged;
+                changes |= Changes.NormalChanged;
             }
         }
     }
@@ -136,4 +145,13 @@ public class ContourShape
         return indices;
     }
     #endregion
+
+    public void DrawGizmo(Transform transform)
+    {
+        Vector3 position = transform.position;
+        Quaternion rotation = transform.rotation;
+        // Draw contour
+        for (int pti = 0, ptCount = Length; pti < ptCount - 1; pti++)
+            Gizmos.DrawLine(rotation * GetPosition(pti) + position, rotation * GetPosition(pti + 1) + position);
+    }
 }

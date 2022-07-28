@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System;
 using System.Collections.Generic;
 
 [DefaultExecutionOrder(0)]
@@ -30,11 +31,25 @@ public abstract class ContourBuilder : MonoBehaviour
     public void Reset()
     {
         if (readers != null) readers.Clear();
+        RebuildAll();
     }
 
     private void Update()
     {
         Build();
+    }
+
+    private void LateUpdate()
+    {
+        // Every changes in blueprints should have been adressed => reset change flags
+        if (blueprints != null)
+        {
+            foreach (ContourBlueprint bp in blueprints)
+            {
+                if (bp.shape != null) bp.shape.changes = ContourShape.Changes.None;
+                bp.materialHasChanged = false;
+            }
+        }
     }
 
     public virtual void Build()
@@ -52,28 +67,37 @@ public abstract class ContourBuilder : MonoBehaviour
                 {
                     readers[bpi] = null;
                 }
-                else if (readers[bpi] == null)
+                else if (bp.materialHasChanged || readers[bpi] == null)
                 {
-                    readers[bpi] = ContourReader.NewReader(bp);
+                    RebuildAll();
                 }
                 else
                 {
-                    ContourShape.ShapeChanged shapeChanges = bp.ShapeChanges;
-                    if (shapeChanges != ContourShape.ShapeChanged.None)
+                    if (bp.shape != null)
                     {
-                        if (shapeChanges.HasFlag(ContourShape.ShapeChanged.LengthChanged))
+                        ContourShape.Changes shapeChanges = bp.shape.changes;
+                        if (shapeChanges != 0)
                         {
-                            RebuildAll();
-                        }
-                        else if (shapeChanges.HasFlag(ContourShape.ShapeChanged.PositionMoved))
-                        {
-                            readers[bpi].ReadBlueprintPositions(bp);
-                            UpdatePositions();
-                        }
-                        if (shapeChanges.HasFlag(ContourShape.ShapeChanged.NormalChanged))
-                        {
-                            readers[bpi].ReadBlueprintNormal(bp);
-                            UpdateNormals();
+                            if (shapeChanges.HasFlag(ContourShape.Changes.LengthChanged))
+                            {
+                                RebuildAll();
+                            }
+                            else if (shapeChanges.HasFlag(ContourShape.Changes.PositionMoved))
+                            {
+                                bool canReadPositions = readers[bpi].ReadBlueprintPositions(bp);
+                                if (canReadPositions) UpdatePositions();
+                                else
+                                {
+                                    // If there's a problem with blueprints positions, cancel everything and rebuild from scratch
+                                    RebuildAll();
+                                    return;
+                                }
+                            }
+                            if (shapeChanges.HasFlag(ContourShape.Changes.NormalChanged))
+                            {
+                                readers[bpi].ReadBlueprintNormal(bp);
+                                UpdateNormals();
+                            }
                         }
                     }
                 }
@@ -111,27 +135,34 @@ public abstract class ContourBuilder : MonoBehaviour
             int bpCount = blueprints.Count;
             readers = new List<ContourReader>(bpCount);
             for (int i = 0; i < bpCount; i++)
-                readers.Add(ContourReader.NewReader(blueprints[i]));
+            {
+                ContourReader newReader = ContourReader.NewReader(blueprints[i]);
+                if (CanBuildFrom(newReader)) readers.Add(newReader);
+                else readers.Add(null);
+            }
         }
     }
 
-    public virtual void RebuildAll()
-    {
-        return;
-    }
+    public abstract void RebuildAll();
 
-    protected virtual bool CanBuildFrom(ContourReader reader)
-    {
-        return false;
-    }
+    protected abstract bool CanBuildFrom(ContourReader reader);
 
-    protected virtual void UpdatePositions()
-    {
-        return;
-    }
+    protected virtual void UpdatePositions() { }
 
-    protected virtual void UpdateNormals()
+    protected virtual void UpdateNormals() { }
+
+    public virtual void OnDrawGizmosSelected()
     {
-        return;
+        if (blueprints != null && readers != null)
+        {
+            int bpCount = blueprints.Count;
+            for (int i = 0; i < bpCount; i++)
+            {
+                ContourBlueprint bp = blueprints[i];
+                if (readers == null || readers.Count <= i) Gizmos.color = Color.red;
+                else Gizmos.color = readers[i] != null ? Color.white : Color.red;
+                if (bp != null && bp.shape != null) bp.shape.DrawGizmo(transform);
+            }
+        }
     }
 }

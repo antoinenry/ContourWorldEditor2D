@@ -6,21 +6,14 @@ using UnityEngine;
 [ExecuteAlways]
 public class ContourBlocBuilder : MonoBehaviour
 {
-    public ContourBloc bloc;
-    public List<Contour> contours;
-    public ContourPalette palette;
-
-    //[HideInInspector] [SerializeField] private List<ContourReader> readers;
-    [HideInInspector] [SerializeField] private List<ContourBuilder> builders;
-
     [Serializable]
-    public struct Contour
+    public struct ContourBuildInfos
     {
         public ContourShape shape;
         public ContourBlueprint[] blueprints;
         public int paletteIndex;
 
-        public Contour(ContourShape shape)
+        public ContourBuildInfos(ContourShape shape)
         {
             this.shape = shape;
             paletteIndex = -1;
@@ -30,17 +23,23 @@ public class ContourBlocBuilder : MonoBehaviour
         public Vector2[] GetPositions()
         {
             Vector2[] shapePositions = shape.GetPositions();
-            return shapePositions != null ? shapePositions : new Vector2[0];     
+            return shapePositions != null ? shapePositions : new Vector2[0];
         }
     }
+
+    public ContourBloc bloc;
+    public ContourPalette palette;
+
+    [SerializeField] private List<ContourBuildInfos> contourBuildInfos;
+    [SerializeField] private List<ContourBuilder> builders;
 
     private void Reset()
     {
         bloc = GetComponent<ContourBloc>();
-        foreach (ContourBlueprint bp in GetComponents<ContourBlueprint>())
-            DestroyImmediate(bp);
-        foreach (ContourBuilder b in GetComponentsInChildren<ContourBuilder>())
-            if (b != null && b.gameObject != null) DestroyImmediate(b.gameObject);
+        //foreach (ContourBlueprint bp in GetComponents<ContourBlueprint>())
+        //    DestroyImmediate(bp);
+        //foreach (ContourBuilder b in GetComponentsInChildren<ContourBuilder>())
+        //    if (b != null && b.gameObject != null) DestroyImmediate(b.gameObject);
         RebuildAll();
     }
 
@@ -56,25 +55,23 @@ public class ContourBlocBuilder : MonoBehaviour
         if (bloc != null)
         {
             if (bloc.changes.HasFlag(ContourBloc.BlocChanges.ContourAdded) || bloc.changes.HasFlag(ContourBloc.BlocChanges.ContourRemoved))
-            {
                 RebuildAll();
-            }
         }
     }
 
-    public int ContourCount => contours != null ? contours.Count : 0;
+    public int ContourCount => contourBuildInfos != null ? contourBuildInfos.Count : 0;
     
     public void RebuildAll()
     {
-        if (bloc != null) GetContoursFromBloc();
+        GetContoursFromBloc();
         ResetAllBlueprints();
         ResetAllBuilders();
     }
 
     public Vector2[] GetPositions(int contourIndex)
     {
-        if (contours == null || contourIndex < 0 || contourIndex >= contours.Count) return new Vector2[0];
-        return contours[contourIndex].GetPositions();
+        if (contourBuildInfos == null || contourIndex < 0 || contourIndex >= contourBuildInfos.Count) return new Vector2[0];
+        return contourBuildInfos[contourIndex].GetPositions();
     }
 
     public int PaletteSize => palette != null ? palette.Size : 0;
@@ -90,18 +87,18 @@ public class ContourBlocBuilder : MonoBehaviour
 
     public int GetPaletteIndex(int contourIndex)
     {
-        if (contours == null || contourIndex < 0 || contourIndex >= contours.Count) return -1;
-        return contours[contourIndex].paletteIndex;
+        if (contourBuildInfos == null || contourIndex < 0 || contourIndex >= contourBuildInfos.Count) return -1;
+        return contourBuildInfos[contourIndex].paletteIndex;
     }
 
     public void SetPaletteIndex(int contourIndex, int paletteIndex)
     {
-        if (contours == null || contourIndex < 0 || contourIndex >= contours.Count) return;
-        Contour ct = contours[contourIndex];
+        if (contourBuildInfos == null || contourIndex < 0 || contourIndex >= contourBuildInfos.Count) return;
+        ContourBuildInfos ct = contourBuildInfos[contourIndex];
         if (ct.paletteIndex != paletteIndex)
         {
             ct.paletteIndex = paletteIndex;
-            contours[contourIndex] = ct;
+            contourBuildInfos[contourIndex] = ct;
             ResetContourBlueprints(contourIndex);
             ResetAllBuilders();
         }
@@ -110,22 +107,22 @@ public class ContourBlocBuilder : MonoBehaviour
     public void GetContoursFromBloc()
     {
         // Update contour shapes from bloc, while keeping materials & blueprints related parameters
-        List<ContourShape> shapesInBloc = bloc.ContourShapes;
+        List<ContourShape> shapesInBloc = bloc != null ? bloc.ContourShapes : new List<ContourShape>(0);
         int contourCount = shapesInBloc.Count;
         // If builder has no contours, create contour list from scratch
         if (ContourCount == 0)
-            contours = shapesInBloc.ConvertAll(shape => new Contour(shape));
+            contourBuildInfos = shapesInBloc.ConvertAll(shape => new ContourBuildInfos(shape));
         // Or update existing list
         else
         {
-            List<Contour> updatedContours = new List<Contour>(contourCount);
+            List<ContourBuildInfos> updatedContours = new List<ContourBuildInfos>(contourCount);
             foreach (ContourShape shape in shapesInBloc)
             {
                 if (shape == null) continue;
                 // First we try to find a match by reference
-                Contour contour = contours.Find(ct => ct.shape != null && ct.shape == shape);
+                ContourBuildInfos contour = contourBuildInfos.Find(ct => ct.shape != null && ct.shape == shape);
                 // Then we try to fing a match by positions (usefull for first update)
-                if (contour.shape == null) contour = contours.Find(ct => Enumerable.SequenceEqual(ct.shape.GetPositions(), shape.GetPositions()));
+                if (contour.shape == null) contour = contourBuildInfos.Find(ct => Enumerable.SequenceEqual(ct.shape.GetPositions(), shape.GetPositions()));
                 // If no match, contour will have default values
                 if (contour.shape == null) contour.paletteIndex = -1;
                 contour.shape = shape;
@@ -133,7 +130,7 @@ public class ContourBlocBuilder : MonoBehaviour
                 updatedContours.Add(contour);
             }
             // Apply update
-            contours = updatedContours;
+            contourBuildInfos = updatedContours;
         }
     }
 
@@ -142,25 +139,26 @@ public class ContourBlocBuilder : MonoBehaviour
         // Reset blueprints for each contour
         for (int cti = 0, ctCount = ContourCount; cti < ctCount; cti++)
                 ResetContourBlueprints(cti);
-        // Put all existing blueprints in an "unused" pool
-        List<ContourBlueprint> unusedBlueprints = new List<ContourBlueprint>();
-        GetComponents(unusedBlueprints);
-        // Check all contours for blueprints (these are "used" blueprints)
-        if (contours != null)
-        {
-            foreach (Contour contour in contours)
-                foreach (ContourBlueprint bp in contour.blueprints)
-                    unusedBlueprints.Remove(bp);
-        }
-        // Destroy all unused blueprints
-        foreach (ContourBlueprint bp in unusedBlueprints)
-            DestroyImmediate(bp);                
+        //// Put all existing blueprints in an "unused" pool
+        //List<ContourBlueprint> unusedBlueprints = new List<ContourBlueprint>();
+        //GetComponents(unusedBlueprints);
+        //// Check all contours for blueprints (these are "used" blueprints)
+        //if (contourBuildInfos != null)
+        //{
+        //    foreach (ContourBuildInfos contour in contourBuildInfos)
+        //        foreach (ContourBlueprint bp in contour.blueprints)
+        //            unusedBlueprints.Remove(bp);
+        //}
+        //// Destroy all unused blueprints
+        //foreach (ContourBlueprint bp in unusedBlueprints)
+        //    DestroyImmediate(bp);                
     }
 
+    // A SIMPLIFIER ---- Si on se débarasse des blueprints en Monobehaviour ----
     private void ResetContourBlueprints(int contourIndex)
     {
         // Each contour needs one blueprint and reader per material
-        Contour contour = contours[contourIndex];
+        ContourBuildInfos contour = contourBuildInfos[contourIndex];
         List<ContourMaterial> contourMaterials = palette != null ? palette.GetContourMaterials(contour.paletteIndex) : new List<ContourMaterial>();
         int cmCount = contourMaterials.Count;
         List<ContourBlueprint> usedBlueprints = new List<ContourBlueprint>();
@@ -180,7 +178,8 @@ public class ContourBlocBuilder : MonoBehaviour
             // Or create blueprint
             else
             {
-                blueprint = gameObject.AddComponent(cm.BlueprintType) as ContourBlueprint;
+                //blueprint = gameObject.AddComponent(cm.BlueprintType) as ContourBlueprint;
+                blueprint = new ContourBlueprint();
                 blueprint.material = cm;
             }
             // Set blueprint positions
@@ -190,9 +189,9 @@ public class ContourBlocBuilder : MonoBehaviour
         }
         // Apply changes
         contour.blueprints = usedBlueprints.ToArray();
-        contours[contourIndex] = contour;
+        contourBuildInfos[contourIndex] = contour;
         //Destroy unused blueprints
-        foreach (ContourBlueprint bp in unusedBlueprints) DestroyImmediate(bp);
+        //foreach (ContourBlueprint bp in unusedBlueprints) DestroyImmediate(bp);
     }
 
     private void ResetAllBuilders()
@@ -211,8 +210,8 @@ public class ContourBlocBuilder : MonoBehaviour
         }
         // Get all blueprints
         List<ContourBlueprint> blueprints = new List<ContourBlueprint>();
-        if (contours != null)
-            foreach (Contour ct in contours)
+        if (contourBuildInfos != null)
+            foreach (ContourBuildInfos ct in contourBuildInfos)
                 blueprints.AddRange(ct.blueprints);
         // Set new builders
         List<ContourBuilder> newBuilders;
@@ -256,15 +255,15 @@ public class ContourBlocBuilder : MonoBehaviour
 
     public void FixStaticContours()
     {
-        if (contours == null) return;
-        foreach(Contour contour in contours)
+        if (contourBuildInfos == null) return;
+        foreach(ContourBuildInfos contour in contourBuildInfos)
         {
             if(contour.shape != null) contour.shape.SetPointsStatic(false);
         }
-        foreach (Contour contour in contours)
+        foreach (ContourBuildInfos contour in contourBuildInfos)
         {
             if (contour.blueprints == null) continue;
-            bool isContourAnimated = Array.FindIndex(contour.blueprints, bp => bp != null && bp is ContourAnimationBlueprint) != -1;
+            bool isContourAnimated = Array.FindIndex(contour.blueprints, bp => bp != null && !bp.IsStatic) != -1;
             if (isContourAnimated == false && contour.shape != null) contour.shape.SetPointsStatic(true);
         }
     }

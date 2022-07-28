@@ -1,18 +1,10 @@
 ﻿using UnityEngine;
-using System;
 
 public abstract class ContourMaterial : ScriptableObject
 {
+    public virtual bool IsStatic => true;
     public enum BlueprintMode { UseMaterialValue, UseBlueprintValue, UseBoth }
     public int Version { get; private set; }
-
-    public virtual Type BlueprintType
-    { 
-        get
-        {
-            return typeof(ContourBlueprint);
-        }
-    }
 
     public void ChangeVersion()
     {

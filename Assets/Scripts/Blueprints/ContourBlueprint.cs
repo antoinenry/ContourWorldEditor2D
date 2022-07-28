@@ -1,23 +1,23 @@
 ﻿using System;
 using UnityEngine;
 
-[DefaultExecutionOrder(1)]
-[ExecuteAlways]
+//[DefaultExecutionOrder(1)]
+//[ExecuteAlways]
 [Serializable]
-public class ContourBlueprint : MonoBehaviour
+public class ContourBlueprint //: MonoBehaviour
 {
     public ContourShape shape;
     public ContourMaterial material;
+    public bool materialHasChanged;
 
     public Vector2[] Positions => shape != null ? shape.GetPositions() : null;
+    public int ContourLength => shape != null ? shape.Length : 0;
+    public bool IsLoop => shape != null && shape.IsLoop;
+    public Vector3 Normal => shape != null ? shape.Normal : Vector3.zero;
+    public bool IsStatic => material != null ? material.IsStatic : true;
 
-    public ContourShape.ShapeChanged ShapeChanges => shape != null ? shape.changes : ContourShape.ShapeChanged.None;
-
-    [Flags]
-    public enum BlueprintChange { None = 0, MaterialChanged = 1, ParameterChanged = 2 }
-
-    private void Update()
-    {
-        if (shape != null) shape.changes = ContourShape.ShapeChanged.None;
-    }
+    //private void Update()
+    //{
+    //    if (shape != null) shape.changes = ContourShape.ShapeChanged.None;
+    //}
 }

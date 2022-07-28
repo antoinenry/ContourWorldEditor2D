@@ -8,5 +8,5 @@ public class ContourAnimationMaterial : ContourMaterial
     public float cycleDuration = 1f;
     public float phase = 180f;
 
-    public override Type BlueprintType => typeof(ContourAnimationBlueprint);
+    public override bool IsStatic => false;
 }

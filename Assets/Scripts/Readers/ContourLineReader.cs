@@ -4,32 +4,26 @@ using System.Collections.Generic;
 
 public class ContourLineReader : ContourMeshReader
 {
+    public override bool CanReadBlueprint(ContourBlueprint blueprint)
+    {
+        return blueprint != null && blueprint.material != null && blueprint.material is ContourLineMaterial && blueprint.ContourLength > 1;
+    }
+
     public override bool TryReadBlueprint(ContourBlueprint blueprint)
     {
         // Read if possible
-        if (blueprint != null && blueprint is ContourMeshBlueprint && blueprint.material is ContourLineMaterial)
+        if (CanReadBlueprint(blueprint))
         {
-            ContourMeshBlueprint meshBlueprint = blueprint as ContourMeshBlueprint;
-            // Get positions
+            // Get positions and material
             Vector2[] positions = blueprint.Positions;
-            if (positions == null) return false;
-            // Get material
             ContourLineMaterial contourMaterial = blueprint.material as ContourLineMaterial;
-            if (contourMaterial == null) return false;
             MeshMaterial = contourMaterial.meshMaterial;
-            // Check if enough points to build at least one segment
-            int positionCount = positions != null ? positions.Length : 0;
-            if (positionCount < 2)
-            {
-                Clear();
-                return false;
-            }
             // Set vertices: two vertices per point
-            int vertexCount = positionCount * 2;
+            int vertexCount = blueprint.ContourLength * 2;
             Vertices = new List<Vector3>(new Vector3[vertexCount]);
             GenerateVertices(positions, contourMaterial.zOffset, contourMaterial.width);
             // Set triangles: one quad per segment, two triangles per quad
-            int quadCount = positionCount - 1;
+            int quadCount = blueprint.ContourLength - 1;
             Triangles = new List<int>(quadCount * 6);
             for (int i = 0; i < quadCount; i++)
             {
@@ -41,13 +35,13 @@ public class ContourLineReader : ContourMeshReader
             }
             // Set normals: fetch value in blueprint
             Normals = new List<Vector3>(vertexCount);
-            Vector3 normal = meshBlueprint.Normal;
+            Vector3 normal = blueprint.Normal;
             for (int i = 0; i < vertexCount; i++)
                 Normals.Add(normal);
             // Set uvs: repeat texture along segments
             GenerateUVs(positions, contourMaterial.uvScale);
             // Set colors: fetch value in blueprint
-            Color color = meshBlueprint.Color;
+            Color color = contourMaterial.color;
             Colors = new List<Color>(vertexCount);
             for (int i = 0; i < vertexCount; i++)
                 Colors.Add(color);
@@ -57,10 +51,10 @@ public class ContourLineReader : ContourMeshReader
         return false;
     }
 
-    public override void ReadBlueprintPositions(ContourBlueprint blueprint)
+    public override bool ReadBlueprintPositions(ContourBlueprint blueprint)
     {
         // Read contour positions only (assumes only modification on contour is some point moved)
-        if (blueprint != null && blueprint is ContourMeshBlueprint && blueprint.material is ContourLineMaterial)
+        if (CanReadBlueprint(blueprint))
         {
             // Get positions
             Vector2[] positions = blueprint.Positions;
@@ -75,11 +69,12 @@ public class ContourLineReader : ContourMeshReader
                     GenerateVertices(positions, contourMaterial.zOffset, contourMaterial.width);
                     GenerateUVs(positions, contourMaterial.uvScale);
                 }
+                return true;
             }
-            else throw new Exception("Blueprint and reader mismatch");
+            else return false;
         }
         // Notify if there's a problem with the blueprint
-        else throw new Exception("Can't read blueprint");
+        else return false;
     }
 
     private void GenerateVertices(Vector2[] positions, float zOffset, float width)

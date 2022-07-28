@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class ContourColliderReader : ContourReader
 {
-    public List<Vector2> Positions { get; private set; }
+    public List<Vector2> Points { get; private set; }
     public Type ColliderType { get; private set; }
     public bool IsTrigger { get; private set; }
     public PhysicsMaterial2D PhysicsMaterial { get; private set; }
@@ -13,46 +13,36 @@ public class ContourColliderReader : ContourReader
 
     public override string BuilderName => "Collider Builder";
 
+    public override bool CanReadBlueprint(ContourBlueprint blueprint)
+    {
+        return blueprint != null && blueprint.material != null && blueprint.material is ContourColliderMaterial && blueprint.ContourLength > 1;
+    }
+
     public override bool TryReadBlueprint(ContourBlueprint blueprint)
     {
         // Read if possible
-        if (blueprint != null && blueprint.material is ContourColliderMaterial)
+        if (CanReadBlueprint(blueprint))
         {
-            // Check blueprint for positions and material
-            Vector2[] positions = blueprint.Positions;
-            if (positions == null || positions.Length < 2 || blueprint.material == null)
-            {
-                Clear();
-                return false;
-            }
-            int positionCount = positions.Length;
-            // Get material
-            ContourColliderMaterial contourMaterial = blueprint.material as ContourColliderMaterial;
             // Set collider type
-            ColliderType = null;
-            switch (contourMaterial.type)
-            {
-                // Edge is always possible
-                case ContourColliderMaterial.ColliderType.Edge:
-                    ColliderType = typeof(EdgeCollider2D);
-                    break;
-                // Polygon is possible if contour is a loop
-                case ContourColliderMaterial.ColliderType.Polygon:
-                    if (positions.Length > 2 && positions[0] == positions[positionCount - 1]) ColliderType = typeof(PolygonCollider2D);
-                    break;
-                case ContourColliderMaterial.ColliderType.Auto:
-                    ColliderType = (positionCount > 2 && positions[0] == positions[positionCount - 1]) ? typeof(PolygonCollider2D) : typeof(EdgeCollider2D);
-                    break;
-            }
+            ColliderType = GetColliderType(blueprint);
             if (ColliderType == null)
             {
                 Clear();
                 return false;
             }
             // Get positions
-            Positions = new List<Vector2>(blueprint.Positions);
-            if (ColliderType == typeof(PolygonCollider2D)) Positions.RemoveAt(positionCount - 1);
+            Points = new List<Vector2>(blueprint.Positions);
+            // For polygon colliders, contour must be a loop
+            if (ColliderType == typeof(PolygonCollider2D) && Points.Count > 1)
+            {
+                if (!blueprint.IsLoop)
+                {
+                    Clear();
+                    return false;
+                }
+            }
             // Get collider parameters
+            ContourColliderMaterial contourMaterial = blueprint.material as ContourColliderMaterial;
             IsTrigger = contourMaterial.isTrigger;
             PhysicsMaterial = contourMaterial.physicsMaterial;
             // Success
@@ -62,38 +52,66 @@ public class ContourColliderReader : ContourReader
         return false;
     }
 
-    public override void ReadBlueprintPositions(ContourBlueprint blueprint)
+    public override bool ReadBlueprintPositions(ContourBlueprint blueprint)
     {
-        // Read contour positions only (assumes only modification on contour is some point moved)
-        if (blueprint != null && blueprint.material is ContourColliderMaterial)
+        // Read contour positions
+        if (CanReadBlueprint(blueprint))
         {
-            // Get positions
-            Vector2[] positions = blueprint.Positions;
-            // Check if blueprint matches reader mesh's length
-            int colliderLength = Positions != null ? Positions.Count : 0;
-            bool lengthCheck;
-            if (ColliderType == typeof(PolygonCollider2D))
-                lengthCheck = positions.Length == colliderLength + 1;
-            else
-                lengthCheck = positions.Length == colliderLength;
-            if (lengthCheck)
-            {                
-                for (int i = 0; i < colliderLength; i++)
-                    Positions[i] = blueprint.Positions[i];
+            // Quick compatibility check with collider infos
+            ContourColliderMaterial contourMaterial = blueprint.material as ContourColliderMaterial;
+            if (contourMaterial.isTrigger != IsTrigger
+                || contourMaterial.physicsMaterial != PhysicsMaterial
+                || GetColliderType(blueprint) != ColliderType)
+            {
+                // If compatibility check fails, attempt to completely reread blueprint
+                bool reread = TryReadBlueprint(blueprint);
+                if (reread == false) return false;
             }
-            else throw new Exception("Blueprint and reader mismatch");
+            else
+            {
+                int colliderLength = Points != null ? Points.Count : 0;
+                // Polygon collider are loops and don't need to repeat the last position
+                if (ColliderType == typeof(PolygonCollider2D)) colliderLength -= 1;
+                for (int i = 0; i < colliderLength; i++)
+                    Points[i] = blueprint.Positions[i];
+            }
+            return true;
         }
         // Notify if there's a problem with the blueprint
-        else throw new Exception("Can't read blueprint");
+        else return false;
+    }
+
+    private Type GetColliderType(ContourBlueprint blueprint)
+    {
+        Type colliderType = null;
+        if (CanReadBlueprint(blueprint))
+        {
+            ContourColliderMaterial contourMaterial = blueprint.material as ContourColliderMaterial;
+            switch (contourMaterial.type)
+            {
+                // Edge is always possible
+                case ContourColliderMaterial.ColliderType.Edge:
+                    colliderType = typeof(EdgeCollider2D);
+                    break;
+                // Polygon is possible if contour is a loop
+                case ContourColliderMaterial.ColliderType.Polygon:
+                    if (blueprint.IsLoop) colliderType = typeof(PolygonCollider2D);
+                    break;
+                case ContourColliderMaterial.ColliderType.Auto:
+                    colliderType = blueprint.IsLoop ? typeof(PolygonCollider2D) : typeof(EdgeCollider2D);
+                    break;
+            }
+        }
+        return colliderType;
     }
 
     public override bool Clear()
     {
-        if (Positions == null && ColliderType == null)
+        if (Points == null && ColliderType == null)
             return false;
         else
         {
-            Positions = null;
+            Points = null;
             ColliderType = null;
             return true;
         }

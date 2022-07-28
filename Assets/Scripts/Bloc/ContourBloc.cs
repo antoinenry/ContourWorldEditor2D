@@ -50,14 +50,16 @@ public class ContourBloc : MonoBehaviour
 
     private void Update()
     {
+        Debug.LogError("REVOIR ICI: LateUpdate");
         changes = BlocChanges.None;
         if (contourShapes != null)
             foreach (ContourShape shape in contourShapes)
-                if (shape != null) shape.changes = ContourShape.ShapeChanged.None;
+                if (shape != null) shape.changes = ContourShape.Changes.None;
     }
 
     public void SetPointInstances()
     {
+        if (points == null) return;
         foreach (BlocPoint pt in points)
         {
             ContourPoint blocPointInstance = pt.pointInstance;
@@ -209,7 +211,7 @@ public class ContourBloc : MonoBehaviour
         // Set point position in contours
         if (movedPoint.OccurenceCount > 0)
             foreach (PointOccurence occ in movedPoint.occurences)
-                contourShapes[occ.contourIndex].changes |= ContourShape.ShapeChanged.PositionMoved;
+                contourShapes[occ.contourIndex].changes |= ContourShape.Changes.PositionMoved;
                 //contourShapes[occ.contourIndex].SetPosition(occ.indexInContour, position);
     }
 
