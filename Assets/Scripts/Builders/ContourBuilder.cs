@@ -137,8 +137,10 @@ public abstract class ContourBuilder : MonoBehaviour
             for (int i = 0; i < bpCount; i++)
             {
                 ContourReader newReader = ContourReader.NewReader(blueprints[i]);
-                if (CanBuildFrom(newReader)) readers.Add(newReader);
-                else readers.Add(null);
+                if (CanBuildFrom(newReader))
+                    readers.Add(newReader);
+                else
+                    readers.Add(null);
             }
         }
     }
@@ -159,8 +161,10 @@ public abstract class ContourBuilder : MonoBehaviour
             for (int i = 0; i < bpCount; i++)
             {
                 ContourBlueprint bp = blueprints[i];
-                if (readers == null || readers.Count <= i) Gizmos.color = Color.red;
-                else Gizmos.color = readers[i] != null ? Color.white : Color.red;
+                if (readers == null || readers.Count <= i)
+                    Gizmos.color = Color.red;
+                else
+                    Gizmos.color = (readers[i] != null && readers[i].ReadSuccess) ? Color.white : Color.red;
                 if (bp != null && bp.shape != null) bp.shape.DrawGizmo(transform);
             }
         }

@@ -94,6 +94,8 @@ public class ContourMeshBuilder : ContourBuilder
 
     public override void RebuildAll()
     {
+        Debug.Log("Rebuild All");
+
         ResetReaders();
         // Set subbuilders
         subBuilders = new List<SubmeshBuilder>();
@@ -101,12 +103,20 @@ public class ContourMeshBuilder : ContourBuilder
         {
             foreach (ContourMeshReader reader in readers)
             {
-                if (reader == null) continue;                
+                if (reader == null || !reader.ReadSuccess) continue;
                 int subBuilderIndex = subBuilders.FindIndex(sub => sub.submeshMaterial == reader.MeshMaterial);
+                SubmeshBuilder subBuilderMatch;
                 if (subBuilderIndex == -1)
-                    subBuilders.Add(new SubmeshBuilder(reader));
+                {
+                    subBuilderMatch = new SubmeshBuilder(reader);
+                    subBuilders.Add(subBuilderMatch);
+                }
                 else
-                    subBuilders[subBuilderIndex].readers.Add(reader);
+                {
+                    subBuilderMatch = subBuilders[subBuilderIndex];
+                    if (subBuilderMatch.readers == null) subBuilderMatch.readers = new List<ContourMeshReader>(1);
+                    subBuilderMatch.readers.Add(reader);
+                }
             }
         }
         // Build mesh
@@ -146,32 +156,33 @@ public class ContourMeshBuilder : ContourBuilder
 
     protected override bool CanBuildFrom(ContourReader reader)
     {
-        return reader != null && reader is ContourMeshReader;
+        return reader != null && reader is ContourMeshReader && reader.ReadSuccess;
     }
 
     protected override void UpdatePositions()
     {
-        if (mesh == null)
-        {
+        if (mesh == null || readers.Contains(null) || subBuilders == null)
             RebuildAll();
-            return;
-        }
-        // Update mesh vertices
-        List<Vector3> vertices = new List<Vector3>();
-        foreach (SubmeshBuilder sub in subBuilders)
+        else
         {
-            if (sub.readers != null) vertices.AddRange(sub.GetVertices());
-            else
+            // Update mesh vertices
+            List<Vector3> vertices = new List<Vector3>();
+            foreach (SubmeshBuilder sub in subBuilders)
             {
-                RebuildAll();
-                return;
+                if (sub.readers != null)
+                    vertices.AddRange(sub.GetVertices());
+                else
+                {
+                    RebuildAll();
+                    return;
+                }
             }
+            mesh.SetVertices(vertices);
+            // Set bounds
+            mesh.RecalculateBounds();
+            // Update mesh filter and renderer
+            UpdateMeshComponents();
         }
-        mesh.SetVertices(vertices);
-        // Set bounds
-        mesh.RecalculateBounds();
-        // Update mesh filter and renderer
-        UpdateMeshComponents();
     }
 
     protected override void UpdateNormals()

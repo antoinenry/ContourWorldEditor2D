@@ -13,7 +13,23 @@ public class ContourColliderReader : ContourReader
 
     public override string BuilderName => "Collider Builder";
 
-    public override bool CanReadBlueprint(ContourBlueprint blueprint)
+    public override bool ReadSuccess
+    {
+        get
+        {
+            if (ColliderType == null)
+                return false;
+            else if (ColliderType == typeof(PolygonCollider2D))
+            {
+                int pointCount = Points != null ? Points.Count : 0;
+                return pointCount > 1 && Points[0] == Points[pointCount - 1];
+            }
+            else
+                return true;
+        }
+    }
+
+public override bool CanReadBlueprint(ContourBlueprint blueprint)
     {
         return blueprint != null && blueprint.material != null && blueprint.material is ContourColliderMaterial && blueprint.ContourLength > 1;
     }

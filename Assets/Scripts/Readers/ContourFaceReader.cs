@@ -5,6 +5,15 @@ using System.Collections.Generic;
 [Serializable]
 public class ContourFaceReader : ContourMeshReader
 {
+    public override bool ReadSuccess
+    {
+        get
+        {
+            int vertexCount = Vertices != null ? Vertices.Count : 0;
+            return vertexCount > 2 && Vertices[0] == Vertices[vertexCount - 1];
+        }
+    }
+
     public override bool CanReadBlueprint(ContourBlueprint blueprint)
     {
         return blueprint != null && blueprint.material != null && blueprint.material is ContourFaceMaterial && blueprint.IsLoop;
@@ -13,8 +22,8 @@ public class ContourFaceReader : ContourMeshReader
     public override bool TryReadBlueprint(ContourBlueprint blueprint)
     {
         // If contour is not looped, correct it
-        if (blueprint != null && blueprint.material != null && blueprint.material is ContourFaceMaterial && !blueprint.IsLoop)
-            blueprint.shape.LoopContour();
+        //if (blueprint != null && blueprint.material != null && blueprint.material is ContourFaceMaterial && !blueprint.IsLoop)
+            //blueprint.shape.LoopContour();
         // Read if possible
         if (CanReadBlueprint(blueprint))
         {
@@ -22,8 +31,8 @@ public class ContourFaceReader : ContourMeshReader
             Vector2[] positions = blueprint.Positions;
             ContourFaceMaterial contourMaterial = blueprint.material as ContourFaceMaterial;
             MeshMaterial = contourMaterial.meshMaterial;
-            // Set vertices: copy positions x,y and set z to value in contourMaterial (last position is ignored because of loop)
-            int vertexCount = positions.Length - 1;
+            // Set vertices: copy positions x,y and set z to value in contourMaterial
+            int vertexCount = positions.Length;
             Vector3 zOffset = contourMaterial.zOffset * Vector3.forward;
             Vertices = new List<Vector3>(vertexCount);
             for (int i = 0; i < vertexCount; i++)
@@ -63,7 +72,7 @@ public class ContourFaceReader : ContourMeshReader
             // Check if blueprint matches reader mesh's length
             int positionCount = positions != null ? positions.Length : 0;
             int vertexCount = Vertices != null ? Vertices.Count : 0;
-            if (vertexCount == positionCount - 1)
+            if (vertexCount == positionCount)
             {
                 if (vertexCount > 0)
                 {
@@ -75,11 +84,6 @@ public class ContourFaceReader : ContourMeshReader
                         UVs[i] = Vertices[i];
                 }
             }
-            return true;
-        }
-        else if (blueprint != null && blueprint.material != null && blueprint.material is ContourFaceMaterial && !blueprint.IsLoop)
-        {
-            blueprint.shape.LoopContour();
             return true;
         }
         // Notify if there's a problem with the blueprint

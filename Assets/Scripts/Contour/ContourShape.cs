@@ -94,15 +94,6 @@ public class ContourShape
             center += points[i].position;
         return center / length;
     }
-
-    public void LoopContour()
-    {
-        if (Length > 1)
-        {
-            ReplacePoint(0, points[Length - 1]);
-        }
-    }
-
     #endregion
 
     #region Normal

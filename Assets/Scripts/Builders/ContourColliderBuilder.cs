@@ -34,6 +34,7 @@ public class ContourColliderBuilder : ContourBuilder
             if (collider != null)
             {
                 return (reader != null
+                    && reader.ReadSuccess
                     && ColliderType == reader.ColliderType
                     && IsTrigger == reader.IsTrigger
                     && PhysicMaterial == reader.PhysicsMaterial);
@@ -46,7 +47,7 @@ public class ContourColliderBuilder : ContourBuilder
             // Check general compatibility
             if (!ColliderIsCompatibleWith(reader))
                 return false;
-            // Exception for edge collider: can only create one contour..
+            // Exception for edge collider: can only create one contour
             if (ColliderType == typeof(EdgeCollider2D))
                 return readers == null || readers.Count == 0;
             else
@@ -95,6 +96,8 @@ public class ContourColliderBuilder : ContourBuilder
 
     public override void RebuildAll()
     {
+        Debug.Log("Rebuild All");
+
         ResetReaders();
         // Find all collider components
         List<Collider2D> unusedColliders = new List<Collider2D>();
@@ -105,13 +108,13 @@ public class ContourColliderBuilder : ContourBuilder
         {
             foreach (ContourColliderReader reader in readers)
             {
-                if (reader == null) continue;
+                if (reader == null || !reader.ReadSuccess) continue;
                 int subBuilderIndex = subBuilders.FindIndex(sub => sub.CanAddReader(reader));
                 SubColliderBuilder subBuilderMatch;
                 if (subBuilderIndex == -1)
                 {
                     subBuilderMatch = new SubColliderBuilder(reader, this);
-                    if (subBuilderMatch.collider != null) subBuilders.Add(subBuilderMatch);
+                    subBuilders.Add(subBuilderMatch);
                 }
                 else
                 {
@@ -133,17 +136,7 @@ public class ContourColliderBuilder : ContourBuilder
 
     protected override bool CanBuildFrom(ContourReader reader)
     {
-        if (reader == null || !(reader is ContourColliderReader)) return false;
-        ContourColliderReader ccr = reader as ContourColliderReader;
-        if (ccr.ColliderType == null)
-            return false;
-        else if (ccr.ColliderType == typeof(PolygonCollider2D))
-        {
-            int pointCount = ccr.Points != null ? ccr.Points.Count : 0;
-            return pointCount > 1 && ccr.Points[0] == ccr.Points[pointCount - 1];
-        }
-        else
-            return true;
+        return reader != null && reader is ContourColliderReader && reader.ReadSuccess;       
     }
 
     protected override void UpdatePositions()
@@ -154,11 +147,8 @@ public class ContourColliderBuilder : ContourBuilder
         {
             foreach (SubColliderBuilder sub in subBuilders)
             {
-                if (sub != null)
-                {
-                    if (sub.TrySetColliderPoints() == false)
-                        RebuildAll();
-                }
+                if (sub == null || sub.TrySetColliderPoints() == false)
+                    RebuildAll();
             }
         }      
     }

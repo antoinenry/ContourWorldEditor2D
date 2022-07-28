@@ -4,6 +4,8 @@ using System.Collections.Generic;
 
 public class ContourLineReader : ContourMeshReader
 {
+    public override bool ReadSuccess => true;
+
     public override bool CanReadBlueprint(ContourBlueprint blueprint)
     {
         return blueprint != null && blueprint.material != null && blueprint.material is ContourLineMaterial && blueprint.ContourLength > 1;

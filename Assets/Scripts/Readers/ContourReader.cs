@@ -18,6 +18,8 @@ public abstract class ContourReader
         return newReader;
     }
 
+    public abstract bool ReadSuccess { get; }
+
     public abstract bool CanReadBlueprint(ContourBlueprint blueprint);
 
     public virtual bool ReadBlueprintPositions(ContourBlueprint blueprint) { return true; }
