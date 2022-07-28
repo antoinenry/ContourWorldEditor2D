@@ -149,7 +149,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 445019003}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 34c9720e5a70dfd4198f95ec7f9ce9e7, type: 3}
   m_Name: 
@@ -332,6 +332,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1068484049}
   - component: {fileID: 1068484051}
+  - component: {fileID: 1068484052}
   m_Layer: 0
   m_Name: ColliderBuilder
   m_TagString: Untagged
@@ -372,19 +373,54 @@ MonoBehaviour:
       points:
       - position: {x: 0, y: 0}
         isStatic: 0
-      - position: {x: 1.11, y: 0}
+      - position: {x: 1.02, y: -0.34}
         isStatic: 0
-      - position: {x: 2.22, y: -0.83}
+      - position: {x: 1.4, y: -0.77}
         isStatic: 0
-      - position: {x: 0.42, y: -1.32}
+      - position: {x: 0.88, y: -1.55}
         isStatic: 0
-      - position: {x: -1.04, y: -0.69}
+      - position: {x: -0.06, y: -1.78}
         isStatic: 0
-      - position: {x: -0.21, y: 0}
+      - position: {x: -0.64, y: -0.76}
+        isStatic: 0
+      - position: {x: 0, y: 0}
         isStatic: 0
       normal: {x: 0, y: 0, z: 0}
     material: {fileID: 11400000, guid: bcaed89fc10030541ae280df0049fdfc, type: 2}
     materialHasChanged: 0
+--- !u!60 &1068484052
+PolygonCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1068484045}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0, y: 0}
+    oldSize: {x: 0, y: 0}
+    newSize: {x: 0, y: 0}
+    adaptiveTilingThreshold: 0
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Points:
+    m_Paths:
+    - - {x: 0, y: 0}
+      - {x: 1.02, y: -0.34}
+      - {x: 1.4, y: -0.77}
+      - {x: 0.88, y: -1.55}
+      - {x: -0.06, y: -1.78}
+      - {x: -0.64, y: -0.76}
+      - {x: 0, y: 0}
+  m_UseDelaunayMesh: 0
 --- !u!1 &1279412458
 GameObject:
   m_ObjectHideFlags: 0

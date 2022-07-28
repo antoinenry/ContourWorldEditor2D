@@ -148,7 +148,7 @@ public class ContourColliderBuilder : ContourBuilder
 
     protected override void UpdatePositions()
     {
-        if (readers == null || readers.Contains(null))
+        if (readers == null || readers.Contains(null) || subBuilders == null)
             RebuildAll();
         else if (subBuilders != null)
         {
@@ -160,11 +160,6 @@ public class ContourColliderBuilder : ContourBuilder
                         RebuildAll();
                 }
             }
-        }
-        else
-        {
-            //RebuildAll();
-            Debug.Log("subBuilders == null");
-        }        
+        }      
     }
 }
