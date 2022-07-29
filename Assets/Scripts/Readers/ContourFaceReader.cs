@@ -10,7 +10,7 @@ public class ContourFaceReader : ContourMeshReader
         get
         {
             int vertexCount = Vertices != null ? Vertices.Count : 0;
-            return vertexCount > 2 && Vertices[0] == Vertices[vertexCount - 1];
+            return vertexCount == 0 || Vertices[0] == Vertices[vertexCount - 1];
         }
     }
 

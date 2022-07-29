@@ -67,7 +67,7 @@ public abstract class ContourBuilder : MonoBehaviour
                 {
                     readers[bpi] = null;
                 }
-                else if (bp.materialHasChanged || readers[bpi] == null)
+                else if (bp.materialHasChanged)// || readers[bpi] == null)
                 {
                     RebuildAll();
                 }
@@ -84,7 +84,7 @@ public abstract class ContourBuilder : MonoBehaviour
                             }
                             else if (shapeChanges.HasFlag(ContourShape.Changes.PositionMoved))
                             {
-                                bool canReadPositions = readers[bpi].ReadBlueprintPositions(bp);
+                                bool canReadPositions = readers[bpi] != null && readers[bpi].ReadBlueprintPositions(bp);
                                 if (canReadPositions) UpdatePositions();
                                 else
                                 {

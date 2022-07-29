@@ -22,7 +22,7 @@ public class ContourColliderReader : ContourReader
             else if (ColliderType == typeof(PolygonCollider2D))
             {
                 int pointCount = Points != null ? Points.Count : 0;
-                return pointCount > 1 && Points[0] == Points[pointCount - 1];
+                return pointCount == 0 || Points[0] == Points[pointCount - 1];
             }
             else
                 return true;
