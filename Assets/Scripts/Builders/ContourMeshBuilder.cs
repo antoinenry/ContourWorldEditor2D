@@ -92,8 +92,6 @@ public class ContourMeshBuilder : ContourBuilder
 
     public override void RebuildAll()
     {
-        Debug.Log("Rebuild All");
-
         ResetReaders();
         // Set subbuilders
         subBuilders = new List<SubmeshBuilder>();

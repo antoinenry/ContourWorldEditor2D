@@ -29,6 +29,7 @@ public class ContourBlocBuilder : MonoBehaviour
 
     public ContourBloc bloc;
     public ContourPalette palette;
+    public int defaultPaletteIndex;
 
     [SerializeField] private List<ContourBuildInfos> contourBuildInfos;
     [SerializeField] private List<ContourBuilder> builders;
@@ -36,10 +37,6 @@ public class ContourBlocBuilder : MonoBehaviour
     private void Reset()
     {
         bloc = GetComponent<ContourBloc>();
-        //foreach (ContourBlueprint bp in GetComponents<ContourBlueprint>())
-        //    DestroyImmediate(bp);
-        //foreach (ContourBuilder b in GetComponentsInChildren<ContourBuilder>())
-        //    if (b != null && b.gameObject != null) DestroyImmediate(b.gameObject);
         RebuildAll();
     }
 
@@ -68,10 +65,9 @@ public class ContourBlocBuilder : MonoBehaviour
         ResetAllBuilders();
     }
 
-    public Vector2[] GetPositions(int contourIndex)
+    public ContourBuildInfos GetContourInfos(int contourIndex)
     {
-        if (contourBuildInfos == null || contourIndex < 0 || contourIndex >= contourBuildInfos.Count) return new Vector2[0];
-        return contourBuildInfos[contourIndex].GetPositions();
+        return contourBuildInfos[contourIndex];
     }
 
     public int PaletteSize => palette != null ? palette.Size : 0;
@@ -138,6 +134,8 @@ public class ContourBlocBuilder : MonoBehaviour
     {
         // Each contour needs one blueprint and reader per material
         ContourBuildInfos contour = contourBuildInfos[contourIndex];
+        // If undefined, set default paleete index for contour
+        if (contour.paletteIndex == -1) contour.paletteIndex = defaultPaletteIndex;
         List<ContourMaterial> contourMaterials = palette != null ? palette.GetContourMaterials(contour.paletteIndex) : new List<ContourMaterial>();
         int cmCount = contourMaterials.Count;
         List<ContourBlueprint> usedBlueprints = new List<ContourBlueprint>();

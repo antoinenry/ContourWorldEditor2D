@@ -96,8 +96,6 @@ public class ContourColliderBuilder : ContourBuilder
 
     public override void RebuildAll()
     {
-        Debug.Log("Rebuild All");
-
         ResetReaders();
         // Find all collider components
         List<Collider2D> unusedColliders = new List<Collider2D>();

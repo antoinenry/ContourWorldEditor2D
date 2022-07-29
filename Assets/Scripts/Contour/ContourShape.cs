@@ -11,7 +11,7 @@ public class ContourShape
     [SerializeField] private Vector3 normal;
 
     [Flags]
-    public enum Changes { None = 0, PositionMoved = 1, LengthChanged = 2, NormalChanged = 4 }       
+    public enum Changes { None = 0, All = ~0, PositionMoved = 1, LengthChanged = 2, NormalChanged = 4 }       
 
     public ContourShape()
     {
