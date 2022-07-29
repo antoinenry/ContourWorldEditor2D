@@ -2,8 +2,6 @@
 using System;
 using System.Collections.Generic;
 
-[RequireComponent(typeof(MeshFilter))]
-[RequireComponent(typeof(MeshRenderer))]
 public class ContourMeshBuilder : ContourBuilder
 {
     [Serializable]
@@ -208,18 +206,22 @@ public class ContourMeshBuilder : ContourBuilder
 
     private void UpdateMeshComponents()
     {
+        // Ensure gameobject has MeshFilter component
         if (filter == null)
+        {
             filter = GetComponent<MeshFilter>();
-        if (filter != null)
-        {
-            filter.sharedMesh = mesh;
+            if (filter == null) filter = gameObject.AddComponent<MeshFilter>();
         }
+        // Update Mesh Filter
+        filter.sharedMesh = mesh;
+        //Ensure gameobject has MeshRenderer component
         if (render == null)
-            render = GetComponent<MeshRenderer>();
-        if (render != null)
         {
-            List<Material> submeshMaterials = subBuilders.ConvertAll(sub => sub.submeshMaterial);
-            render.materials = submeshMaterials.ToArray();
+            render = GetComponent<MeshRenderer>();
+            if (render == null) render = gameObject.AddComponent<MeshRenderer>();
         }
+        // Update Mesh Renderer
+        List<Material> submeshMaterials = subBuilders.ConvertAll(sub => sub.submeshMaterial);
+        render.materials = submeshMaterials.ToArray();
     }
 }
