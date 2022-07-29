@@ -7,7 +7,7 @@ public class ContourBlocBuilderInspector : Editor
 {
     private static bool showContourList;
     private static ContourBlocBuilder targetBuilder;
-    private static bool[] expandContourInspector;
+    private static int selectedContourIndex;
 
     private void OnEnable()
     {
@@ -46,26 +46,28 @@ public class ContourBlocBuilderInspector : Editor
             ContourListInspectorGUI();
             EditorGUI.indentLevel--;
         }
+        else
+            selectedContourIndex = -1;
     }
 
     private void ContourListInspectorGUI()
     {
         // Adjust inspector capacity to contour count
         int ctCount = targetBuilder.ContourCount;
-        if (expandContourInspector == null) expandContourInspector = new bool[ctCount];
-        else Array.Resize(ref expandContourInspector, ctCount);
         // Display each contour with expandable inspector
         string[] paletteOptions = targetBuilder.GetPaletteOptionNames();
         for (int cti = 0; cti < ctCount; cti++)
         {
             // Minimal inspector: palette option name
             EditorGUILayout.BeginHorizontal();
-            EditorGUI.BeginChangeCheck();
             GUIStyle foldoutStyle = new GUIStyle(EditorStyles.foldout);
             foldoutStyle.focused.textColor = Color.blue;
-            expandContourInspector[cti] = EditorGUILayout.Foldout(expandContourInspector[cti], "Contour " + cti, foldoutStyle);
+            bool contourIsSelected = cti == selectedContourIndex;
+            EditorGUI.BeginChangeCheck();
+            contourIsSelected = EditorGUILayout.Foldout(contourIsSelected, "Contour " + cti, foldoutStyle);
             if (EditorGUI.EndChangeCheck())
             {
+                selectedContourIndex = contourIsSelected ? cti : -1;
                 SceneView.RepaintAll();
                 // Apply modifications in inspector
                 EditorUtility.SetDirty(targetBuilder);
@@ -86,7 +88,7 @@ public class ContourBlocBuilderInspector : Editor
             }
             EditorGUILayout.EndHorizontal();
             // Expanded contour inspector
-            if (expandContourInspector[cti])
+            if (contourIsSelected)
             {
                 EditorGUILayout.BeginVertical("box");
                 GUI.enabled = false;
@@ -101,6 +103,15 @@ public class ContourBlocBuilderInspector : Editor
 
     private void OnSceneGUI()
     {
-        
+        // Highlight selected contour
+        if (selectedContourIndex != -1)
+        {
+            Handles.color = Color.blue;
+            Vector2[] contourPoints = targetBuilder.GetContourInfos(selectedContourIndex).GetPositions();
+            contourPoints = Array.ConvertAll(contourPoints, pos => (Vector2)targetBuilder.transform.TransformPoint(pos));
+            int contourLength = contourPoints.Length;
+            for (int i = 0; i < contourLength - 1; i++)
+                Handles.DrawLine(contourPoints[i], contourPoints[i+1]);
+        }
     }
 }
