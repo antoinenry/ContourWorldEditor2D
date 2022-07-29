@@ -48,13 +48,12 @@ public class ContourBloc : MonoBehaviour
         SetPointInstances();
     }
 
-    private void Update()
+    private void LateUpdate()
     {
-        Debug.LogError("REVOIR ICI: LateUpdate");
         changes = BlocChanges.None;
-        if (contourShapes != null)
-            foreach (ContourShape shape in contourShapes)
-                if (shape != null) shape.changes = ContourShape.Changes.None;
+        //if (contourShapes != null)
+        //    foreach (ContourShape shape in contourShapes)
+        //        if (shape != null) shape.changes = ContourShape.Changes.None;
     }
 
     public void SetPointInstances()

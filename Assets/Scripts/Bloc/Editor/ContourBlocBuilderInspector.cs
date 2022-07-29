@@ -55,29 +55,13 @@ public class ContourBlocBuilderInspector : Editor
         defaultPaletteIndex = EditorGUILayout.Popup("Default contour material", defaultPaletteIndex, paletteOptions);
         // Edit blueprints
         showBlueprintList = EditorGUILayout.Foldout(showBlueprintList, "Blueprints");
-        //if (showBlueprintList)
-        //{
-        //    EditorGUI.indentLevel++;
-        //    // Show blue prints as a list, integrated in this inspector
-        //    ContourListInspectorGUI();
-        //    // Option to show all blueprints as individual components
-        //    //EditorGUI.BeginChangeCheck();
-        //    //showBluePrintComponents = EditorGUILayout.Toggle("Show components", showBluePrintComponents);
-        //    //if (EditorGUI.EndChangeCheck()) SetBlueprintsVisible(showBluePrintComponents);
-        //    EditorGUI.indentLevel--;
-        //}
-        //else
-        //    SetBlueprintsVisible(false);
-    }
-
-    private void SetBlueprintsVisible(bool visible)
-    {
-        //ContourBlueprint[] blueprints = targetBuilder.GetComponents<ContourBlueprint>();
-        //foreach (ContourBlueprint bp in blueprints)
-        //{
-        //    bp.hideFlags = visible ? HideFlags.None : HideFlags.HideInInspector;
-        //    EditorUtility.SetDirty(bp);
-        //}
+        if (showBlueprintList)
+        {
+            EditorGUI.indentLevel++;
+            // Show blueprints as a list
+            ContourListInspectorGUI();
+            EditorGUI.indentLevel--;
+        }
     }
 
     private void ContourListInspectorGUI()

@@ -30,7 +30,8 @@ public abstract class ContourBuilder : MonoBehaviour
 
     public void Reset()
     {
-        if (readers != null) readers.Clear();
+        blueprints = new List<ContourBlueprint>();
+        readers = new List<ContourReader>();
         RebuildAll();
     }
 

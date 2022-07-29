@@ -64,7 +64,7 @@ public class ContourBlocBuilder : MonoBehaviour
     public void RebuildAll()
     {
         GetContoursFromBloc();
-        ResetAllBlueprints();
+        ResetAllContourBuildInfos();
         ResetAllBuilders();
     }
 
@@ -99,7 +99,7 @@ public class ContourBlocBuilder : MonoBehaviour
         {
             ct.paletteIndex = paletteIndex;
             contourBuildInfos[contourIndex] = ct;
-            ResetContourBlueprints(contourIndex);
+            ResetContourBuildInfosAt(contourIndex);
             ResetAllBuilders();
         }
     }
@@ -134,28 +134,7 @@ public class ContourBlocBuilder : MonoBehaviour
         }
     }
 
-    private void ResetAllBlueprints()
-    {
-        // Reset blueprints for each contour
-        for (int cti = 0, ctCount = ContourCount; cti < ctCount; cti++)
-                ResetContourBlueprints(cti);
-        //// Put all existing blueprints in an "unused" pool
-        //List<ContourBlueprint> unusedBlueprints = new List<ContourBlueprint>();
-        //GetComponents(unusedBlueprints);
-        //// Check all contours for blueprints (these are "used" blueprints)
-        //if (contourBuildInfos != null)
-        //{
-        //    foreach (ContourBuildInfos contour in contourBuildInfos)
-        //        foreach (ContourBlueprint bp in contour.blueprints)
-        //            unusedBlueprints.Remove(bp);
-        //}
-        //// Destroy all unused blueprints
-        //foreach (ContourBlueprint bp in unusedBlueprints)
-        //    DestroyImmediate(bp);                
-    }
-
-    // A SIMPLIFIER ---- Si on se débarasse des blueprints en Monobehaviour ----
-    private void ResetContourBlueprints(int contourIndex)
+    private void ResetContourBuildInfosAt(int contourIndex)
     {
         // Each contour needs one blueprint and reader per material
         ContourBuildInfos contour = contourBuildInfos[contourIndex];
@@ -178,20 +157,23 @@ public class ContourBlocBuilder : MonoBehaviour
             // Or create blueprint
             else
             {
-                //blueprint = gameObject.AddComponent(cm.BlueprintType) as ContourBlueprint;
                 blueprint = new ContourBlueprint();
                 blueprint.material = cm;
             }
             // Set blueprint positions
-            //blueprint.Positions = contour.GetPositions();
             blueprint.shape = contour.shape;
             usedBlueprints.Add(blueprint);
         }
         // Apply changes
         contour.blueprints = usedBlueprints.ToArray();
         contourBuildInfos[contourIndex] = contour;
-        //Destroy unused blueprints
-        //foreach (ContourBlueprint bp in unusedBlueprints) DestroyImmediate(bp);
+    }
+
+    private void ResetAllContourBuildInfos()
+    {
+        // Reset blueprints for each contour
+        for (int cti = 0, ctCount = ContourCount; cti < ctCount; cti++)
+            ResetContourBuildInfosAt(cti);
     }
 
     private void ResetAllBuilders()
@@ -208,42 +190,41 @@ public class ContourBlocBuilder : MonoBehaviour
                 if (!unusedBuilders.Contains(oldBuilder)) unusedBuilders.Add(oldBuilder);
             }
         }
-        // Get all blueprints
-        List<ContourBlueprint> blueprints = new List<ContourBlueprint>();
-        if (contourBuildInfos != null)
-            foreach (ContourBuildInfos ct in contourBuildInfos)
-                blueprints.AddRange(ct.blueprints);
         // Set new builders
         List<ContourBuilder> newBuilders;
-        newBuilders = new List<ContourBuilder>(blueprints.Count);
+        newBuilders = new List<ContourBuilder>();
         // Dispatch readers to adequate builders
-        foreach (ContourBlueprint bp in blueprints)
+        if (contourBuildInfos != null)
         {
-            ContourBuilder matchingBuilder = null;
-            // Check if adequate builder exist in old builders
-            if (oldBuilderCount > 0)
-            {
-                matchingBuilder = builders.Find(b => b != null && b.TryAddBlueprint(bp));
-                if (matchingBuilder != null)
+            foreach (ContourBuildInfos ct in contourBuildInfos)
+                foreach (ContourBlueprint bp in ct.blueprints)
                 {
-                    unusedBuilders.Remove(matchingBuilder);
+                    ContourBuilder matchingBuilder = null;
+                    // Check if adequate builder exist in old builders
+                    if (oldBuilderCount > 0)
+                    {
+                        matchingBuilder = builders.Find(b => b != null && b.TryAddBlueprint(bp));
+                        if (matchingBuilder != null)
+                        {
+                            unusedBuilders.Remove(matchingBuilder);
+                            newBuilders.Add(matchingBuilder);
+                            continue;
+                        }
+                    }
+                    // Else check if adequate builder exists in new builders
+                    matchingBuilder = newBuilders.Find(b => b != null && b.TryAddBlueprint(bp));
+                    if (matchingBuilder != null)
+                    {
+                        unusedBuilders.Remove(matchingBuilder);
+                        newBuilders.Add(matchingBuilder);
+                        continue;
+                    }
+                    // Else create builder from scratch
+                    matchingBuilder = ContourBuilder.NewBuilder(bp, transform);
+                    if (matchingBuilder == null) continue;
                     newBuilders.Add(matchingBuilder);
-                    continue;
                 }
-            }
-            // Else check if adequate builder exists in new builders
-            matchingBuilder = newBuilders.Find(b => b != null && b.TryAddBlueprint(bp));
-            if (matchingBuilder != null)
-            {
-                unusedBuilders.Remove(matchingBuilder);
-                newBuilders.Add(matchingBuilder);
-                continue;
-            }
-            // Else create builder from scratch
-            matchingBuilder = ContourBuilder.NewBuilder(bp, transform);
-            if (matchingBuilder == null) continue;
-            newBuilders.Add(matchingBuilder);
-        }
+        }        
         // Destroy all unused builders
         foreach (ContourBuilder b in unusedBuilders)
             if (b != null) DestroyImmediate(b.gameObject);
