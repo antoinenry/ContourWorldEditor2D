@@ -35,12 +35,12 @@ public abstract class ContourBuilder : MonoBehaviour
         RebuildAll();
     }
 
-    private void Update()
+    public void Update()
     {
         Build();
     }
 
-    private void LateUpdate()
+    public void LateUpdate()
     {
         // Every changes in blueprints should have been adressed => reset change flags
         if (blueprints != null)

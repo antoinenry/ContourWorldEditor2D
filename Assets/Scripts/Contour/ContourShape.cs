@@ -121,20 +121,6 @@ public class ContourShape
         foreach (ContourPoint pt in points) pt.isStatic = value;
     }
 
-    public void SetPointStatic(int index, bool value)
-    {
-        points[index].isStatic = value;
-    }
-
-    public List<int> GetNonStaticPointsIndices()
-    {
-        if (points == null) return new List<int>(0);
-        int length = Length;
-        List<int> indices = new List<int>(length);
-        for(int i = 0; i < length; i++)
-            if (points[i].isStatic == false) indices.Add(i);
-        return indices;
-    }
     #endregion
 
     public void DrawGizmo(Transform transform)

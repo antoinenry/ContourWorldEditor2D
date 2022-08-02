@@ -43,6 +43,10 @@ public class ContourBlocBuilder : MonoBehaviour
     private void OnEnable()
     {
         RebuildAll();
+    }
+
+    private void Start()
+    {
         FixStaticContours();
     }
 
@@ -235,9 +239,10 @@ public class ContourBlocBuilder : MonoBehaviour
     public void FixStaticContours()
     {
         if (contourBuildInfos == null) return;
-        foreach(ContourBuildInfos contour in contourBuildInfos)
+
+        foreach (ContourBuildInfos contour in contourBuildInfos)
         {
-            if(contour.shape != null) contour.shape.SetPointsStatic(false);
+            if (contour.shape != null) contour.shape.SetPointsStatic(false);
         }
         foreach (ContourBuildInfos contour in contourBuildInfos)
         {

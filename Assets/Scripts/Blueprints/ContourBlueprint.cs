@@ -14,7 +14,7 @@ public class ContourBlueprint //: MonoBehaviour
     public int ContourLength => shape != null ? shape.Length : 0;
     public bool IsLoop => shape != null && shape.IsLoop;
     public Vector3 Normal => shape != null ? shape.Normal : Vector3.zero;
-    public bool IsStatic => material != null ? material.IsStatic : true;
+    public bool IsStatic => material != null && material.IsStatic;
 
     //private void Update()
     //{
